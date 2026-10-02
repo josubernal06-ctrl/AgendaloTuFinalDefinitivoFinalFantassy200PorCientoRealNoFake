@@ -1,4 +1,4 @@
-package com.example.isnotempty.data.model
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.model
 
 class ActividadSolitaria(override val id: Int,
                          override val titulo: String,

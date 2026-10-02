@@ -1,4 +1,4 @@
-package com.example.isnotempty.ui.theme
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -34,7 +34,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun IsnotemptyTheme(
+fun AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,

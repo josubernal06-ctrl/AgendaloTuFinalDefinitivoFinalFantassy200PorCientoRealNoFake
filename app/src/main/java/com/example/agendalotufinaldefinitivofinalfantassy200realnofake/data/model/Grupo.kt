@@ -1,4 +1,4 @@
-package com.example.isnotempty.data.model
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.model
 
 data class Grupo(val id: Int, val nombreGrupo: String,val propietario: Usuario,val integrantes: List<Usuario>){
     fun agregarMiembro(nuevoMiembro: Usuario): Grupo {

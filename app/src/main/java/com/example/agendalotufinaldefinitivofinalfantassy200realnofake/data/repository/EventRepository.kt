@@ -1,6 +1,6 @@
-package com.example.isnotempty.data.repository
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository
 
-import com.example.isnotempty.data.model.Event
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.model.Event
 
 /**
  * CAPA DE DATOS (REPOSITORIOS):

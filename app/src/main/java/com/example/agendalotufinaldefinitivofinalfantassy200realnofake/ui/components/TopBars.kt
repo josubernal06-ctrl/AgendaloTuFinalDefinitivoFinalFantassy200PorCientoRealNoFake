@@ -1,4 +1,4 @@
-package com.example.isnotempty.ui.components
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
-import com.example.isnotempty.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

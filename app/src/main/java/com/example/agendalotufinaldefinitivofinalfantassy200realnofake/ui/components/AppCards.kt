@@ -1,4 +1,4 @@
-package com.example.isnotempty.ui.components
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.isnotempty.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
 
 /**
  * Tarjeta interactiva con contador y botones extraída a la capa de componentes.
