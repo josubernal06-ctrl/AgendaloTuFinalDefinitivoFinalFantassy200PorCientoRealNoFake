@@ -5,8 +5,8 @@ import java.time.LocalTime
 
 class Pref_Horario(
     var dia: DayOfWeek,
-    private var horaInicio: LocalTime,
-    private var horaFin: LocalTime,
+    var horaInicio: LocalTime,
+    var horaFin: LocalTime,
     var prioridad: Int
 ){
     
