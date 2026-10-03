@@ -1,35 +1,38 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.logica
 
-import android.util.Log.i
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.*
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Conflicto
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Grupo
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.RecomendacionHorario
+import kotlin.collections.emptyList
 
 class GestorHorarios {
-    fun calcularMejorHorario(g: Grupo, a: AbstractActividad, dur: Int): (RecomendacionHorario, List<Conflicto>) {
-        // TODO: Extraer las PreferenciasUsuario de todos los miembros del Grupo g
-        val prefs = mutableListOf<Any>()
-        for (miembro in g.miembros) {
-            prefs.add(miembro.preferencias)
+    fun calcularMejorHorario(g: Grupo, a: AbstractActividad, dur: Int): (RecomendacionHorario, List<Conflicto>) -> Pair<RecomendacionHorario?, List<Conflicto>> {
+        // Extraer las PreferenciasUsuario de todos los miembros del Grupo g mas bonito
+        val listaPreferenciasUsuarios = g.miembros.map { it.preferencias }
+
+        // Encontrar coincidencias (matches) basados en igualdad o contención
+        val matchesEncontrados = findMatches(listaPreferenciasUsuarios, dur)
+
+        // Identificar cruces y generar objetos Conflicto si los hay
+        val conflictos = mutableListOf<Conflicto>()
+        // TODO: Lógica adicional para verificar cruces con actividades existentes
+
+        // 4. Construir la recomendación final si hay matches
+        val mejorSlot = matchesEncontrados.firstOrNull()
+        val alternativas = if (matchesEncontrados.size > 1) matchesEncontrados.drop(1) else emptyList()
+
+        val recomendacionFinal = if (mejorSlot != null) {
+            RecomendacionHorario(mejorSlot, alternativas, conflictos)
+        } else {
+            null
         }
 
-        // TODO: Comparar las disponibilidades para encontrar coincidencias
-        val recomendacionFinal = findMatches(prefs, dur)
-        // TODO: Identificar cruces y generar objetos Conflicto si los hay
-
-
-        return recomendacionFinal, conflictos
+        return Pair(recomendacionFinal, conflictos)
     }
 
-    fun findMatches(prefs: List<Any>, dur: Int): List<RecomendacionHorario> {
+    fun findMatches(listaPreferenciasUsuarios: List<PreferenciasUsuario>, dur: Int): List<RecomendacionHorario> {
 
-        //lista vaacia de matches
-        val matches = mutableListOf<Any>()
-        for (preferenciasUser in prefs) {
-
-        }
-
-        return matches
     }
 }
