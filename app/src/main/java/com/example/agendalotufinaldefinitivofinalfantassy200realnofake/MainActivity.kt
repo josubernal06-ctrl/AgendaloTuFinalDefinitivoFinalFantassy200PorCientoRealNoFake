@@ -103,4 +103,8 @@ class MainActivity : ComponentActivity() {
         AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme {
         }
     }
+
+    fun ejemplo(x: String) {
+        print(x)
+    }
 }
