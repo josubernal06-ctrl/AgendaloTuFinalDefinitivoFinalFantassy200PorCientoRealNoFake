@@ -36,8 +36,7 @@ class MainActivity : ComponentActivity() {
                 } else {
                     HomeScreen(
                         tema = temaActual,
-                        onNavigateToProfile = { showProfile = true }
-                    )
+                    ) { showProfile = true }
                 }
             }
         }
