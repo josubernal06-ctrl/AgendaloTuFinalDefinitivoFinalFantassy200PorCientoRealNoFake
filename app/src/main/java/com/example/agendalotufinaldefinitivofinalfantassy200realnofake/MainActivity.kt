@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity() {
              }
         }
     }
-
+/*te amo<3*/
     @Preview(showBackground = true)
     @Composable
     fun GreetingPreview() {
