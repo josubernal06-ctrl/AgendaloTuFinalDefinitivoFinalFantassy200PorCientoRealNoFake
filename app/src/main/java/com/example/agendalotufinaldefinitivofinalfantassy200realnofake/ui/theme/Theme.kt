@@ -32,6 +32,7 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1C1B1F),
     */
 )
+/*jodete ahora TIENES que hacer un PUll*/
 
 @Composable
 fun AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme(
