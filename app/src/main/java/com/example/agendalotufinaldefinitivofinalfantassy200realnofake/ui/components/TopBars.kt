@@ -1,5 +1,6 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,16 +9,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ClearAll
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -26,7 +27,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
@@ -62,7 +62,6 @@ fun TopBarNavigationExample(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MiTopBar(
@@ -72,12 +71,15 @@ fun MiTopBar(
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     var textoIngresado by remember { mutableStateOf("") }
+    var buscadorVisible by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .background(color= tema.botones)
-        .padding(bottom = 12.dp)) {
-        MediumTopAppBar(
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = tema.botones)
+            .padding(bottom = if (buscadorVisible) 8.dp else 0.dp)
+    ) {
+        TopAppBar(
             title = { Text(text = titulo, color = tema.letras, fontStyle = FontStyle.Normal) },
             navigationIcon = {
                 if (onBackClick != null) {
@@ -91,20 +93,28 @@ fun MiTopBar(
                 }
             },
             actions = {
-                Row(modifier = Modifier.padding(end = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.padding(end = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    // Botón con icono de Lupa (Search) para desplegar/ocultar el buscador
+                    IconButton(onClick = {
+                        buscadorVisible = !buscadorVisible
+                        if (!buscadorVisible) {
+                            textoIngresado = "" // Limpia la búsqueda al cerrar
+                        }
+                    }) {
+                        Icon(
+                            imageVector = if (buscadorVisible) Icons.Default.Close else Icons.Default.Search,
+                            contentDescription = if (buscadorVisible) "Cerrar búsqueda" else "Buscar",
+                            tint = tema.letras
+                        )
+                    }
 
                     IconButton(onClick = { /* Configuración */ }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Configuración",
-                            tint = tema.letras
-                        )
-                    }
-                    IconButton(onClick = { /* Buscar */ }) {
-                        Icon(
-                            imageVector = Icons.Default.ClearAll,
-                            contentDescription = "Buscar",
                             tint = tema.letras
                         )
                     }
@@ -117,7 +127,15 @@ fun MiTopBar(
             scrollBehavior = scrollBehavior
         )
 
-        EntradaTextoField(valor = textoIngresado, onValueChange = { textoIngresado = it}
-            , label = "Buscar Chats", tema = tema, modifier = Modifier.padding(16.dp))
+        // Se despliega la barra de búsqueda únicamente al presionar el icono de la lupa
+        AnimatedVisibility(visible = buscadorVisible) {
+            EntradaTextoField(
+                valor = textoIngresado,
+                onValueChange = { textoIngresado = it },
+                label = "Buscar...",
+                tema = tema,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+        }
     }
 }
