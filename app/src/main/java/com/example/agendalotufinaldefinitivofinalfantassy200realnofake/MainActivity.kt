@@ -4,14 +4,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.model.Usuario
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.HomeScreen
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.UserProfileScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,29 +20,26 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+                // Instanciamos un usuario falso para mostrar la pantalla
+                val usuarioActual = Usuario(id = 101, nombre = "María García", email = "maria.garcia@gmail.com")
+                val temaActual = obtenerTema(1) // Usamos el tema 1 como ejemplo
+
+                // Estado simple para la navegación
+                var showProfile by remember { mutableStateOf(false) }
+
+                if (showProfile) {
+                    UserProfileScreen(
+                        usuario = usuarioActual,
+                        tema = temaActual,
+                        onBackClick = { showProfile = false }
+                    )
+                } else {
+                    HomeScreen(
+                        tema = temaActual,
+                        onNavigateToProfile = { showProfile = true }
                     )
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme {
-        Greeting("Android")
     }
 }
