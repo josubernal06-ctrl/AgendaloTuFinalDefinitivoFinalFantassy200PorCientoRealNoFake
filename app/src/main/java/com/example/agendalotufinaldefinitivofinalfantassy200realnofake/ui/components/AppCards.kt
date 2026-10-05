@@ -95,3 +95,45 @@ fun EntradaTextoField(
         )
     )
 }
+
+/**
+ * Tarjeta para mostrar un horario o clase agendada.
+ */
+@Composable
+fun HorarioCard(
+    titulo: String,
+    descripcion: String,
+    hora: String,
+    tema: TemaColor,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.15f))
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = titulo,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = tema.letras
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = descripcion,
+                fontSize = 14.sp,
+                color = tema.letras.copy(alpha = 0.8f)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = hora,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = tema.botones
+            )
+        }
+    }
+}
