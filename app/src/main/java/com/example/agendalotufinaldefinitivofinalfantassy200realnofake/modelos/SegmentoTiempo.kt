@@ -10,3 +10,5 @@ class SegmentoTiempo(
     var esConjunta: Boolean,
     var puntuacion: Double
 )
+
+/*TE AMO MAS JAJAJAJAJAJA*/
