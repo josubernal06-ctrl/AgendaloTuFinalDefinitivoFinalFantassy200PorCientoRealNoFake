@@ -42,7 +42,8 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.
 fun HomeScreen(
     tema: TemaColor,
     onNavigateToProfile: () -> Unit,
-    onNavigateToAlarm: () -> Unit = {}
+    onNavigateToAlarm: () -> Unit = {},
+    onNavigateToActivity: () -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) } // 0 = Calendar
     val tabTitles = listOf("Calendar", "Alarm")
@@ -104,7 +105,7 @@ fun HomeScreen(
         },
         floatingActionButton = {
             Example(
-                onClick = { /* TODO: Acción para añadir nuevo horario */ },
+                onClick = onNavigateToActivity,
                 colorFondo = tema.botones,
                 colorTexto = tema.fondo
             )

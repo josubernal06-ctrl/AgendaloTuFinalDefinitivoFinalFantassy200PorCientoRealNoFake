@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.model.Usuario
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.ActivityScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.AlarmScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.HomeScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.UserProfileScreen
@@ -39,7 +40,14 @@ class MainActivity : ComponentActivity() {
                                     launchSingleTop = true
                                     restoreState = true
                                 }
-                            }
+                            },
+                            onNavigateToActivity = { navController.navigate("activity") }
+                        )
+                    }
+
+                    composable("activity") {
+                        ActivityScreen(
+                            onBackClick = { navController.popBackStack() }
                         )
                     }
 
