@@ -35,10 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
 
-/**
- * Componente visual de Calendario Semanal (UI Maqueta).
- * Mantiene la estética integrada al tema de la app sin lógica compleja de tiempo real.
- */
 @Composable
 fun CalendarioSemanal(
     tema: TemaColor,
@@ -75,7 +71,7 @@ fun CalendarioSemanal(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Octubre 2024",
+                    text = "Octubre 2026",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = tema.letras
