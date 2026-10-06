@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.CalendarGridView
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,17 +56,27 @@ fun ActivityScreen(
         bottomBar = {
             TabRow(
                 selectedTabIndex = selectedTabIndex,
+                containerColor = tema.botones,
+                contentColor = tema.letras,
                 modifier = Modifier.navigationBarsPadding()
             ) {
                 tabTitles.forEachIndexed { index, title ->
+                    val isSelected = selectedTabIndex == index
                     Tab(
-                        selected = selectedTabIndex == index,
+                        selected = isSelected,
                         onClick = { selectedTabIndex = index },
-                        text = { Text(title, fontSize = 12.sp) },
+                        text = {
+                            Text(
+                                text = title,
+                                fontSize = 12.sp,
+                                color = if (isSelected) tema.letras else tema.letras.copy(alpha = 0.6f)
+                            )
+                        },
                         icon = {
                             Icon(
-                                tabIcons[index],
+                                imageVector = tabIcons[index],
                                 contentDescription = title,
+                                tint = if (isSelected) tema.letras else tema.letras.copy(alpha = 0.6f),
                                 modifier = Modifier.size(22.dp)
                             )
                         }
@@ -78,10 +89,10 @@ fun ActivityScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.End
             ) {
-                ExtendedExample("Actividad Simple", onClick = {
+                ExtendedExample("Actividad Simple", tema = tema, onClick = {
                     // Acción Actividad Simple
                 })
-                ExtendedExample("Actividad en Conjunto", onClick = {
+                ExtendedExample("Actividad en Conjunto", tema = tema, onClick = {
                     // Acción Actividad en Conjunto
                 })
             }
@@ -95,12 +106,15 @@ fun ActivityScreen(
 @Composable
 fun ExtendedExample(
     text: String,
+    tema: TemaColor,
     onClick: () -> Unit
 ) {
     ExtendedFloatingActionButton(
         onClick = onClick,
-        icon = { Icon(Icons.Default.CalendarMonth, contentDescription = null) },
-        text = { Text(text) }
+        containerColor = tema.botones,
+        contentColor = tema.letras,
+        icon = { Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = tema.letras) },
+        text = { Text(text, color = tema.letras) }
     )
 }
 
