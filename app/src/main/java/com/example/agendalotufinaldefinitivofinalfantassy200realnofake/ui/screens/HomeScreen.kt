@@ -25,7 +25,7 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.
 fun HomeScreen(
     tema: TemaColor,
     onNavigateToProfile: () -> Unit,
-    navigate: Nothing?.(String) -> Unit
+    onNavigateToActivity: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -37,10 +37,7 @@ fun HomeScreen(
         },
         floatingActionButton = {
             Example(
-                onClick = {
-                    val navController = null
-                    navController.navigate("ActivityScreen")
-                },
+                onClick = onNavigateToActivity,
                 colorFondo = tema.botones,
                 colorTexto = tema.fondo
             )

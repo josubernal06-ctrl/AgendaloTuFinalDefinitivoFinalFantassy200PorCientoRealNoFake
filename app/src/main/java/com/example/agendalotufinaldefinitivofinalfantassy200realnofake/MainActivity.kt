@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.model.Usuario
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.ActivityScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.HomeScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.UserProfileScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme
@@ -26,6 +27,7 @@ class MainActivity : ComponentActivity() {
 
                 // Estado simple para la navegación
                 var showProfile by remember { mutableStateOf(false) }
+                var showActivity by remember { mutableStateOf(false) }
 
                 if (showProfile) {
                     UserProfileScreen(
@@ -33,10 +35,16 @@ class MainActivity : ComponentActivity() {
                         tema = temaActual,
                         onBackClick = { showProfile = false }
                     )
+                } else if (showActivity) {
+                    ActivityScreen(
+                        onBackClick = { showActivity = false }
+                    )
                 } else {
                     HomeScreen(
                         tema = temaActual,
-                    ) { showProfile = true }
+                        onNavigateToProfile = { showProfile = true },
+                        onNavigateToActivity = { showActivity = true }
+                    )
                 }
             }
         }
