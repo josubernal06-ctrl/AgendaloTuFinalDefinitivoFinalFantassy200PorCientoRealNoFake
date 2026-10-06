@@ -4,11 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.model.Usuario
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.AlarmScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.HomeScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.UserProfileScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme
@@ -20,24 +20,49 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme {
-                // Instanciamos un usuario falso para mostrar la pantalla
                 val usuarioActual = Usuario(id = 101, nombre = "María García", email = "maria.garcia@gmail.com")
                 val temaActual = obtenerTema(1) // Usamos el tema 1 como ejemplo
 
-                // Estado simple para la navegación
-                var showProfile by remember { mutableStateOf(false) }
+                val navController = rememberNavController()
 
-                if (showProfile) {
-                    UserProfileScreen(
-                        usuario = usuarioActual,
-                        tema = temaActual,
-                        onBackClick = { showProfile = false }
-                    )
-                } else {
-                    HomeScreen(
-                        tema = temaActual,
-                        onNavigateToProfile = { showProfile = true }
-                    )
+                NavHost(
+                    navController = navController,
+                    startDestination = "home"
+                ) {
+                    composable("home") {
+                        HomeScreen(
+                            tema = temaActual,
+                            onNavigateToProfile = { navController.navigate("profile") },
+                            onNavigateToAlarm = {
+                                navController.navigate("alarm") {
+                                    popUpTo("home") { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        )
+                    }
+
+                    composable("alarm") {
+                        AlarmScreen(
+                            tema = temaActual,
+                            onNavigateToHome = {
+                                navController.navigate("home") {
+                                    popUpTo("home") { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            },
+                            onNavigateToProfile = { navController.navigate("profile") }
+                        )
+                    }
+
+                    composable("profile") {
+                        UserProfileScreen(
+                            usuario = usuarioActual,
+                            tema = temaActual,
+                            onBackClick = { navController.popBackStack() }
+                        )
+                    }
                 }
             }
         }
