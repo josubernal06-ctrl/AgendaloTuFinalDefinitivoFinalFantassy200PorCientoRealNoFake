@@ -6,7 +6,8 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.interface
 class Usuario(
     private val id: Int,
     var nickname: String,
-    var email: String
+    var email: String,
+    var preferencias: PreferenciasUsuario
 ) : IParticipante, IOrganizador {
 
     override fun notificar(mensaje: String) {
