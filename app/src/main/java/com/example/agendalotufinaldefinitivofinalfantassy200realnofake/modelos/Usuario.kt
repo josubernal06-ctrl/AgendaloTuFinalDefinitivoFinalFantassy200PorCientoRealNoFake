@@ -6,27 +6,29 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.interface
 class Usuario(
     private val id: Int,
     var nickname: String,
-    var email: String,
-    var preferencias: PreferenciasUsuario
+    var email: String
 ) : IParticipante, IOrganizador {
 
+    var preferencias: PreferenciasUsuario = PreferenciasUsuario(mutableListOf())
+
     override fun notificar(mensaje: String) {
-        // TODO: Implementar lógica para enviar notificación al usuario
+        // Implementación
     }
 
     override fun crearGrupo(nombre: String) {
-        // TODO: Implementar inicialización de un nuevo Grupo
+        // Implementación
     }
 
     override fun invitarMiembro(user: Usuario) {
-        // TODO: Implementar lógica para invitar a otro usuario a un grupo
+        // Implementación
     }
 
     fun crearActividad() {
-        // TODO: Implementar creación de ActividadSolitaria o ActividadConjunta
+        // Implementación
     }
 
-    fun getDisponibilidad() {
-        // TODO: Calcular y retornar la disponibilidad en base a PreferenciasUsuario y Segmentos ocupados
+    fun getDisponibilidad(): Boolean {
+        // Implementación
+        return true
     }
 }

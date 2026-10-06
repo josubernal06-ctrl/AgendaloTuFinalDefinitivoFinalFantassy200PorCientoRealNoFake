@@ -4,13 +4,17 @@ class Grupo(
     private val id: Int,
     var nombreGrupo: String,
     private var propietario: Usuario,
-    var miembros: MutableList<Usuario> = mutableListOf()
+    var miebros: List<Usuario> = emptyList()
 ) {
     fun agregarMiembro(user: Usuario) {
-        // TODO: Añadir el objeto user a la lista miembros
+        if (miebros is MutableList) {
+            (miebros as MutableList).add(user)
+        }
     }
 
-    fun eliminarMiembro(user: Usuario) {
-        // TODO: Buscar y remover el objeto user de la lista miembros
+    fun eleiminarMiembro(user: Usuario) {
+        if (miebros is MutableList) {
+            (miebros as MutableList).remove(user)
+        }
     }
 }

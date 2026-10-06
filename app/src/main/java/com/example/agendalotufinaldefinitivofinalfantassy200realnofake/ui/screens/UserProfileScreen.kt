@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.model.Usuario
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Usuario
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.BotonPersonalizado
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
@@ -78,7 +78,7 @@ fun UserProfileScreen(
             
             // Nombre del usuario
             Text(
-                text = usuario.nombre,
+                text = usuario.nickname,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 color = tema.letras
@@ -125,7 +125,7 @@ fun UserProfileScreen(
                     PerfilDatoItem(
                         icono = Icons.Default.Info,
                         titulo = "ID de Usuario",
-                        valor = "#${usuario.id}",
+                        valor = "#Oculto",
                         tema = tema
                     )
                 }
@@ -191,7 +191,7 @@ fun PerfilDatoItem(
 @Composable
 fun UserProfileScreenPreview() {
     // Datos y tema falsos para la vista previa
-    val usuarioEjemplo = Usuario(id = 1, nombre = "Juan Pérez", email = "juan.perez@email.com")
+    val usuarioEjemplo = Usuario(1, nickname = "Juan Pérez", email = "juan.perez@email.com")
     val temaEjemplo = obtenerTema(1) 
     
     UserProfileScreen(

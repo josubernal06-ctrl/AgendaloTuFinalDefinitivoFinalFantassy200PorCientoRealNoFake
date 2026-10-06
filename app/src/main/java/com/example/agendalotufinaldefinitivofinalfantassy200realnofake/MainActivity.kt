@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.model.Usuario
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Usuario
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.ActivityScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.AlarmScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.HomeScreen
@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme {
-                val usuarioActual = Usuario(id = 101, nombre = "María García", email = "maria.garcia@gmail.com")
+                val usuarioActual = Usuario(id = 101, nickname = "María García", email = "maria.garcia@gmail.com")
                 val temaActual = obtenerTema(1) // Usamos el tema 1 como ejemplo
 
                 val navController = rememberNavController()
