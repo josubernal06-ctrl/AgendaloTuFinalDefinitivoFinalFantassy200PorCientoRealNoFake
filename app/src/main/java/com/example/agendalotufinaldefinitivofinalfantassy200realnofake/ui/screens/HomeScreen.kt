@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -32,6 +33,12 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -56,16 +63,22 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.HolidayUiState
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.HolidayViewModel
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     tema: TemaColor,
+    
     onNavigateToProfile: () -> Unit,
     onNavigateToAlarm: () -> Unit = {},
     onNavigateToActivity: () -> Unit = {},
+    onCrearActividad: (String) -> Unit = {}
+    onNavigateToActivity: () -> Unit = {},
     holidayViewModel: HolidayViewModel = viewModel()
 ) {
-    var selectedTabIndex by remember { mutableIntStateOf(0) } // 0 = Calendar
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    
+    
     val tabTitles = listOf("Calendar", "Alarm")
     val tabIcons = listOf(
         Icons.Default.CalendarMonth,
@@ -78,7 +91,7 @@ fun HomeScreen(
             MiTopBar(
                 titulo = "AgendaloTú",
                 tema = tema,
-                onBackClick = null // No necesitamos volver atrás desde Home
+                onBackClick = null
             )
         },
         bottomBar = {
@@ -126,11 +139,15 @@ fun HomeScreen(
             }
         },
         floatingActionButton = {
-            Example(
-                onClick = onNavigateToActivity,
-                colorFondo = tema.botones,
-                colorTexto = tema.fondo
-            )
+            Column(horizontalAlignment = androidx.compose.ui.Alignment.End, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                ExtendedFloatingActionButton(
+                    onClick = onNavigateToActivity,
+                    containerColor = tema.botones,
+                    contentColor = tema.fondo,
+                    icon = { Icon(Icons.Default.Add, contentDescription = "Mis Actividades") },
+                    text = { Text("Ver Actividades") }
+                )
+            }
         },
         containerColor = tema.fondo
     ) { paddingValues ->
@@ -142,13 +159,11 @@ fun HomeScreen(
                 .padding(top = 16.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 1. Calendario semanal (ubicado en la parte superior del contenido)
             CalendarioSemanal(
                 tema = tema,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            // 2. Botón para ver el perfil
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -162,40 +177,23 @@ fun HomeScreen(
                 )
             }
 
-            // 3. Título de próximas actividades
             Text(
-                text = "Tus próximas actividades:",
+                text = "Tus grupos:",
                 color = tema.letras,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            // 4. LazyRow horizontal de las actividades
+            // Espacio reservado para grupos
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                item {
-                    HorarioCard(
-                        titulo = "Desarrollo de Apps",
-                        descripcion = "Revisión de Jetpack Compose y estado",
-                        hora = "10:00 AM - 11:30 AM",
-                        tema = tema,
-                        modifier = Modifier.width(280.dp)
-                    )
-                }
-
-                item {
-                    HorarioCard(
-                        titulo = "Reunión de Proyecto",
-                        descripcion = "Sincronización del equipo de backend",
-                        hora = "2:00 PM - 3:00 PM",
-                        tema = tema,
-                        modifier = Modifier.width(280.dp)
-                    )
-                }
+                // Todavia no hay nada
+            }
+        }
 
                 item {
                     HorarioCard(

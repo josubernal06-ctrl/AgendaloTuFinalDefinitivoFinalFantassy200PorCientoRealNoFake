@@ -3,15 +3,17 @@ package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.scree
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Alarm
-import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -19,12 +21,19 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.compon
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.AiViewModel
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.ActividadUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityScreen(
     onBackClick: () -> Unit,
     aiViewModel: AiViewModel = viewModel()
+    tema: TemaColor,
+    uiState: ActividadUiState,
+    onBackClick: () -> Unit,
+    onNavigateToCreate: () -> Unit
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabTitles = listOf("Calendar", "Alarm")
@@ -42,51 +51,23 @@ fun ActivityScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Actividades", color = tema.letras) },
+                title = { Text("Mis Actividades", color = tema.letras) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Regresar",
-                            tint = tema.letras
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar", tint = tema.letras)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = tema.botones,
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = tema.botones)
             )
         },
-        bottomBar = {
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = onNavigateToCreate,
                 containerColor = tema.botones,
-                contentColor = tema.letras,
-                modifier = Modifier.navigationBarsPadding()
-            ) {
-                tabTitles.forEachIndexed { index, title ->
-                    val isSelected = selectedTabIndex == index
-                    Tab(
-                        selected = isSelected,
-                        onClick = { selectedTabIndex = index },
-                        text = {
-                            Text(
-                                text = title,
-                                fontSize = 12.sp,
-                                color = if (isSelected) tema.letras else tema.letras.copy(alpha = 0.6f)
-                            )
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = tabIcons[index],
-                                contentDescription = title,
-                                tint = if (isSelected) tema.letras else tema.letras.copy(alpha = 0.6f),
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-                    )
-                }
-            }
+                contentColor = tema.fondo,
+                icon = { Icon(Icons.Default.Add, contentDescription = "Nueva Actividad") },
+                text = { Text("Nueva Actividad") }
+            )
         },
         containerColor = tema.fondo
     ) { innerPadding ->
@@ -128,6 +109,30 @@ fun ActivityScreen(
                     Text("Agendar con AI", color = tema.letras)
                 }
             }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp)
+        ) {
+            if (uiState.isLoading) {
+                Text(text = "Cargando actividades...", color = tema.letras)
+            } else if (uiState.error != null) {
+                Text(text = "Error: ${uiState.error}", color = MaterialTheme.colorScheme.error)
+            } else if (uiState.actividades.isEmpty()) {
+                Text(text = "No tienes actividades guardadas. ¡Crea una!", color = tema.letras)
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(uiState.actividades) { actividad ->
+                        ActividadItem(actividad, tema)
+                    }
+                }
+            }
+        }
+    }
+}
 
             // Text donde va la respuesta de la API (lazy / scrollable)
             Text("Respuesta de la IA:", color = tema.letras, fontSize = 14.sp)
@@ -180,5 +185,62 @@ fun ActivityScreen(
 fun ActivityScreenPreview() {
     AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme {
         ActivityScreen(onBackClick = {})
+@Composable
+fun ActividadItem(actividad: AbstractActividad, tema: TemaColor) {
+    // Usamos reflexión simple para leer el valor privado 'esPrivada' para la UI de forma segura
+    var esPrivada by remember { mutableStateOf(false) }
+    var segmentoString by remember { mutableStateOf("") }
+
+    LaunchedEffect(actividad) {
+        try {
+            val clazz = AbstractActividad::class.java
+            val privField = clazz.getDeclaredField("esPrivada")
+            privField.isAccessible = true
+            esPrivada = privField.get(actividad) as Boolean
+
+            // Tratamos de leer el segmento solo para mostrar fechas de manera rudimentaria
+            val segField = clazz.getDeclaredField("segmentoTiempo")
+            segField.isAccessible = true
+            val segmento = segField.get(actividad)
+
+            val segClazz = segmento!!::class.java
+            val iniField = segClazz.getDeclaredField("inicio")
+            iniField.isAccessible = true
+            val inicio = iniField.get(segmento).toString().substringBefore("T")
+
+            segmentoString = inicio
+        } catch (e: Exception) {
+            segmentoString = "Fecha oculta"
+        }
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = tema.botones.copy(alpha = 0.1f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = actividad.titulo,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = tema.letras
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Visibilidad: ${if (esPrivada) "Privada" else "Pública"}",
+                    fontSize = 14.sp,
+                    color = tema.letras.copy(alpha = 0.8f)
+                )
+                Text(
+                    text = segmentoString,
+                    fontSize = 14.sp,
+                    color = tema.letras.copy(alpha = 0.8f)
+                )
+            }
+        }
     }
 }
