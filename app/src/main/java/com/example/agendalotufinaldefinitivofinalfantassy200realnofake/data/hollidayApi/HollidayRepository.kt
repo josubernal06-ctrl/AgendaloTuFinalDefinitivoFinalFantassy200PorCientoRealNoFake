@@ -2,7 +2,7 @@ package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.hol
 
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.RetrofitClient
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.hollidayRemote.HolidayApiService
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.model.Holiday
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Holiday
 
 class HolidayRepository {
     private val api: HolidayApiService = RetrofitClient.apiServiceHoliday

@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -34,8 +32,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -102,37 +98,7 @@ fun ActivityScreen(
                 )
             )
         },
-        bottomBar = {
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                containerColor = tema.botones,
-                contentColor = tema.letras,
-                modifier = Modifier.navigationBarsPadding()
-            ) {
-                tabTitles.forEachIndexed { index, title ->
-                    val isSelected = selectedTabIndex == index
-                    Tab(
-                        selected = isSelected,
-                        onClick = { selectedTabIndex = index },
-                        text = {
-                            Text(
-                                text = title,
-                                fontSize = 12.sp,
-                                color = if (isSelected) tema.letras else tema.letras.copy(alpha = 0.6f)
-                            )
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = tabIcons[index],
-                                contentDescription = title,
-                                tint = if (isSelected) tema.letras else tema.letras.copy(alpha = 0.6f),
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-                    )
-                }
-            }
-        },
+
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onNavigateToCreate,
@@ -218,31 +184,6 @@ fun ActivityScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Botones "Actividad Simple" y "Actividad en Conjunto" uno al lado del otro
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    onClick = { /* Acción Actividad Simple */ },
-                    colors = ButtonDefaults.buttonColors(containerColor = tema.botones),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = tema.letras, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Actividad Simple", color = tema.letras, fontSize = 12.sp)
-                }
-                Button(
-                    onClick = { /* Acción Actividad en Conjunto */ },
-                    colors = ButtonDefaults.buttonColors(containerColor = tema.botones),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = tema.letras, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Actividad Conjunta", color = tema.letras, fontSize = 12.sp)
-                }
-            }
         }
     }
 }
