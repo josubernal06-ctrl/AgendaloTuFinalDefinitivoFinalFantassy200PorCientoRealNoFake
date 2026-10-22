@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -45,6 +47,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,7 +69,8 @@ fun ActivityScreen(
     aiViewModel: AiViewModel = viewModel(),
     tema: TemaColor = obtenerTema(1),
     uiState: ActividadUiState? = null,
-    onNavigateToCreate: () -> Unit = {}
+    onNavigateToCreate: () -> Unit = {},
+    onDeleteActivity: (AbstractActividad) -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabTitles = listOf("Calendar", "Alarm")
@@ -159,7 +163,11 @@ fun ActivityScreen(
                 } else if (uiState.actividades.isNotEmpty()) {
                     Text(text = "Tus actividades guardadas:", color = tema.letras, fontWeight = FontWeight.Bold)
                     uiState.actividades.forEach { actividad ->
-                        ActividadItem(actividad, tema)
+                        ActividadItem(
+                            actividad = actividad,
+                            tema = tema,
+                            onDeleteClick = { onDeleteActivity(actividad) }
+                        )
                     }
                 }
             }
@@ -210,12 +218,41 @@ fun ActivityScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Botones "Actividad Simple" y "Actividad en Conjunto" uno al lado del otro
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = { /* Acción Actividad Simple */ },
+                    colors = ButtonDefaults.buttonColors(containerColor = tema.botones),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = tema.letras, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Actividad Simple", color = tema.letras, fontSize = 12.sp)
+                }
+                Button(
+                    onClick = { /* Acción Actividad en Conjunto */ },
+                    colors = ButtonDefaults.buttonColors(containerColor = tema.botones),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = tema.letras, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Actividad Conjunta", color = tema.letras, fontSize = 12.sp)
+                }
+            }
         }
     }
 }
 
 @Composable
-fun ActividadItem(actividad: AbstractActividad, tema: TemaColor) {
+fun ActividadItem(
+    actividad: AbstractActividad,
+    tema: TemaColor,
+    onDeleteClick: () -> Unit
+) {
     var esPrivada by remember { mutableStateOf(false) }
     var segmentoString by remember { mutableStateOf("") }
 
@@ -246,12 +283,26 @@ fun ActividadItem(actividad: AbstractActividad, tema: TemaColor) {
         colors = CardDefaults.cardColors(containerColor = tema.botones.copy(alpha = 0.1f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = actividad.titulo,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = tema.letras
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = actividad.titulo,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = tema.letras,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = onDeleteClick) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Eliminar actividad",
+                        tint = tema.letras
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(4.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),

@@ -69,7 +69,8 @@ class  MainActivity : ComponentActivity() {
                             tema = temaActual,
                             uiState = uiState,
                             onBackClick = { navController.popBackStack() },
-                            onNavigateToCreate = { navController.navigate("create_activity") }
+                            onNavigateToCreate = { navController.navigate("create_activity") },
+                            onDeleteActivity = { viewModel.eliminarActividad(it) }
                         )
                     }
 

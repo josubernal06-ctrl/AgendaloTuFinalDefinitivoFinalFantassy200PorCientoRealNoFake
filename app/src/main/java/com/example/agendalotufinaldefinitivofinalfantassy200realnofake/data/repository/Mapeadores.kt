@@ -23,6 +23,10 @@ fun ActividadEntity.toDomain(): AbstractActividad {
 fun AbstractActividad.toEntity(): ActividadEntity {
     // Usamos reflection para acceder a los campos privados requeridos por el diagrama UML estricto
     val clazz = AbstractActividad::class.java
+
+    val idField = clazz.getDeclaredField("id")
+    idField.isAccessible = true
+    val realId = idField.get(this) as Int
     
     val descField = clazz.getDeclaredField("descripcion")
     descField.isAccessible = true
@@ -46,7 +50,7 @@ fun AbstractActividad.toEntity(): ActividadEntity {
     val fin = finField.get(seg) as LocalDateTime
 
     return ActividadEntity(
-        id = 0,
+        id = realId,
         titulo = this.titulo,
         descripcion = desc,
         esPrivada = priv,
