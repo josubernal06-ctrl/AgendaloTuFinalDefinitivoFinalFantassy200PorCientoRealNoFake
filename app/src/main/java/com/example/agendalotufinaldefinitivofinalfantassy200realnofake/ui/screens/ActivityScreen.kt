@@ -2,9 +2,11 @@ package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.scree
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Alarm
@@ -39,7 +41,11 @@ fun ActivityScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Actividades", color = tema.letras) },
+
+
                 navigationIcon = {
+
+
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,

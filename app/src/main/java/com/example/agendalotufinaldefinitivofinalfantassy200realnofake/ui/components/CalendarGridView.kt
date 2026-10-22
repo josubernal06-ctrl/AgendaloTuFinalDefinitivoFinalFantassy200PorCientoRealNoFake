@@ -77,6 +77,7 @@ fun CalendarGridView(innerPadding: PaddingValues) {
             items(daysInMonth) { day ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
+                    //contrno de loscuadrados
                     shape = MaterialTheme.shapes.small
                 ) {
                     Box(
