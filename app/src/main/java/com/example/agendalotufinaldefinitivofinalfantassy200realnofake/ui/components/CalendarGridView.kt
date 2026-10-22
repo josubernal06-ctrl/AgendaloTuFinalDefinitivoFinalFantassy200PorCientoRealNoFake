@@ -1,6 +1,5 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components
 
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,9 +31,8 @@ fun CalendarGridView(innerPadding: PaddingValues) {
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(innerPadding)
-            .padding(16.dp)
     ) {
         // Título del Mes
         Text(
@@ -62,13 +60,15 @@ fun CalendarGridView(innerPadding: PaddingValues) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Cuadrícula Lazy con rectángulos más compactos verticalmente
+        // Cuadrícula con altura fija y sin scroll interno para evitar conflictos
         LazyVerticalGrid(
             columns = GridCells.Fixed(7),
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(260.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
-            contentPadding = PaddingValues(bottom = 100.dp)
+            userScrollEnabled = false
         ) {
             items(emptyLeadingCells) {
                 Box(modifier = Modifier.fillMaxSize())
@@ -82,7 +82,7 @@ fun CalendarGridView(innerPadding: PaddingValues) {
                 ) {
                     Box(
                         modifier = Modifier
-                            .padding(vertical = 12.dp) // Más pequeños verticalmente
+                            .padding(vertical = 12.dp)
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
