@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -22,6 +25,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -30,12 +34,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.BotonPersonalizado
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.CalendarioSemanal
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.Example
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.FeriadoCard
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.HorarioCard
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodel.HolidayUiState
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodel.HolidayViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +51,8 @@ fun HomeScreen(
     tema: TemaColor,
     onNavigateToProfile: () -> Unit,
     onNavigateToAlarm: () -> Unit = {},
-    onNavigateToActivity: () -> Unit = {}
+    onNavigateToActivity: () -> Unit = {},
+    holidayViewModel: HolidayViewModel = viewModel()
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) } // 0 = Calendar
     val tabTitles = listOf("Calendar", "Alarm")
@@ -116,6 +125,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .padding(top = 16.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -182,6 +192,59 @@ fun HomeScreen(
                         tema = tema,
                         modifier = Modifier.width(280.dp)
                     )
+                }
+            }
+
+            // 5. Título de feriados de Bolivia
+            Text(
+                text = "Feriados en Bolivia (BO):",
+                color = tema.letras,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            // 6. Sección deslizable de feriados usando MVVM
+            val holidayUiState by holidayViewModel.uiState.collectAsState()
+
+            when (val state = holidayUiState) {
+                is HolidayUiState.Loading -> {
+                    Text(
+                        text = "Cargando feriados de Bolivia...",
+                        color = tema.letras.copy(alpha = 0.7f),
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
+                is HolidayUiState.Error -> {
+                    Text(
+                        text = "Error al cargar feriados: ${state.message}",
+                        color = tema.letras.copy(alpha = 0.7f),
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
+                is HolidayUiState.Success -> {
+                    if (state.holidays.isEmpty()) {
+                        Text(
+                            text = "No se encontraron feriados para Bolivia.",
+                            color = tema.letras.copy(alpha = 0.7f),
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    } else {
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(state.holidays) { feriado ->
+                                FeriadoCard(
+                                    nombre = feriado.name,
+                                    fecha = feriado.date,
+                                    tema = tema,
+                                    modifier = Modifier.width(220.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

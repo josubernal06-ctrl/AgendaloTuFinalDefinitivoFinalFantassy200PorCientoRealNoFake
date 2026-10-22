@@ -7,10 +7,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -111,29 +115,75 @@ fun HorarioCard(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.15f))
     ) {
+        Row {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Avatar del usuario",
+                modifier = Modifier.size(80.dp),
+                tint = tema.letras
+            )
+             Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = titulo,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = tema.letras
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = descripcion,
+                    fontSize = 14.sp,
+                    color = tema.letras.copy(alpha = 0.8f)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = hora,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = tema.botones
+                )
+            }
+        }
+
+    }
+}
+
+/**
+ * Tarjeta para mostrar un feriado público.
+ */
+@Composable
+fun FeriadoCard(
+    nombre: String,
+    fecha: String,
+    tema: TemaColor,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.2f))
+    ) {
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = titulo,
-                fontSize = 18.sp,
+                text = nombre,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = tema.letras
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = descripcion,
-                fontSize = 14.sp,
-                color = tema.letras.copy(alpha = 0.8f)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = hora,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = tema.botones
-            )
+            if (fecha.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Fecha: $fecha",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = tema.botones
+                )
+            }
         }
     }
 }
