@@ -34,7 +34,7 @@ fun ActivityScreen(
         Icons.Default.Alarm,
     )
     val tema = obtenerTema(1)
-
+//xd
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
