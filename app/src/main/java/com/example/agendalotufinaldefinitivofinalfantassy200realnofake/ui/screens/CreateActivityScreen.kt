@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.*
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
@@ -32,13 +33,15 @@ fun CreateActivityScreen(
     var fechaFin by remember { mutableStateOf("2024-12-31T12:00") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    val textColor = Color.Black
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nueva Actividad", color = tema.letras) },
+                title = { Text("Nueva Actividad", color = textColor) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar", tint = tema.letras)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar", tint = textColor)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = tema.botones)
@@ -57,39 +60,71 @@ fun CreateActivityScreen(
             OutlinedTextField(
                 value = titulo,
                 onValueChange = { titulo = it },
-                label = { Text("Título de la actividad") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("Título de la actividad", color = textColor) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = textColor,
+                    unfocusedTextColor = textColor,
+                    focusedLabelColor = textColor,
+                    unfocusedLabelColor = textColor,
+                    focusedBorderColor = tema.botones,
+                    unfocusedBorderColor = textColor.copy(alpha = 0.5f)
+                )
             )
 
             OutlinedTextField(
                 value = descripcion,
                 onValueChange = { descripcion = it },
-                label = { Text("Descripción") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("Descripción", color = textColor) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = textColor,
+                    unfocusedTextColor = textColor,
+                    focusedLabelColor = textColor,
+                    unfocusedLabelColor = textColor,
+                    focusedBorderColor = tema.botones,
+                    unfocusedBorderColor = textColor.copy(alpha = 0.5f)
+                )
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = esPrivada, onCheckedChange = { esPrivada = it })
-                Text("Es Privada", color = tema.letras)
+                Text("Es Privada", color = textColor)
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = esConjunta, onCheckedChange = { esConjunta = it })
-                Text("Es Conjunta (Actividad de Grupo)", color = tema.letras)
+                Text("Es Conjunta (Actividad de Grupo)", color = textColor)
             }
 
             OutlinedTextField(
                 value = fechaInicio,
                 onValueChange = { fechaInicio = it },
-                label = { Text("Inicio (Formato YYYY-MM-DDTHH:MM)") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("Inicio (Formato YYYY-MM-DDTHH:MM)", color = textColor) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = textColor,
+                    unfocusedTextColor = textColor,
+                    focusedLabelColor = textColor,
+                    unfocusedLabelColor = textColor,
+                    focusedBorderColor = tema.botones,
+                    unfocusedBorderColor = textColor.copy(alpha = 0.5f)
+                )
             )
 
             OutlinedTextField(
                 value = fechaFin,
                 onValueChange = { fechaFin = it },
-                label = { Text("Fin (Formato YYYY-MM-DDTHH:MM)") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("Fin (Formato YYYY-MM-DDTHH:MM)", color = textColor) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = textColor,
+                    unfocusedTextColor = textColor,
+                    focusedLabelColor = textColor,
+                    unfocusedLabelColor = textColor,
+                    focusedBorderColor = tema.botones,
+                    unfocusedBorderColor = textColor.copy(alpha = 0.5f)
+                )
             )
 
             if (errorMessage != null) {
@@ -108,7 +143,6 @@ fun CreateActivityScreen(
                         
                         val segmento = SegmentoTiempo(inicio, fin, esConjunta, 0.0)
                         
-                        // Utilizamos reflection inverso para inyectar descripcion y privada al constructor, o los pasamos directamente a los modelos que sí los exponen en el init.
                         val actividad = if (esConjunta) {
                             ActividadConjunta(0, titulo, descripcion, usuarioActual, esPrivada, segmento)
                         } else {
@@ -116,15 +150,15 @@ fun CreateActivityScreen(
                         }
                         
                         onSaveClick(actividad)
-                        onBackClick() // Regresamos tras guardar
+                        onBackClick()
                     } catch (e: DateTimeParseException) {
                         errorMessage = "Formato de fecha inválido. Usa YYYY-MM-DDTHH:MM (ej. 2024-12-31T10:00)"
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = tema.botones, contentColor = tema.fondo)
+                colors = ButtonDefaults.buttonColors(containerColor = tema.botones, contentColor = Color.White)
             ) {
-                Text("Guardar Actividad")
+                Text("Guardar Actividad", color = Color.White)
             }
         }
     }

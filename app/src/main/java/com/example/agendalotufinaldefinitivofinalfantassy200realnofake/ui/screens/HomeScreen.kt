@@ -15,10 +15,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.WaterDrop
@@ -27,18 +27,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -52,14 +47,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.ClimaViewModel
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.BotonPersonalizado
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.CalendarioSemanal
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.Example
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.FeriadoCard
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.HorarioCard
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.ClimaViewModel
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.HolidayUiState
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.HolidayViewModel
 
@@ -68,11 +62,8 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel
 @Composable
 fun HomeScreen(
     tema: TemaColor,
-    
     onNavigateToProfile: () -> Unit,
     onNavigateToAlarm: () -> Unit = {},
-    onNavigateToActivity: () -> Unit = {},
-    onCrearActividad: (String) -> Unit = {}
     onNavigateToActivity: () -> Unit = {},
     holidayViewModel: HolidayViewModel = viewModel()
 ) {
@@ -191,10 +182,6 @@ fun HomeScreen(
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Todavia no hay nada
-            }
-        }
-
                 item {
                     HorarioCard(
                         titulo = "Inglés B2",

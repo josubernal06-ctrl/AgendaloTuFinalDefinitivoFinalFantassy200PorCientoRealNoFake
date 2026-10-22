@@ -1,39 +1,72 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.CalendarGridView
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.AiViewModel
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.ActividadUiState
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.AiViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityScreen(
     onBackClick: () -> Unit,
-    aiViewModel: AiViewModel = viewModel()
-    tema: TemaColor,
-    uiState: ActividadUiState,
-    onBackClick: () -> Unit,
-    onNavigateToCreate: () -> Unit
+    aiViewModel: AiViewModel = viewModel(),
+    tema: TemaColor = obtenerTema(1),
+    uiState: ActividadUiState? = null,
+    onNavigateToCreate: () -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabTitles = listOf("Calendar", "Alarm")
@@ -41,7 +74,6 @@ fun ActivityScreen(
         Icons.Default.CalendarMonth,
         Icons.Default.Alarm,
     )
-    val tema = obtenerTema(1)
 
     val promptText by aiViewModel.promptText.collectAsState()
     val responseText by aiViewModel.responseText.collectAsState()
@@ -51,14 +83,51 @@ fun ActivityScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Mis Actividades", color = tema.letras) },
+                title = { Text("Actividades", color = tema.letras) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar", tint = tema.letras)
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Regresar",
+                            tint = tema.letras
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = tema.botones)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = tema.botones,
+                )
             )
+        },
+        bottomBar = {
+            TabRow(
+                selectedTabIndex = selectedTabIndex,
+                containerColor = tema.botones,
+                contentColor = tema.letras,
+                modifier = Modifier.navigationBarsPadding()
+            ) {
+                tabTitles.forEachIndexed { index, title ->
+                    val isSelected = selectedTabIndex == index
+                    Tab(
+                        selected = isSelected,
+                        onClick = { selectedTabIndex = index },
+                        text = {
+                            Text(
+                                text = title,
+                                fontSize = 12.sp,
+                                color = if (isSelected) tema.letras else tema.letras.copy(alpha = 0.6f)
+                            )
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = tabIcons[index],
+                                contentDescription = title,
+                                tint = if (isSelected) tema.letras else tema.letras.copy(alpha = 0.6f),
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                    )
+                }
+            }
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -80,6 +149,20 @@ fun ActivityScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             CalendarGridView(PaddingValues(0.dp))
+
+            // Si hay uiState de Room, mostramos las actividades guardadas
+            if (uiState != null) {
+                if (uiState.isLoading) {
+                    Text(text = "Cargando actividades...", color = tema.letras)
+                } else if (uiState.error != null) {
+                    Text(text = "Error: ${uiState.error}", color = MaterialTheme.colorScheme.error)
+                } else if (uiState.actividades.isNotEmpty()) {
+                    Text(text = "Tus actividades guardadas:", color = tema.letras, fontWeight = FontWeight.Bold)
+                    uiState.actividades.forEach { actividad ->
+                        ActividadItem(actividad, tema)
+                    }
+                }
+            }
 
             // Text field para promptear a gemini
             OutlinedTextField(
@@ -109,30 +192,6 @@ fun ActivityScreen(
                     Text("Agendar con AI", color = tema.letras)
                 }
             }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp)
-        ) {
-            if (uiState.isLoading) {
-                Text(text = "Cargando actividades...", color = tema.letras)
-            } else if (uiState.error != null) {
-                Text(text = "Error: ${uiState.error}", color = MaterialTheme.colorScheme.error)
-            } else if (uiState.actividades.isEmpty()) {
-                Text(text = "No tienes actividades guardadas. ¡Crea una!", color = tema.letras)
-            } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(uiState.actividades) { actividad ->
-                        ActividadItem(actividad, tema)
-                    }
-                }
-            }
-        }
-    }
-}
 
             // Text donde va la respuesta de la API (lazy / scrollable)
             Text("Respuesta de la IA:", color = tema.letras, fontSize = 14.sp)
@@ -151,43 +210,12 @@ fun ActivityScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Botones "Actividad Simple" y "Actividad en Conjunto" uno al lado del otro
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    onClick = { /* Acción Actividad Simple */ },
-                    colors = ButtonDefaults.buttonColors(containerColor = tema.botones),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = tema.letras, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Actividad Simple", color = tema.letras, fontSize = 12.sp)
-                }
-                Button(
-                    onClick = { /* Acción Actividad en Conjunto */ },
-                    colors = ButtonDefaults.buttonColors(containerColor = tema.botones),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = tema.letras, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Actividad Conjunta", color = tema.letras, fontSize = 12.sp)
-                }
-            }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ActivityScreenPreview() {
-    AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme {
-        ActivityScreen(onBackClick = {})
 @Composable
 fun ActividadItem(actividad: AbstractActividad, tema: TemaColor) {
-    // Usamos reflexión simple para leer el valor privado 'esPrivada' para la UI de forma segura
     var esPrivada by remember { mutableStateOf(false) }
     var segmentoString by remember { mutableStateOf("") }
 
@@ -198,7 +226,6 @@ fun ActividadItem(actividad: AbstractActividad, tema: TemaColor) {
             privField.isAccessible = true
             esPrivada = privField.get(actividad) as Boolean
 
-            // Tratamos de leer el segmento solo para mostrar fechas de manera rudimentaria
             val segField = clazz.getDeclaredField("segmentoTiempo")
             segField.isAccessible = true
             val segmento = segField.get(actividad)
@@ -206,10 +233,10 @@ fun ActividadItem(actividad: AbstractActividad, tema: TemaColor) {
             val segClazz = segmento!!::class.java
             val iniField = segClazz.getDeclaredField("inicio")
             iniField.isAccessible = true
-            val inicio = iniField.get(segmento).toString().substringBefore("T")
+            val inicio = iniField.get(segmento)?.toString()?.substringBefore("T") ?: ""
 
             segmentoString = inicio
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             segmentoString = "Fecha oculta"
         }
     }
@@ -242,5 +269,13 @@ fun ActividadItem(actividad: AbstractActividad, tema: TemaColor) {
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ActivityScreenPreview() {
+    AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme {
+        ActivityScreen(onBackClick = {})
     }
 }
