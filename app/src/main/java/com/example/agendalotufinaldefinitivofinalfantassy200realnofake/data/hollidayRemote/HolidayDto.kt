@@ -1,4 +1,4 @@
-package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.remote
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.hollidayRemote
 
 data class HolidayDto(
     val date: String? = null,

@@ -1,7 +1,7 @@
-package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.hollidayApi
 
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.remote.HolidayApiService
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.remote.RetrofitClient
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.hollidayRemote.HolidayApiService
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.hollidayRemote.RetrofitClient
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.model.Holiday
 
 class HolidayRepository {

@@ -1,4 +1,4 @@
-package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.hollidayApi
 
 /**
  * Un Mapeador (Mapper) es una función o clase que transforma un objeto DTO (el que viene de la API)

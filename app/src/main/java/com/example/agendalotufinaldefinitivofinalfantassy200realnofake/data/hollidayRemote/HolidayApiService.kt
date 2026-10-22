@@ -1,4 +1,4 @@
-package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.remote
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.hollidayRemote
 
 import retrofit2.http.GET
 import retrofit2.http.Path

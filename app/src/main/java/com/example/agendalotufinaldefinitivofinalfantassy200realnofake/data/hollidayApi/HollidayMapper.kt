@@ -1,6 +1,6 @@
-package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.hollidayApi
 
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.remote.HolidayDto
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.hollidayRemote.HolidayDto
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.model.Holiday
 
 fun HolidayDto.toModel(): Holiday = Holiday(

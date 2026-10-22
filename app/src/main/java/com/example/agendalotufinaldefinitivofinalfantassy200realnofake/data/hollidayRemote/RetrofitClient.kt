@@ -1,4 +1,4 @@
-package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.remote
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.hollidayRemote
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
