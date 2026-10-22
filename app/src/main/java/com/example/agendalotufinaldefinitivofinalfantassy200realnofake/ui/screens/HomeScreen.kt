@@ -16,10 +16,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -48,8 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.ClimaViewModel
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.ClimaViewModel
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.BotonPersonalizado
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.CalendarioSemanal
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.Example
@@ -57,8 +53,8 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.compon
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.HorarioCard
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodel.HolidayUiState
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodel.HolidayViewModel
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.HolidayUiState
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.HolidayViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -14,16 +14,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.ai.AiRepository
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.CalendarGridView
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
-import kotlinx.coroutines.launch
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.AiViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityScreen(
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    aiViewModel: AiViewModel = viewModel()
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabTitles = listOf("Calendar", "Alarm")
@@ -33,11 +34,9 @@ fun ActivityScreen(
     )
     val tema = obtenerTema(1)
 
-    var promptText by remember { mutableStateOf("") }
-    var responseText by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-    val aiRepository = remember { AiRepository() }
-    val scope = rememberCoroutineScope()
+    val promptText by aiViewModel.promptText.collectAsState()
+    val responseText by aiViewModel.responseText.collectAsState()
+    val isLoading by aiViewModel.isLoading.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -104,7 +103,7 @@ fun ActivityScreen(
             // Text field para promptear a gemini
             OutlinedTextField(
                 value = promptText,
-                onValueChange = { promptText = it },
+                onValueChange = { aiViewModel.onPromptChanged(it) },
                 label = { Text("Prompt para Gemini", color = tema.letras) },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -119,21 +118,7 @@ fun ActivityScreen(
 
             // Boton "Agendar con AI"
             Button(
-                onClick = {
-                    if (promptText.isNotBlank()) {
-                        scope.launch {
-                            isLoading = true
-                            try {
-                                val res = aiRepository.obtenerRespuestaGemini(promptText)
-                                responseText = res.answer
-                            } catch (e: Exception) {
-                                responseText = "Error al conectar con AI: ${e.localizedMessage}"
-                            } finally {
-                                isLoading = false
-                            }
-                        }
-                    }
-                },
+                onClick = { aiViewModel.enviarPromptAGemini() },
                 colors = ButtonDefaults.buttonColors(containerColor = tema.botones),
                 modifier = Modifier.fillMaxWidth()
             ) {
