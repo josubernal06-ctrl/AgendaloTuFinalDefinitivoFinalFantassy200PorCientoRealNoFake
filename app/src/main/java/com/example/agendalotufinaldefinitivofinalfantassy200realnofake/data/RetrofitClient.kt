@@ -1,46 +1,79 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data
 
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.ai.AiApi
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.clima.ClimaApi
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.hollidayRemote.HolidayApiService
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
-/** 
- * Unica instancia de Retrofit de la app (patron singleton con `object`). 
- * Nos conectará a la web.
- */
 object RetrofitClient {
 
-    // La URL base debe terminar en "/" para que Retrofit pueda concatenar las rutas.
-    private const val BASE_URL = "https://api.chucknorris.io/"
-    private const val BASE_URL3 = "https://stoic.tekloon.net/"
-    private const val BASE_URL_KANYE = "https://api.kanye.rest/"
-
-    // La API Key en la URL hace que Google interprete el "v1beta" distinto si le mandamos "v1" o "v1beta".
-    // Asegurémonos de tener la barra al final para Retrofit.
+    // --- Gemini API ---
     private const val BASE_URL_GEMINI = "https://generativelanguage.googleapis.com/v1beta/"
 
-    // Cliente HTTP con timeouts extendidos para Gemini (las IA requieren mas tiempo de respuesta)
     private val clienteHttpGemini: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-        .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
-        .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
         .build()
 
-    // Inicialización "lazy" (perezosa): Solo se crea cuando se la llama por primera vez
-
-
-
     val instanceGemini: AiApi by lazy {
-        Retrofit.Builder() // builder es un patron de diseño de codigo
-            .baseUrl(BASE_URL_GEMINI) // Le pasamos la url
-            .client(clienteHttpGemini) // Le pasamos el cliente configurado con timeouts largos
-            .addConverterFactory(GsonConverterFactory.create()) // El conversor mágico que pasa de JSON a Kotlin
-            .build() //constructor del objecto Retrofit
-            .create(AiApi::class.java) // Crea la implementación de nuestra Interfaz
-
+        Retrofit.Builder()
+            .baseUrl(BASE_URL_GEMINI)
+            .client(clienteHttpGemini)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(AiApi::class.java)
     }
 
+    // --- Open-Meteo Clima API ---
+    private const val BASE_URL_OPEN_METEO = "https://api.open-meteo.com/"
+
+    private val clienteHttpClima: OkHttpClient = OkHttpClient.Builder()
+        .protocols(listOf(Protocol.HTTP_1_1))
+        .addInterceptor { chain ->
+            val request = chain.request().newBuilder()
+                .header("User-Agent", "Mozilla/5.0 (Android 12; Mobile; rv:124.0) Gecko/124.0 Firefox/124.0")
+                .header("Accept", "application/json")
+                .build()
+            chain.proceed(request)
+        }
+        .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC })
+        .retryOnConnectionFailure(true)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
+
+    val instance: ClimaApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL_OPEN_METEO)
+            .client(clienteHttpClima)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(ClimaApi::class.java)
+    }
+
+    // --- Holiday API ---
+    private const val HOLIDAY_BASE_URL = "https://date.nager.at/"
+
+    private val clienteHttpHoliday: OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        })
+        .build()
+
+    val apiServiceHoliday: HolidayApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(HOLIDAY_BASE_URL)
+            .client(clienteHttpHoliday)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(HolidayApiService::class.java)
+    }
 }
