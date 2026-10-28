@@ -3,7 +3,7 @@ package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewm
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IActividadRepository
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.IActividadRepository
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.Resultado
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
 import kotlinx.coroutines.flow.MutableStateFlow

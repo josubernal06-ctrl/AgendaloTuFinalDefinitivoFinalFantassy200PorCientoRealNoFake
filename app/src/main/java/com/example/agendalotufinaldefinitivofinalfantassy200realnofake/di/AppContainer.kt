@@ -4,31 +4,31 @@ import android.content.Context
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.ai.AiRepository
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.AppDatabase
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.ActividadRepository
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.*
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.mock.MockAiRepository
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.GrupoRepository
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.IActividadRepository
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.IGrupoRepository
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IAiRepository
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IAuthRepository
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.mock.MockAuthRepository
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.mock.MockGrupoRepository
 
-class AppContainer(private val context: Context) {
-    // Auth - mock repository for session
+class AppContainer(context: Context) {
+    val database: AppDatabase by lazy {
+        AppDatabase.getDatabase(context)
+    }
+
     val authRepository: IAuthRepository by lazy {
         MockAuthRepository()
     }
 
-    // Grupos - mock repository
-    val grupoRepository: IGrupoRepository by lazy {
-        MockGrupoRepository()
-    }
-
-    // Actividades - Uses Room with AlarmDao integration
     val actividadRepository: IActividadRepository by lazy {
-        val database = AppDatabase.getDatabase(context)
         ActividadRepository(database.actividadDao(), database.alarmDao())
     }
 
-    // AI - Real Gemini API Repository
+    val grupoRepository: IGrupoRepository by lazy {
+        GrupoRepository(database.grupoDao())
+    }
+
     val aiRepository: IAiRepository by lazy {
         AiRepository()
     }
 }
-

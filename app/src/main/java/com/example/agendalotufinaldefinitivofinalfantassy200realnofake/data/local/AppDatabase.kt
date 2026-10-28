@@ -9,9 +9,14 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.loca
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.alarm.AlarmDao
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.alarm.AlarmEntity
 
-@Database(entities = [ActividadEntity::class, AlarmEntity::class], version = 2, exportSchema = false)
+@Database(
+    entities = [ActividadEntity::class, GrupoEntity::class, AlarmEntity::class],
+    version = 3,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun actividadDao(): ActividadDao
+    abstract fun grupoDao(): GrupoDao
     abstract fun alarmDao(): AlarmDao
 
     companion object {
@@ -25,12 +30,11 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "agendalotu_database"
                 )
-                    .fallbackToDestructiveMigration()
-                    .build()
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }
         }
     }
 }
-

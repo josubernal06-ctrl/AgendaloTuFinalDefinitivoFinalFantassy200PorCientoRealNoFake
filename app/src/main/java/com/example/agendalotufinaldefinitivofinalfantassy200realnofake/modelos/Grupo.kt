@@ -11,16 +11,12 @@ class Grupo(
     fun agregarMiembro(user: Usuario) {
         if (miebros is MutableList) {
             (miebros as MutableList).add(user)
-        } else {
-            miebros = miebros.toMutableList().apply { add(user) }
         }
     }
 
     fun eleiminarMiembro(user: Usuario) {
         if (miebros is MutableList) {
             (miebros as MutableList).remove(user)
-        } else {
-            miebros = miebros.toMutableList().apply { remove(user) }
         }
     }
 }

@@ -15,8 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,7 +22,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -37,25 +34,18 @@ import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.AppDatabase
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.alarm.AlarmEntity
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.Example
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -65,15 +55,13 @@ import java.util.Locale
 fun AlarmScreen(
     tema: TemaColor,
     onNavigateToHome: () -> Unit,
-    onNavigateToGroups: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(1) } // 1 = Alarm
-    val tabTitles = listOf("Calendar", "Alarm", "Grupos")
+    val tabTitles = listOf("Calendar", "Alarm")
     val tabIcons = listOf(
         Icons.Default.CalendarMonth,
         Icons.Default.Alarm,
-        Icons.Default.Person
     )
 
     var showTimePicker by remember { mutableStateOf(false) }
@@ -85,8 +73,7 @@ fun AlarmScreen(
             MiTopBar(
                 titulo = "Alarmas",
                 tema = tema,
-                onBackClick = null,
-                showSearchBar = true
+                onBackClick = null
             )
         },
         bottomBar = {
@@ -111,8 +98,6 @@ fun AlarmScreen(
                             selectedTabIndex = index
                             if (index == 0) {
                                 onNavigateToHome()
-                            } else if (index == 2) {
-                                onNavigateToGroups()
                             }
                         },
                         text = {
@@ -135,6 +120,13 @@ fun AlarmScreen(
                 }
             }
         },
+        floatingActionButton = {
+            Example(
+                onClick = { /*not yet*/ },
+                colorFondo = tema.botones,
+                colorTexto = tema.fondo
+            )
+        },
         containerColor = tema.fondo
     ) { paddingValues ->
         Column(
@@ -145,12 +137,6 @@ fun AlarmScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            val context = LocalContext.current
-            val database = remember { AppDatabase.getDatabase(context) }
-            val alarmDao = remember { database.alarmDao() }
-            val scope = rememberCoroutineScope()
-            val alarmas by alarmDao.obtenerTodasLasAlarmas().collectAsState(initial = emptyList())
-
             Text(
                 text = "Gestión de Alarmas",
                 color = tema.letras,
@@ -158,75 +144,32 @@ fun AlarmScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            if (alarmas.isEmpty()) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.15f))
+            // Tarjeta con la alarma configurada
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.15f))
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "No tienes alarmas programadas",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = tema.letras
-                        )
-                        Text(
-                            text = "Se crearán automáticamente 40 minutos antes de cada actividad agendada.",
-                            fontSize = 14.sp,
-                            color = tema.letras.copy(alpha = 0.8f)
-                        )
-                    }
-                }
-            } else {
-                Text(
-                    text = "Alarmas programadas (40 min antes):",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = tema.letras
-                )
-                alarmas.forEach { alarma ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.15f))
-                    ) {
-                        androidx.compose.foundation.layout.Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = alarma.tituloActividad,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = tema.botones
-                                )
-                                Text(
-                                    text = "Alarma: ${alarma.fechaHoraAlarma}",
-                                    fontSize = 14.sp,
-                                    color = tema.letras
-                                )
-                            }
-                            IconButton(onClick = {
-                                scope.launch {
-                                    alarmDao.eliminarAlarma(alarma)
-                                }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Eliminar Alarma",
-                                    tint = tema.letras
-                                )
-                            }
-                        }
-                    }
+                    Text(
+                        text = "Próxima Alarma",
+                        fontSize = 14.sp,
+                        color = tema.letras.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = selectedTimeText,
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = tema.botones
+                    )
+                    Text(
+                        text = "Programada para tus actividades agendadas",
+                        fontSize = 14.sp,
+                        color = tema.letras
+                    )
                 }
             }
 
