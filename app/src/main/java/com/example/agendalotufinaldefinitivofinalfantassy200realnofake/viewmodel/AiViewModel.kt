@@ -46,7 +46,8 @@ class AiViewModel(
         val actividad = GestorHorarios.parsearActividadDesdeRespuesta(respuestaApi, usuario)
         if (actividad != null) {
             val repoToUse = actividadRepository ?: context?.let {
-                ActividadRepository(AppDatabase.getDatabase(it).actividadDao())
+                val db = AppDatabase.getDatabase(it)
+                ActividadRepository(db.actividadDao(), db.alarmDao())
             }
             repoToUse?.let { repo ->
                 withContext(Dispatchers.IO) {

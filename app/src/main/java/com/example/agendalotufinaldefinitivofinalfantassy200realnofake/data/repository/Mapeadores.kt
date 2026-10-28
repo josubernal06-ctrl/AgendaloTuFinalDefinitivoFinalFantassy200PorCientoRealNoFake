@@ -1,6 +1,6 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository
 
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.ActividadEntity
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.actividad.ActividadEntity
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.*
 import java.time.LocalDateTime
 

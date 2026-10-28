@@ -37,7 +37,7 @@ class  MainActivity : ComponentActivity() {
 
                 val context = LocalContext.current
                 val database = AppDatabase.getDatabase(context)
-                val repository = ActividadRepository(database.actividadDao())
+                val repository = ActividadRepository(database.actividadDao(), database.alarmDao())
                 val factory = ActividadesViewModel.Factory(repository)
 
                 val navController = rememberNavController()

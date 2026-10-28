@@ -1,4 +1,4 @@
-package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.actividad
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
@@ -9,7 +9,7 @@ interface ActividadDao {
     fun obtenerTodasLasActividades(): Flow<List<ActividadEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertarActividad(actividad: ActividadEntity)
+    fun insertarActividad(actividad: ActividadEntity): Long
 
     @Update
     fun actualizarActividad(actividad: ActividadEntity)
