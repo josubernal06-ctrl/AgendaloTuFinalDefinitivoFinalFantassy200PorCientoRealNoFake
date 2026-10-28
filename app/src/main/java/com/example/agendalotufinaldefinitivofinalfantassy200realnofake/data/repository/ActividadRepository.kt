@@ -4,6 +4,7 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.loca
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.alarm.AlarmDao
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.alarm.AlarmEntity
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IActividadRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -14,9 +15,9 @@ import java.time.LocalDateTime
 class ActividadRepository(
     private val dao: ActividadDao,
     private val alarmDao: AlarmDao? = null
-) {
+) : IActividadRepository {
 
-    fun obtenerActividades(): Flow<Resultado<List<AbstractActividad>>> {
+    override fun obtenerActividades(): Flow<Resultado<List<AbstractActividad>>> {
         return dao.obtenerTodasLasActividades().map { entities ->
             Resultado.Exito(entities.map { it.toDomain() }) as Resultado<List<AbstractActividad>>
         }.catch { e ->
@@ -24,7 +25,7 @@ class ActividadRepository(
         }
     }
 
-    suspend fun insertarActividad(actividad: AbstractActividad) {
+    override suspend fun insertarActividad(actividad: AbstractActividad) {
         withContext(Dispatchers.IO) {
             val entity = actividad.toEntity()
             val rowId = dao.insertarActividad(entity)
@@ -50,7 +51,7 @@ class ActividadRepository(
         }
     }
 
-    suspend fun eliminarActividad(actividad: AbstractActividad) {
+    override suspend fun eliminarActividad(actividad: AbstractActividad) {
         withContext(Dispatchers.IO) {
             val entity = actividad.toEntity()
             dao.eliminarActividad(entity)

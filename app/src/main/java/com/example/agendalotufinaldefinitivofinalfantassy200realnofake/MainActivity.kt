@@ -52,7 +52,8 @@ class  MainActivity : ComponentActivity() {
                 val actividadFactory = ActividadesViewModel.Factory(appContainer.actividadRepository)
                 val grupoFactory = GrupoViewModel.Factory(appContainer.grupoRepository)
                 val grupoViewModel: GrupoViewModel = viewModel(factory = grupoFactory)
-                val aiViewModel: AiViewModel = viewModel()
+                val aiFactory = AiViewModel.Factory(appContainer.aiRepository)
+                val aiViewModel: AiViewModel = viewModel(factory = aiFactory)
 
                 val navController = rememberNavController()
                 val temaActual = obtenerTema(1)

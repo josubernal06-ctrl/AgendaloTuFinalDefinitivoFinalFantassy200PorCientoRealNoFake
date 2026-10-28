@@ -2,6 +2,7 @@ package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmode
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.ai.AiRepository
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.AppDatabase
@@ -9,6 +10,7 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repo
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.logica.GestorHorarios
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Usuario
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IAiRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class AiViewModel(
-    private val repository: AiRepository = AiRepository()
+    private val repository: IAiRepository = AiRepository()
 ) : ViewModel() {
 
     private val _promptText = MutableStateFlow("")
@@ -103,5 +105,16 @@ class AiViewModel(
             }
         }
     }
+
+    class Factory(private val repository: IAiRepository) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(AiViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return AiViewModel(repository) as T
+            }
+            throw IllegalArgumentException("Clase ViewModel desconocida")
+        }
+    }
 }
+
 
