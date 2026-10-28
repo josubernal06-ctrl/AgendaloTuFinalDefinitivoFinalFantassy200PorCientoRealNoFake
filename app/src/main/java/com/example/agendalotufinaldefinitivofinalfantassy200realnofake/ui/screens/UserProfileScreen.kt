@@ -148,7 +148,7 @@ fun UserProfileScreen(
             
             BotonPersonalizado(
                 texto = "Cerrar Sesión",
-                onClick = { /* TODO: Implementar cierre de sesión */ },
+                onClick = onLogoutClick,
                 colorFondo = tema.detalles.copy(alpha = 0.5f),
                 colorTexto = tema.letras
             )

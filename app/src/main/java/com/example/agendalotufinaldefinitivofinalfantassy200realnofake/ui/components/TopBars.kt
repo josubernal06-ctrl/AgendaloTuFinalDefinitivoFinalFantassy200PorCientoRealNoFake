@@ -69,6 +69,7 @@ fun MiTopBar(
     searchQuery: String? = null,
     onSearchQueryChange: ((String) -> Unit)? = null,
     searchLabel: String = "Buscar...",
+    showSearchBar: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     var internalQuery by remember { mutableStateOf("") }
@@ -109,7 +110,7 @@ fun MiTopBar(
                             tint = tema.letras
                         )
                     }
-                    if (currentQuery.isNotEmpty()) {
+                    if (showSearchBar && currentQuery.isNotEmpty()) {
                         IconButton(onClick = { onQueryChange("") }) {
                             Icon(
                                 imageVector = Icons.Default.ClearAll,
@@ -127,13 +128,14 @@ fun MiTopBar(
             scrollBehavior = scrollBehavior
         )
 
-        // Barra de búsqueda siempre visible integrada al tema
-        EntradaTextoField(
-            valor = currentQuery,
-            onValueChange = onQueryChange,
-            label = searchLabel,
-            tema = tema,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
+        if (showSearchBar) {
+            EntradaTextoField(
+                valor = currentQuery,
+                onValueChange = onQueryChange,
+                label = searchLabel,
+                tema = tema,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+        }
     }
 }

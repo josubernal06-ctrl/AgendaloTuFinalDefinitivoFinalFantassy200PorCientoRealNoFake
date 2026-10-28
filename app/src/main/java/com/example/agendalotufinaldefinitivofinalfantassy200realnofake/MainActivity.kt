@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -25,9 +26,14 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.di.AppContainer
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.LoginScreen
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.AuthViewModel
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.ActividadesViewModel
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.*
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.*
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.AiViewModel
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Grupo
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.ActividadConjunta
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.Resultado
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import java.time.LocalDateTime
 
 class  MainActivity : ComponentActivity() {
@@ -44,9 +50,19 @@ class  MainActivity : ComponentActivity() {
                 val currentUser by authViewModel.currentUser.collectAsStateWithLifecycle()
                 
                 val actividadFactory = ActividadesViewModel.Factory(appContainer.actividadRepository)
+                val grupoFactory = GrupoViewModel.Factory(appContainer.grupoRepository)
+                val grupoViewModel: GrupoViewModel = viewModel(factory = grupoFactory)
+                val aiViewModel: AiViewModel = viewModel()
 
                 val navController = rememberNavController()
                 val temaActual = obtenerTema(1)
+                
+                // Cargar grupos cuando el usuario inicie sesión
+                LaunchedEffect(currentUser) {
+                    if (currentUser != null) {
+                        grupoViewModel.cargarGrupos(currentUser!!.id)
+                    }
+                }
 
                 if (currentUser == null) {
                     val testUsers by authViewModel.testUsers.collectAsStateWithLifecycle()
@@ -71,7 +87,153 @@ class  MainActivity : ComponentActivity() {
                                     restoreState = true
                                 }
                             },
+                            onNavigateToGroups = {
+                                navController.navigate("groups") {
+                                    popUpTo("home") { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
                             onNavigateToActivity = { navController.navigate("activity") }
+                        )
+                    }
+
+                    composable("groups") {
+                        val uiState by grupoViewModel.uiState.collectAsStateWithLifecycle()
+                        GroupListScreen(
+                            tema = temaActual,
+                            uiState = uiState,
+                            onNavigateToHome = {
+                                navController.navigate("home") {
+                                    popUpTo("home") { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            onNavigateToAlarm = {
+                                navController.navigate("alarm") {
+                                    popUpTo("home") { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            onCreateGroup = { navController.navigate("create_group") },
+                            onJoinGroup = { navController.navigate("join_group") },
+                            onGroupClick = { grupo -> navController.navigate("group_detail/${grupo.id}") }
+                        )
+                    }
+
+                    composable("create_group") {
+                        val actionResult by grupoViewModel.actionResult.collectAsStateWithLifecycle()
+                        LaunchedEffect(actionResult) {
+                            if (actionResult is Resultado.Exito) {
+                                grupoViewModel.clearActionResult()
+                                navController.popBackStack()
+                            }
+                        }
+                        CreateGroupScreen(
+                            tema = temaActual,
+                            onBackClick = { navController.popBackStack() },
+                            onSaveClick = { nombre, desc -> 
+                                grupoViewModel.crearGrupo(nombre, desc, currentUser!!) 
+                            }
+                        )
+                    }
+
+                    composable("join_group") {
+                        val actionResult by grupoViewModel.actionResult.collectAsStateWithLifecycle()
+                        LaunchedEffect(actionResult) {
+                            if (actionResult is Resultado.Exito) {
+                                grupoViewModel.clearActionResult()
+                                navController.popBackStack()
+                            }
+                        }
+                        JoinGroupScreen(
+                            tema = temaActual,
+                            onBackClick = { navController.popBackStack() },
+                            onJoinClick = { codigo -> 
+                                grupoViewModel.unirseAGrupo(codigo, currentUser!!) 
+                            }
+                        )
+                    }
+
+                    composable(
+                        "group_detail/{grupoId}",
+                        arguments = listOf(navArgument("grupoId") { type = NavType.IntType })
+                    ) { backStackEntry ->
+                        val grupoId = backStackEntry.arguments?.getInt("grupoId") ?: -1
+                        val uiState by grupoViewModel.uiState.collectAsStateWithLifecycle()
+                        val grupos = (uiState as? GrupoUiState.Success)?.grupos ?: emptyList()
+                        
+                        GroupDetailScreen(
+                            tema = temaActual,
+                            grupoId = grupoId,
+                            grupos = grupos,
+                            onBackClick = { navController.popBackStack() },
+                            onNavigateToCalendar = { id -> navController.navigate("group_calendar/$id") }
+                        )
+                    }
+                    
+                    composable(
+                        "group_calendar/{grupoId}",
+                        arguments = listOf(navArgument("grupoId") { type = NavType.IntType })
+                    ) { backStackEntry ->
+                        val grupoId = backStackEntry.arguments?.getInt("grupoId") ?: -1
+                        val uiState by grupoViewModel.uiState.collectAsStateWithLifecycle()
+                        val grupo = (uiState as? GrupoUiState.Success)?.grupos?.find { it.id == grupoId }
+                        
+                        val actUiState by actividadFactory.create(ActividadesViewModel::class.java).uiState.collectAsStateWithLifecycle()
+                        val actividades = actUiState.actividades.filterIsInstance<ActividadConjunta>()
+
+                        if (grupo != null) {
+                            GroupActivityCalendarScreen(
+                                tema = temaActual,
+                                grupo = grupo,
+                                actividades = actividades,
+                                onBackClick = { navController.popBackStack() },
+                                onNavigateToCreateActivity = { id -> navController.navigate("create_group_activity/$id") }
+                            )
+                        }
+                    }
+                    
+                    composable(
+                        "create_group_activity/{grupoId}",
+                        arguments = listOf(navArgument("grupoId") { type = NavType.IntType })
+                    ) { backStackEntry ->
+                        val grupoId = backStackEntry.arguments?.getInt("grupoId") ?: -1
+                        val viewModel: ActividadesViewModel = viewModel(factory = actividadFactory)
+                        
+                        val aiState by aiViewModel.responseText.collectAsStateWithLifecycle()
+                        
+                        CreateGroupActivityScreen(
+                            tema = temaActual,
+                            grupoId = grupoId,
+                            usuarioActual = currentUser!!,
+                            onBackClick = { navController.popBackStack() },
+                            onSaveClick = { titulo, desc, rec ->
+                                val nuevaActividad = ActividadConjunta(
+                                    id = (1000..9999).random(),
+                                    titulo = titulo,
+                                    descripcion = desc + "\n[Recomendación AI: $rec]",
+                                    propietario = currentUser!!,
+                                    esPrivada = false,
+                                    segmentoTiempo = SegmentoTiempo(
+                                        inicio = LocalDateTime.now().plusDays(1).withHour(15).withMinute(0),
+                                        fin = LocalDateTime.now().plusDays(1).withHour(16).withMinute(0),
+                                        esConjunta = true,
+                                        puntuacion = 1.0
+                                    ),
+                                    grupoId = grupoId,
+                                    participantes = emptyList()
+                                )
+                                viewModel.crearActividad(nuevaActividad)
+                                navController.popBackStack()
+                            },
+                            aiRecommendationState = aiState,
+                            onSuggestClick = { prompt ->
+                                aiViewModel.onPromptChanged(prompt)
+                                aiViewModel.enviarPromptAGemini()
+                            }
                         )
                     }
 
@@ -108,6 +270,13 @@ class  MainActivity : ComponentActivity() {
                                 navController.navigate("home") {
                                     popUpTo("home") { inclusive = true }
                                     launchSingleTop = true
+                                }
+                            },
+                            onNavigateToGroups = {
+                                navController.navigate("groups") {
+                                    popUpTo("home") { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
                             },
                             onNavigateToProfile = { navController.navigate("profile") }

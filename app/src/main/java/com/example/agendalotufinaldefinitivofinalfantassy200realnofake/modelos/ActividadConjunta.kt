@@ -6,5 +6,7 @@ class ActividadConjunta(
     descripcion: String,
     propietario: Usuario,
     esPrivada: Boolean,
-    segmentoTiempo: SegmentoTiempo
+    segmentoTiempo: SegmentoTiempo,
+    val grupoId: Int = -1,
+    var participantes: List<Usuario> = emptyList()
 ) : AbstractActividad(id, titulo, descripcion, propietario, esPrivada, segmentoTiempo)
