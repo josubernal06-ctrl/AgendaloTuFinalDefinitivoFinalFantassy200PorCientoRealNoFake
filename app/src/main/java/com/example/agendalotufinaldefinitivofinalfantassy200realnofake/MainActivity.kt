@@ -5,16 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.AppDatabase
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.ActividadRepository
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.ActividadSolitaria
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.SegmentoTiempo
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.di.AppContainer
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Usuario
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.CreateActivityScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.ActivityScreen
@@ -24,9 +22,8 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.ActividadesViewModel
-import java.time.LocalDateTime
 
-class  MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -36,9 +33,8 @@ class  MainActivity : ComponentActivity() {
                 val temaActual = obtenerTema(1)
 
                 val context = LocalContext.current
-                val database = AppDatabase.getDatabase(context)
-                val repository = ActividadRepository(database.actividadDao())
-                val factory = ActividadesViewModel.Factory(repository)
+                val appContainer = remember { AppContainer(context) }
+                val factory = ActividadesViewModel.Factory(appContainer.actividadRepository)
 
                 val navController = rememberNavController()
 

@@ -194,30 +194,8 @@ fun ActividadItem(
     tema: TemaColor,
     onDeleteClick: () -> Unit
 ) {
-    var esPrivada by remember { mutableStateOf(false) }
-    var segmentoString by remember { mutableStateOf("") }
-
-    LaunchedEffect(actividad) {
-        try {
-            val clazz = AbstractActividad::class.java
-            val privField = clazz.getDeclaredField("esPrivada")
-            privField.isAccessible = true
-            esPrivada = privField.get(actividad) as Boolean
-
-            val segField = clazz.getDeclaredField("segmentoTiempo")
-            segField.isAccessible = true
-            val segmento = segField.get(actividad)
-
-            val segClazz = segmento!!::class.java
-            val iniField = segClazz.getDeclaredField("inicio")
-            iniField.isAccessible = true
-            val inicio = iniField.get(segmento)?.toString()?.substringBefore("T") ?: ""
-
-            segmentoString = inicio
-        } catch (_: Exception) {
-            segmentoString = "Fecha oculta"
-        }
-    }
+    val esPrivada = actividad.esPrivada
+    val segmentoString = actividad.segmentoTiempo.inicio.toString().substringBefore("T").ifEmpty { "Fecha oculta" }
 
     Card(
         modifier = Modifier.fillMaxWidth(),

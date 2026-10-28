@@ -3,7 +3,7 @@ package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewm
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.ActividadRepository
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.IActividadRepository
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.Resultado
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ActividadesViewModel(private val repository: ActividadRepository) : ViewModel() {
+class ActividadesViewModel(private val repository: IActividadRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ActividadUiState())
     val uiState: StateFlow<ActividadUiState> = _uiState.asStateFlow()
@@ -52,7 +52,7 @@ class ActividadesViewModel(private val repository: ActividadRepository) : ViewMo
         }
     }
 
-    class Factory(private val repository: ActividadRepository) : ViewModelProvider.Factory {
+    class Factory(private val repository: IActividadRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(ActividadesViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
