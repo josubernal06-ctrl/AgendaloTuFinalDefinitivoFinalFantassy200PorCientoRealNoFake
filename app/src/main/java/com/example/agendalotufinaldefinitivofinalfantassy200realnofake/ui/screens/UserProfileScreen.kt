@@ -31,7 +31,8 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.
 fun UserProfileScreen(
     usuario: Usuario,
     tema: TemaColor,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onLogoutClick: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -152,9 +153,17 @@ fun UserProfileScreen(
                 colorTexto = tema.letras
             )
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(
+            onClick = onLogoutClick,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = tema.botones, contentColor = tema.fondo)
+        ) {
+            Text("Cerrar Sesión")
+        }
     }
 }
-
 @Composable
 fun PerfilDatoItem(
     icono: ImageVector,

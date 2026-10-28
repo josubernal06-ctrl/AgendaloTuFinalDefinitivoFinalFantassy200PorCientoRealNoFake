@@ -4,11 +4,11 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.Retr
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.BuildConfig
 import kotlinx.coroutines.delay
 
-class AiRepository {
+class AiRepository : com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IAiRepository {
     // Obtenemos la API_KEY inyectada desde local.properties a través de BuildConfig
     private val API_KEY = BuildConfig.GEMINI_API_KEY 
 
-    suspend fun obtenerRespuestaGemini(promptPregunta: String): AiAnswer {
+    override suspend fun obtenerRespuestaGemini(promptPregunta: String): AiAnswer {
         // 1. Armamos el Request (lo que le vamos a mandar a Gemini)
         val requestBody = AiRequestDto(
             contents = listOf(

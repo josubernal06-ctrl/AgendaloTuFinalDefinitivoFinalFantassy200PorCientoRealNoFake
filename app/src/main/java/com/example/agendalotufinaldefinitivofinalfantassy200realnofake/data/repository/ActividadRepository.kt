@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-class ActividadRepository(private val dao: ActividadDao) {
+class ActividadRepository(private val dao: ActividadDao) : com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IActividadRepository {
 
-    fun obtenerActividades(): Flow<Resultado<List<AbstractActividad>>> {
+    override fun obtenerActividades(): Flow<Resultado<List<AbstractActividad>>> {
         return dao.obtenerTodasLasActividades().map { entities ->
             Resultado.Exito(entities.map { it.toDomain() }) as Resultado<List<AbstractActividad>>
         }.catch { e ->
@@ -18,13 +18,13 @@ class ActividadRepository(private val dao: ActividadDao) {
         }
     }
 
-    suspend fun insertarActividad(actividad: AbstractActividad) {
+    override suspend fun insertarActividad(actividad: AbstractActividad) {
         withContext(Dispatchers.IO) {
             dao.insertarActividad(actividad.toEntity())
         }
     }
 
-    suspend fun eliminarActividad(actividad: AbstractActividad) {
+    override suspend fun eliminarActividad(actividad: AbstractActividad) {
         withContext(Dispatchers.IO) {
             dao.eliminarActividad(actividad.toEntity())
         }
