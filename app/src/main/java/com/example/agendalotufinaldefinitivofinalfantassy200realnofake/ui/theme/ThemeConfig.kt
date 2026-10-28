@@ -34,12 +34,15 @@ fun obtenerTema(numero: Int): TemaColor {
         9 -> TemaColor(9, tema9_fondo, tema9_botones, tema9_detalles, tema9_letras)
         10 -> TemaColor(10, tema10_fondo, tema10_botones, tema10_detalles, tema10_letras)
         11 -> TemaColor(11, tema11_fondo, tema11_botones, tema11_detalles, tema11_letras)
-        else -> TemaColor(1, tema1_fondo, tema1_botones, tema1_detalles, tema1_letras)
+        12 -> TemaColor(12, tema12_fondo, tema12_botones, tema12_detalles, tema12_letras)
+        13 -> TemaColor(13, tema13_fondo, tema13_botones, tema13_detalles, tema13_letras)
+        else -> TemaColor(13, tema13_fondo, tema13_botones, tema13_detalles, tema13_letras)
     }
 
     val nivelCalido = when (numero) {
         3 -> 0.15f
         10 -> 0.30f
+        12, 13 -> 0.0f
         else -> calido
     }
 
@@ -48,6 +51,6 @@ fun obtenerTema(numero: Int): TemaColor {
         fondo = temaBase.fondo.toWarm(nivelCalido),
         botones = temaBase.botones.toWarm(nivelCalido),
         detalles = temaBase.detalles.toWarm(nivelCalido),
-        letras = temaBase.letras.toWarm(nivelCalido)
+        letras = temaBase.letras
     )
 }

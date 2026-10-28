@@ -22,6 +22,7 @@ object RetrofitClient {
         .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
         .build()
 
+
     val instanceGemini: AiApi by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL_GEMINI)

@@ -9,6 +9,7 @@ interface ClimaApi {
         @Query("latitude") latitude: Double = -16.5000,
         @Query("longitude") longitude: Double = -68.1500,
         @Query("hourly") hourly: String = "precipitation_probability,precipitation,temperature_2m",
-        @Query("timezone") timezone: String = "auto"
+        @Query("timezone") timezone: String = "auto",
+        @Query("forecast_days") forecastDays: Int = 16
     ): ClimaDto
 }

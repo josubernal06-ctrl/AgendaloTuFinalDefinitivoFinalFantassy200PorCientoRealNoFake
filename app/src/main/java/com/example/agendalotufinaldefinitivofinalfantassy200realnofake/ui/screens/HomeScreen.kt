@@ -58,31 +58,34 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.HolidayViewModel
 
 
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     tema: TemaColor,
     onNavigateToProfile: () -> Unit,
     onNavigateToAlarm: () -> Unit = {},
-    onNavigateToActivity: () -> Unit = {},
-    holidayViewModel: HolidayViewModel = viewModel()
+    onNavigateToActivity: () -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    
-    
     val tabTitles = listOf("Calendar", "Alarm")
     val tabIcons = listOf(
         Icons.Default.CalendarMonth,
         Icons.Default.Alarm,
     )
     val scrollState = rememberScrollState()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             MiTopBar(
                 titulo = "AgendaloTú",
                 tema = tema,
-                onBackClick = null
+                onBackClick = null,
+                scrollBehavior = scrollBehavior
             )
         },
         bottomBar = {
@@ -190,146 +193,6 @@ fun HomeScreen(
                         tema = tema,
                         modifier = Modifier.width(280.dp)
                     )
-                }
-            }
-
-            // 5. Título de feriados de Bolivia
-            Text(
-                text = "Feriados en Bolivia (BO):",
-                color = tema.letras,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-
-            // 6. Sección deslizable de feriados usando MVVM
-            val holidayUiState by holidayViewModel.uiState.collectAsState()
-
-            when (val state = holidayUiState) {
-                is HolidayUiState.Loading -> {
-                    Text(
-                        text = "Cargando feriados de Bolivia...",
-                        color = tema.letras.copy(alpha = 0.7f),
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                }
-                is HolidayUiState.Error -> {
-                    Text(
-                        text = "Error al cargar feriados: ${state.message}",
-                        color = tema.letras.copy(alpha = 0.7f),
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                }
-                is HolidayUiState.Success -> {
-                    if (state.holidays.isEmpty()) {
-                        Text(
-                            text = "No se encontraron feriados para Bolivia.",
-                            color = tema.letras.copy(alpha = 0.7f),
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
-                    } else {
-                        LazyRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentPadding = PaddingValues(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            items(state.holidays) { feriado ->
-                                FeriadoCard(
-                                    nombre = feriado.name,
-                                    fecha = feriado.date,
-                                    tema = tema,
-                                    modifier = Modifier.width(220.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 5. Título y vista de Clima debajo de las cards
-            Text(
-                text = "Clima:",
-                color = tema.letras,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-
-            val climaViewModel: ClimaViewModel = viewModel()
-            val climaState by climaViewModel.climaState.collectAsState()
-            val isLoading by climaViewModel.isLoading.collectAsState()
-            val errorState by climaViewModel.errorState.collectAsState()
-
-            when {
-                isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = tema.botones
-                    )
-                }
-                errorState != null -> {
-                    Text(
-                        text = "No se pudo cargar el clima",
-                        color = tema.letras.copy(alpha = 0.7f),
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                }
-                climaState != null -> {
-                    val pronostico = climaState?.pronosticoPorHora?.take(12) ?: emptyList()
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        items(pronostico) { item ->
-                            Card(
-                                colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.25f)),
-                                shape = RoundedCornerShape(10.dp),
-                                modifier = Modifier
-                                    .width(70.dp)
-                                    .height(82.dp)
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(4.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.SpaceEvenly
-                                ) {
-                                    Text(
-                                        text = "${item.temperatura.toInt()}°C",
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 13.sp,
-                                        color = tema.letras
-                                    )
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = if (item.probabilidadLluvia > 40) Icons.Default.WaterDrop else Icons.Default.WbSunny,
-                                            contentDescription = null,
-                                            tint = if (item.probabilidadLluvia > 40) tema.botones else tema.letras,
-                                            modifier = Modifier.size(13.dp)
-                                        )
-                                        Text(
-                                            text = "${item.probabilidadLluvia}%",
-                                            fontSize = 10.sp,
-                                            color = tema.letras,
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                    }
-                                    Text(
-                                        text = item.hora,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = tema.letras
-                                    )
-                                }
-                            }
-                        }
-                    }
                 }
             }
 

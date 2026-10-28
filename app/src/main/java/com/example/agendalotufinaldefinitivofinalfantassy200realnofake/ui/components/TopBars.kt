@@ -85,14 +85,14 @@ fun MiTopBar(
             .padding(bottom = 12.dp)
     ) {
         MediumTopAppBar(
-            title = { Text(text = titulo, color = tema.letras, fontStyle = FontStyle.Normal) },
+            title = { Text(text = titulo, color = tema.fondo, fontStyle = FontStyle.Normal) },
             navigationIcon = {
                 if (onBackClick != null) {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar",
-                            tint = tema.letras
+                            tint = tema.fondo
                         )
                     }
                 }
@@ -106,7 +106,7 @@ fun MiTopBar(
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Configuración",
-                            tint = tema.letras
+                            tint = tema.fondo
                         )
                     }
                     if (currentQuery.isNotEmpty()) {
@@ -114,7 +114,7 @@ fun MiTopBar(
                             Icon(
                                 imageVector = Icons.Default.ClearAll,
                                 contentDescription = "Limpiar búsqueda",
-                                tint = tema.letras
+                                tint = tema.fondo
                             )
                         }
                     }

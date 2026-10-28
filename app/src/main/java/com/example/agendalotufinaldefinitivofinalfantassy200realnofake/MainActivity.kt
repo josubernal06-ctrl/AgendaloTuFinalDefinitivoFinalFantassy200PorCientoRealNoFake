@@ -33,7 +33,7 @@ class  MainActivity : ComponentActivity() {
         setContent {
             AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme {
                 val usuarioActual = Usuario(id = 101, nickname = "María García", email = "maria.garcia@gmail.com")
-                val temaActual = obtenerTema(1)
+                val temaActual = obtenerTema(13)
 
                 val context = LocalContext.current
                 val database = AppDatabase.getDatabase(context)

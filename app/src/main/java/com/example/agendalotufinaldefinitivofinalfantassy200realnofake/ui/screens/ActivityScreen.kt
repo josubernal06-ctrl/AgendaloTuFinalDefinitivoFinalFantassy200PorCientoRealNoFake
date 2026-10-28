@@ -1,9 +1,10 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,14 +12,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Alarm
-import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Celebration
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.EventNote
+import androidx.compose.material.icons.filled.Thermostat
+import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -39,59 +49,107 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Clima
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Holiday
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.CalendarGridView
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.ActividadUiState
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.AiViewModel
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.ClimaViewModel
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.HolidayUiState
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.HolidayViewModel
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityScreen(
     onBackClick: () -> Unit,
     aiViewModel: AiViewModel = viewModel(),
+    holidayViewModel: HolidayViewModel = viewModel(),
+    climaViewModel: ClimaViewModel = viewModel(),
     tema: TemaColor = obtenerTema(1),
     uiState: ActividadUiState? = null,
     onNavigateToCreate: () -> Unit = {},
     onDeleteActivity: (AbstractActividad) -> Unit = {}
 ) {
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val tabTitles = listOf("Calendar", "Alarm")
-    val tabIcons = listOf(
-        Icons.Default.CalendarMonth,
-        Icons.Default.Alarm,
-    )
-
     val context = LocalContext.current
+
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var currentYearMonth by remember { mutableStateOf(YearMonth.now()) }
+
     val promptText by aiViewModel.promptText.collectAsState()
     val responseText by aiViewModel.responseText.collectAsState()
     val isLoading by aiViewModel.isLoading.collectAsState()
+
+    val holidayUiState by holidayViewModel.uiState.collectAsState()
+    val holidaysList = (holidayUiState as? HolidayUiState.Success)?.holidays ?: emptyList()
+    val actividadesList = uiState?.actividades ?: emptyList()
+
+    val climaState by climaViewModel.climaState.collectAsState()
+    val isClimaLoading by climaViewModel.isLoading.collectAsState()
+    val climaError by climaViewModel.errorState.collectAsState()
+
+    // Filtrar feriados para la fecha seleccionada
+    val feriadosDelDia = holidaysList.filter { feriado ->
+        try {
+            LocalDate.parse(feriado.date) == selectedDate
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    // Filtrar actividades del usuario para la fecha seleccionada
+    val actividadesDelDia = actividadesList.filter { act ->
+        try {
+            val clazz = AbstractActividad::class.java
+            val segField = clazz.getDeclaredField("segmentoTiempo")
+            segField.isAccessible = true
+            val segmento = segField.get(act)
+            val iniField = segmento!!::class.java.getDeclaredField("inicio")
+            iniField.isAccessible = true
+            val inicioStr = iniField.get(segmento)?.toString() ?: ""
+            if (inicioStr.contains("T")) {
+                LocalDate.parse(inicioStr.substringBefore("T")) == selectedDate
+            } else {
+                false
+            }
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    val formattedSelectedDate = selectedDate.format(
+        DateTimeFormatter.ofPattern("EEE, d 'de' MMMM", Locale("es", "ES"))
+    ).replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("es", "ES")) else it.toString() }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Actividades", color = tema.letras) },
+                title = { Text("Calendario de Actividades", color = tema.fondo) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar",
-                            tint = tema.letras
+                            tint = tema.fondo
                         )
                     }
                 },
@@ -100,7 +158,6 @@ fun ActivityScreen(
                 )
             )
         },
-
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onNavigateToCreate,
@@ -120,31 +177,82 @@ fun ActivityScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            CalendarGridView(PaddingValues(0.dp))
+            // 1. Calendario mensual interactivo con barras de feriados (verde) y actividades (azul)
+            CalendarGridView(
+                currentYearMonth = currentYearMonth,
+                onYearMonthChange = { currentYearMonth = it },
+                selectedDate = selectedDate,
+                onDateSelected = { selectedDate = it },
+                actividades = actividadesList,
+                holidays = holidaysList,
+                tema = tema
+            )
 
-            // Si hay uiState de Room, mostramos las actividades guardadas
-            if (uiState != null) {
-                if (uiState.isLoading) {
-                    Text(text = "Cargando actividades...", color = tema.letras)
-                } else if (uiState.error != null) {
-                    Text(text = "Error: ${uiState.error}", color = MaterialTheme.colorScheme.error)
-                } else if (uiState.actividades.isNotEmpty()) {
-                    Text(text = "Tus actividades guardadas:", color = tema.letras, fontWeight = FontWeight.Bold)
-                    uiState.actividades.forEach { actividad ->
-                        ActividadItem(
-                            actividad = actividad,
-                            tema = tema,
-                            onDeleteClick = { onDeleteActivity(actividad) }
-                        )
-                    }
+            // Leyenda explicativa de colores
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(modifier = Modifier.size(12.dp, 4.dp).clip(RoundedCornerShape(2.dp)).background(Color(0xFF22C55E)))
+                    Text("Feriados", fontSize = 12.sp, color = tema.letras, fontWeight = FontWeight.Medium)
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(modifier = Modifier.size(12.dp, 4.dp).clip(RoundedCornerShape(2.dp)).background(Color(0xFF3B82F6)))
+                    Text("Actividades", fontSize = 12.sp, color = tema.letras, fontWeight = FontWeight.Medium)
                 }
             }
 
-            // Text field para promptear a gemini
+            // 2. Título de la fecha seleccionada
+            Text(
+                text = formattedSelectedDate,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = tema.letras
+            )
+
+            // 3. Información del Clima para el día seleccionado (distintivo Naranja/Siena)
+            ClimaDetalleCard(
+                climaState = climaState,
+                isLoading = isClimaLoading,
+                errorState = climaError,
+                selectedDate = selectedDate,
+                tema = tema
+            )
+
+            // 4. Detalles de Feriados en el día seleccionado
+            feriadosDelDia.forEach { feriado ->
+                FeriadoDetalleCard(feriado = feriado, tema = tema)
+            }
+
+            // 5. Detalles de Actividades en el día seleccionado
+            if (actividadesDelDia.isNotEmpty()) {
+                actividadesDelDia.forEach { actividad ->
+                    ActividadItem(
+                        actividad = actividad,
+                        tema = tema,
+                        onDeleteClick = { onDeleteActivity(actividad) }
+                    )
+                }
+            } else if (feriadosDelDia.isEmpty()) {
+                Text(
+                    text = "No hay actividades ni feriados agendados para este día.",
+                    fontSize = 14.sp,
+                    color = tema.letras.copy(alpha = 0.7f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // 6. Prompt de IA con Gemini
+            Text("Agendar / Asistente IA Gemini:", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = tema.letras)
+
             OutlinedTextField(
                 value = promptText,
                 onValueChange = { aiViewModel.onPromptChanged(it) },
-                label = { Text("Prompt para Gemini", color = tema.letras) },
+                label = { Text("Ej: Agendar reunión mañana a las 4 PM", color = tema.letras) },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = tema.botones,
@@ -156,36 +264,322 @@ fun ActivityScreen(
                 )
             )
 
-            // Boton "Agendar con AI"
             Button(
                 onClick = { aiViewModel.enviarPromptAGemini(context = context) },
                 colors = ButtonDefaults.buttonColors(containerColor = tema.botones),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = tema.letras)
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = tema.fondo)
                 } else {
-                    Text("Agendar con AI", color = tema.letras)
+                    Text("Agendar con IA", color = tema.fondo)
                 }
             }
 
-            // Text donde va la respuesta de la API (lazy / scrollable)
-            Text("Respuesta de la IA:", color = tema.letras, fontSize = 14.sp)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Text(
-                    text = responseText.ifEmpty { "Aquí aparecerá la respuesta de Gemini..." },
-                    color = tema.letras,
-                    fontSize = 14.sp
-                )
+            // Respuesta de Gemini de tamaño dinámico en una Card elegante
+            if (responseText.isNotEmpty() || isLoading) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = tema.detalles.copy(alpha = 0.2f)
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, tema.botones.copy(alpha = 0.3f))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = "Asistente IA",
+                                tint = tema.botones,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = "Respuesta de Gemini",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = tema.botones
+                            )
+                        }
+
+                        if (isLoading) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    color = tema.botones,
+                                    strokeWidth = 2.dp
+                                )
+                                Text(
+                                    text = "Procesando con Gemini IA...",
+                                    fontSize = 14.sp,
+                                    color = tema.letras.copy(alpha = 0.8f)
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = responseText,
+                                color = tema.letras,
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                }
+            } else {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = tema.detalles.copy(alpha = 0.08f)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = "Asistente IA",
+                            tint = tema.letras.copy(alpha = 0.5f),
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = "Aquí aparecerá la respuesta de Gemini...",
+                            color = tema.letras.copy(alpha = 0.6f),
+                            fontSize = 13.sp
+                        )
+                    }
+                }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(40.dp))
+        }
+    }
+}
 
+@Composable
+fun ClimaDetalleCard(
+    climaState: Clima?,
+    isLoading: Boolean,
+    errorState: String?,
+    selectedDate: LocalDate,
+    tema: TemaColor
+) {
+    val pronosticoDelDia = climaState?.pronosticoPorHora?.filter {
+        it.fechaISO == selectedDate.toString()
+    } ?: emptyList()
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF97316).copy(alpha = 0.12f)
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Thermostat,
+                        contentDescription = "Clima",
+                        tint = Color(0xFFEA580C),
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = "Clima para ${selectedDate.format(DateTimeFormatter.ofPattern("d 'de' MMM", Locale("es", "ES")))}",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = tema.letras
+                    )
+                }
+
+                if (pronosticoDelDia.isNotEmpty()) {
+                    val tempPromedio = pronosticoDelDia.map { it.temperatura }.average().toInt()
+                    Text(
+                        text = "$tempPromedio°C",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFEA580C)
+                    )
+                }
+            }
+
+            when {
+                isLoading -> {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            color = Color(0xFFEA580C),
+                            strokeWidth = 2.dp
+                        )
+                        Text("Obteniendo clima de Open-Meteo API...", fontSize = 12.sp, color = tema.letras.copy(alpha = 0.7f))
+                    }
+                }
+                errorState != null -> {
+                    Text(
+                        text = "Error al obtener clima de la API: $errorState",
+                        fontSize = 12.sp,
+                        color = tema.letras.copy(alpha = 0.6f)
+                    )
+                }
+                pronosticoDelDia.isNotEmpty() -> {
+                    val maxLluvia = pronosticoDelDia.maxOfOrNull { it.probabilidadLluvia } ?: 0
+                    val maxTemp = pronosticoDelDia.maxOfOrNull { it.temperatura }?.toInt() ?: 0
+                    val minTemp = pronosticoDelDia.minOfOrNull { it.temperatura }?.toInt() ?: 0
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Máx: ${maxTemp}°C  |  Mín: ${minTemp}°C",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = tema.letras.copy(alpha = 0.8f)
+                        )
+                        Text(
+                            text = if (maxLluvia > 40) "Prob. Lluvia: $maxLluvia%" else "Día Soleado / Despejado",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (maxLluvia > 40) Color(0xFF0284C7) else Color(0xFFD97706)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(pronosticoDelDia) { item ->
+                            Card(
+                                colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.25f)),
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier
+                                    .width(62.dp)
+                                    .height(70.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(4.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    Text(
+                                        text = "${item.temperatura.toInt()}°C",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp,
+                                        color = tema.letras
+                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = if (item.probabilidadLluvia > 40) Icons.Default.WaterDrop else Icons.Default.WbSunny,
+                                            contentDescription = null,
+                                            tint = if (item.probabilidadLluvia > 40) Color(0xFF0284C7) else Color(0xFFD97706),
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(2.dp))
+                                        Text(
+                                            text = "${item.probabilidadLluvia}%",
+                                            fontSize = 9.sp,
+                                            color = tema.letras
+                                        )
+                                    }
+                                    Text(
+                                        text = item.hora,
+                                        fontSize = 10.sp,
+                                        color = tema.letras.copy(alpha = 0.8f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                else -> {
+                    Text(
+                        text = "El pronóstico de Open-Meteo API está disponible para los próximos 16 días.",
+                        fontSize = 12.sp,
+                        color = tema.letras.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun FeriadoDetalleCard(
+    feriado: Holiday,
+    tema: TemaColor
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF22C55E).copy(alpha = 0.15f)),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Celebration,
+                contentDescription = "Feriado",
+                tint = Color(0xFF16A34A),
+                modifier = Modifier.size(32.dp)
+            )
+            Column {
+                Text(
+                    text = feriado.name,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = tema.letras
+                )
+                Text(
+                    text = "Feriado Público Nacional",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF16A34A)
+                )
+            }
         }
     }
 }
@@ -213,17 +607,29 @@ fun ActividadItem(
             val segClazz = segmento!!::class.java
             val iniField = segClazz.getDeclaredField("inicio")
             iniField.isAccessible = true
-            val inicio = iniField.get(segmento)?.toString()?.substringBefore("T") ?: ""
+            val inicioObj = iniField.get(segmento)
 
-            segmentoString = inicio
+            val finField = segClazz.getDeclaredField("fin")
+            finField.isAccessible = true
+            val finObj = finField.get(segmento)
+
+            val inicioTime = inicioObj?.toString()?.substringAfter("T")?.take(5) ?: ""
+            val finTime = finObj?.toString()?.substringAfter("T")?.take(5) ?: ""
+
+            segmentoString = if (inicioTime.isNotEmpty() && finTime.isNotEmpty()) {
+                "$inicioTime - $finTime"
+            } else {
+                inicioObj?.toString()?.substringBefore("T") ?: ""
+            }
         } catch (_: Exception) {
-            segmentoString = "Fecha oculta"
+            segmentoString = "Horario no especificado"
         }
     }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = tema.botones.copy(alpha = 0.1f))
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF3B82F6).copy(alpha = 0.15f)),
+        shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -231,13 +637,25 @@ fun ActividadItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = actividad.titulo,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = tema.letras,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.weight(1f)
-                )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.EventNote,
+                        contentDescription = "Actividad",
+                        tint = Color(0xFF2563EB),
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Text(
+                        text = actividad.titulo,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = tema.letras
+                    )
+                }
+
                 IconButton(onClick = onDeleteClick) {
                     Icon(
                         imageVector = Icons.Default.Delete,
@@ -246,30 +664,34 @@ fun ActividadItem(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(4.dp))
+
+            if (actividad.descripcion.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = actividad.descripcion,
+                    fontSize = 14.sp,
+                    color = tema.letras.copy(alpha = 0.8f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = "Visibilidad: ${if (esPrivada) "Privada" else "Pública"}",
-                    fontSize = 14.sp,
-                    color = tema.letras.copy(alpha = 0.8f)
+                    fontSize = 13.sp,
+                    color = tema.letras.copy(alpha = 0.7f)
                 )
                 Text(
                     text = segmentoString,
-                    fontSize = 14.sp,
-                    color = tema.letras.copy(alpha = 0.8f)
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2563EB)
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ActivityScreenPreview() {
-    AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme {
-        ActivityScreen(onBackClick = {})
     }
 }
