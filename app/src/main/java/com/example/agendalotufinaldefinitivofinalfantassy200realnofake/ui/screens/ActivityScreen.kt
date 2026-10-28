@@ -45,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -75,6 +76,7 @@ fun ActivityScreen(
         Icons.Default.Alarm,
     )
 
+    val context = LocalContext.current
     val promptText by aiViewModel.promptText.collectAsState()
     val responseText by aiViewModel.responseText.collectAsState()
     val isLoading by aiViewModel.isLoading.collectAsState()
@@ -156,7 +158,7 @@ fun ActivityScreen(
 
             // Boton "Agendar con AI"
             Button(
-                onClick = { aiViewModel.enviarPromptAGemini() },
+                onClick = { aiViewModel.enviarPromptAGemini(context = context) },
                 colors = ButtonDefaults.buttonColors(containerColor = tema.botones),
                 modifier = Modifier.fillMaxWidth()
             ) {
