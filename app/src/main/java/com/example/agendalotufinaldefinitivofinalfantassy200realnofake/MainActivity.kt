@@ -17,11 +17,17 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.U
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.CreateActivityScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.ActivityScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.AlarmScreen
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.CreateGroupScreen
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.GroupDetailScreen
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.GroupListScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.HomeScreen
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.JoinGroupScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.UserProfileScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.ActividadesViewModel
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.GrupoUiState
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.GrupoViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,6 +41,7 @@ class MainActivity : ComponentActivity() {
                 val context = LocalContext.current
                 val appContainer = remember { AppContainer(context) }
                 val factory = ActividadesViewModel.Factory(appContainer.actividadRepository)
+                val grupoFactory = GrupoViewModel.Factory(appContainer.grupoRepository)
 
                 val navController = rememberNavController()
 
@@ -48,6 +55,13 @@ class MainActivity : ComponentActivity() {
                             onNavigateToProfile = { navController.navigate("profile") },
                             onNavigateToAlarm = {
                                 navController.navigate("alarm") {
+                                    popUpTo("home") { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            onNavigateToGroups = {
+                                navController.navigate("groups") {
                                     popUpTo("home") { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
@@ -92,7 +106,85 @@ class MainActivity : ComponentActivity() {
                                     launchSingleTop = true
                                 }
                             },
+                            onNavigateToGroups = {
+                                navController.navigate("groups") {
+                                    popUpTo("home") { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
                             onNavigateToProfile = { navController.navigate("profile") }
+                        )
+                    }
+
+                    composable("groups") {
+                        val grupoViewModel: GrupoViewModel = viewModel(factory = grupoFactory)
+                        val grupoUiState by grupoViewModel.uiState.collectAsStateWithLifecycle()
+
+                        androidx.compose.runtime.LaunchedEffect(Unit) {
+                            grupoViewModel.cargarGrupos(usuarioActual.id)
+                        }
+
+                        GroupListScreen(
+                            tema = temaActual,
+                            uiState = grupoUiState,
+                            onNavigateToHome = {
+                                navController.navigate("home") {
+                                    popUpTo("home") { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            },
+                            onNavigateToAlarm = {
+                                navController.navigate("alarm") {
+                                    popUpTo("home") { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            onCreateGroup = { navController.navigate("create_group") },
+                            onJoinGroup = { navController.navigate("join_group") },
+                            onGroupClick = { grupo -> navController.navigate("group_detail/${grupo.id}") }
+                        )
+                    }
+
+                    composable("create_group") {
+                        val grupoViewModel: GrupoViewModel = viewModel(factory = grupoFactory)
+                        CreateGroupScreen(
+                            tema = temaActual,
+                            onBackClick = { navController.popBackStack() },
+                            onSaveClick = { nombre, descripcion ->
+                                grupoViewModel.crearGrupo(nombre, descripcion, usuarioActual)
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+
+                    composable("join_group") {
+                        val grupoViewModel: GrupoViewModel = viewModel(factory = grupoFactory)
+                        JoinGroupScreen(
+                            tema = temaActual,
+                            onBackClick = { navController.popBackStack() },
+                            onJoinClick = { codigo ->
+                                grupoViewModel.unirseAGrupo(codigo, usuarioActual)
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+
+                    composable("group_detail/{grupoId}") { backStackEntry ->
+                        val grupoViewModel: GrupoViewModel = viewModel(factory = grupoFactory)
+                        val grupoUiState by grupoViewModel.uiState.collectAsStateWithLifecycle()
+                        val grupoId = backStackEntry.arguments?.getString("grupoId")?.toIntOrNull() ?: 0
+                        val gruposList = (grupoUiState as? GrupoUiState.Success)?.grupos ?: emptyList()
+
+                        GroupDetailScreen(
+                            tema = temaActual,
+                            grupoId = grupoId,
+                            grupos = gruposList,
+                            onBackClick = { navController.popBackStack() },
+                            onNavigateToCalendar = { id ->
+                                navController.navigate("activity")
+                            }
                         )
                     }
 

@@ -15,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -55,13 +56,15 @@ import java.util.Locale
 fun AlarmScreen(
     tema: TemaColor,
     onNavigateToHome: () -> Unit,
+    onNavigateToGroups: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(1) } // 1 = Alarm
-    val tabTitles = listOf("Calendar", "Alarm")
+    val tabTitles = listOf("Calendar", "Alarm", "Grupos")
     val tabIcons = listOf(
         Icons.Default.CalendarMonth,
         Icons.Default.Alarm,
+        Icons.Default.Person
     )
 
     var showTimePicker by remember { mutableStateOf(false) }
@@ -98,6 +101,8 @@ fun AlarmScreen(
                             selectedTabIndex = index
                             if (index == 0) {
                                 onNavigateToHome()
+                            } else if (index == 2) {
+                                onNavigateToGroups()
                             }
                         },
                         text = {
