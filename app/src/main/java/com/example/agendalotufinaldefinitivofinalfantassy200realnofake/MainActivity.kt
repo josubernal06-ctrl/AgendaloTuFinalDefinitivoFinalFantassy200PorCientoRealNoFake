@@ -88,6 +88,7 @@ class  MainActivity : ComponentActivity() {
                     composable("home") {
                         HomeScreen(
                             tema = temaActual,
+                            grupoViewModel = grupoViewModel,
                             onNavigateToProfile = { navController.navigate("profile") },
                             onNavigateToAlarm = {
                                 navController.navigate("alarm") {
@@ -219,11 +220,11 @@ class  MainActivity : ComponentActivity() {
                             grupoId = grupoId,
                             usuarioActual = currentUser!!,
                             onBackClick = { navController.popBackStack() },
-                            onSaveClick = { titulo, desc, rec ->
+                            onSaveClick = { titulo, desc, _ ->
                                 val nuevaActividad = ActividadConjunta(
                                     id = (1000..9999).random(),
                                     titulo = titulo,
-                                    descripcion = desc + "\n[Recomendación AI: $rec]",
+                                    descripcion = desc,
                                     propietario = currentUser!!,
                                     esPrivada = false,
                                     segmentoTiempo = SegmentoTiempo(

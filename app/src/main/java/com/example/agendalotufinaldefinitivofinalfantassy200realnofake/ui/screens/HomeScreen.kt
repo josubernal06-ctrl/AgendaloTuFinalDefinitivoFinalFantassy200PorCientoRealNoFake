@@ -1,5 +1,6 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -54,6 +55,8 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.compon
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.HorarioCard
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.GrupoUiState
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.GrupoViewModel
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.ClimaViewModel
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.HolidayUiState
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.HolidayViewModel
@@ -67,7 +70,8 @@ fun HomeScreen(
     onNavigateToAlarm: () -> Unit = {},
     onNavigateToGroups: () -> Unit = {},
     onNavigateToActivity: () -> Unit = {},
-    holidayViewModel: HolidayViewModel = viewModel()
+    holidayViewModel: HolidayViewModel = viewModel(),
+    grupoViewModel: GrupoViewModel = viewModel()
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     
@@ -173,6 +177,9 @@ fun HomeScreen(
                 )
             }
 
+            val grupoUiState by grupoViewModel.uiState.collectAsState()
+            val gruposList = (grupoUiState as? GrupoUiState.Success)?.grupos ?: emptyList()
+
             Text(
                 text = "Tus grupos:",
                 color = tema.letras,
@@ -181,20 +188,30 @@ fun HomeScreen(
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            // Espacio reservado para grupos
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item {
-                    HorarioCard(
-                        titulo = "Inglés B2",
-                        descripcion = "Práctica de speaking y vocabulario",
-                        hora = "4:30 PM - 6:00 PM",
-                        tema = tema,
-                        modifier = Modifier.width(280.dp)
-                    )
+            if (gruposList.isEmpty()) {
+                Text(
+                    text = "Aún no perteneces a ningún grupo.",
+                    color = tema.letras.copy(alpha = 0.7f),
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            } else {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(gruposList) { grupo ->
+                        HorarioCard(
+                            titulo = grupo.nombreGrupo,
+                            descripcion = grupo.descripcion.ifBlank { "Código: ${grupo.codigoInvitacion}" },
+                            hora = "${grupo.miebros.size} miembro(s)",
+                            tema = tema,
+                            modifier = Modifier
+                                .width(280.dp)
+                                .clickable { onNavigateToGroups() }
+                        )
+                    }
                 }
             }
 
