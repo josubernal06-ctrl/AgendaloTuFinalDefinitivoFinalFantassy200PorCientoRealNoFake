@@ -9,18 +9,10 @@ class Grupo(
     var miebros: List<Usuario> = emptyList()
 ) {
     fun agregarMiembro(user: Usuario) {
-        if (miebros is MutableList) {
-            (miebros as MutableList).add(user)
-        } else {
-            miebros = miebros.toMutableList().apply { add(user) }
-        }
+        miebros = miebros + user
     }
 
     fun eleiminarMiembro(user: Usuario) {
-        if (miebros is MutableList) {
-            (miebros as MutableList).remove(user)
-        } else {
-            miebros = miebros.toMutableList().apply { remove(user) }
-        }
+        miebros = miebros - user
     }
 }

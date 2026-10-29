@@ -5,8 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -57,6 +59,8 @@ class  MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val temaActual = obtenerTema(1)
                 
+                var showSplash by remember { mutableStateOf(true) }
+                
                 // Cargar grupos cuando el usuario inicie sesión
                 LaunchedEffect(currentUser) {
                     if (currentUser != null) {
@@ -64,7 +68,12 @@ class  MainActivity : ComponentActivity() {
                     }
                 }
 
-                if (currentUser == null) {
+                if (showSplash) {
+                    SplashScreen(
+                        tema = temaActual,
+                        onSplashFinished = { showSplash = false }
+                    )
+                } else if (currentUser == null) {
                     val testUsers by authViewModel.testUsers.collectAsStateWithLifecycle()
                     LoginScreen(
                         tema = temaActual,
@@ -182,7 +191,8 @@ class  MainActivity : ComponentActivity() {
                         val uiState by grupoViewModel.uiState.collectAsStateWithLifecycle()
                         val grupo = (uiState as? GrupoUiState.Success)?.grupos?.find { it.id == grupoId }
                         
-                        val actUiState by actividadFactory.create(ActividadesViewModel::class.java).uiState.collectAsStateWithLifecycle()
+                        val actividadViewModel: ActividadesViewModel = viewModel(factory = actividadFactory)
+                        val actUiState by actividadViewModel.uiState.collectAsStateWithLifecycle()
                         val actividades = actUiState.actividades.filterIsInstance<ActividadConjunta>()
 
                         if (grupo != null) {
@@ -201,8 +211,7 @@ class  MainActivity : ComponentActivity() {
                         arguments = listOf(navArgument("grupoId") { type = NavType.IntType })
                     ) { backStackEntry ->
                         val grupoId = backStackEntry.arguments?.getInt("grupoId") ?: -1
-                        val viewModel: ActividadesViewModel = viewModel(factory = actividadFactory)
-                        
+                        val actividadViewModel: ActividadesViewModel = viewModel(factory = actividadFactory)
                         val aiState by aiViewModel.responseText.collectAsStateWithLifecycle()
                         
                         CreateGroupActivityScreen(
@@ -226,7 +235,7 @@ class  MainActivity : ComponentActivity() {
                                     grupoId = grupoId,
                                     participantes = emptyList()
                                 )
-                                viewModel.crearActividad(nuevaActividad)
+                                actividadViewModel.crearActividad(nuevaActividad)
                                 navController.popBackStack()
                             },
                             aiRecommendationState = aiState,

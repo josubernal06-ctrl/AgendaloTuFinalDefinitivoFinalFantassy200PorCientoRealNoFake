@@ -22,7 +22,10 @@ class MockGrupoRepository : IGrupoRepository {
     override fun obtenerGrupos(userId: Int): Flow<Resultado<List<Grupo>>> {
         // En este mock simplificado, devolvemos los grupos de los que el usuario es miembro
         return inMemoryGrupos.map { grupos ->
-            Resultado.Exito(grupos)
+            val gruposDelUsuario = grupos.filter { grupo -> 
+                grupo.miebros.any { it.id == userId } 
+            }
+            Resultado.Exito(gruposDelUsuario)
         }
     }
 
