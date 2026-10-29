@@ -590,8 +590,7 @@ fun ActividadItem(
     tema: TemaColor,
     onDeleteClick: () -> Unit
 ) {
-    val esPrivada = actividad.esPrivada
-    val segmentoString = actividad.segmentoTiempo.inicio.toString().substringBefore("T").ifEmpty { "Fecha oculta" }
+
     var esPrivada by remember { mutableStateOf(false) }
     var segmentoString by remember { mutableStateOf("") }
 
