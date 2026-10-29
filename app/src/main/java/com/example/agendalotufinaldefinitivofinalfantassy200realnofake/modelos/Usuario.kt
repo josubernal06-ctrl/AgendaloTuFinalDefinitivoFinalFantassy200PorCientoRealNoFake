@@ -4,7 +4,7 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.interface
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.interfaces.IParticipante
 
 class Usuario(
-    private val id: Int,
+    val id: Int,
     var nickname: String,
     var email: String
 ) : IParticipante, IOrganizador {

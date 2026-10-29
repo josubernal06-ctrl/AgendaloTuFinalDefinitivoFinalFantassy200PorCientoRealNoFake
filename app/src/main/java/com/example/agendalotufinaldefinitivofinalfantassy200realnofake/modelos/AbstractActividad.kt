@@ -1,10 +1,10 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos
 
 abstract class AbstractActividad(
-    open val id: Int,
-    open var titulo: String,
-    open var descripcion: String,
-    open var propietario: Usuario,
-    open var esPrivada: Boolean,
-    open var segmentoTiempo: SegmentoTiempo
+    val id: Int,
+    var titulo: String,
+    var descripcion: String,
+    var propietario: Usuario,
+    var esPrivada: Boolean,
+    var segmentoTiempo: SegmentoTiempo
 )

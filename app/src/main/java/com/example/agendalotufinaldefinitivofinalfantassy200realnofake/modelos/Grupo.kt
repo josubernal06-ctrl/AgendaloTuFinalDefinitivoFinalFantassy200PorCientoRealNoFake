@@ -1,9 +1,11 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos
 
 class Grupo(
-    private val id: Int,
+    val id: Int,
     var nombreGrupo: String,
-    private var propietario: Usuario,
+    var propietario: Usuario,
+    var descripcion: String = "",
+    var codigoInvitacion: String = "",
     var miebros: List<Usuario> = emptyList()
 ) {
     fun agregarMiembro(user: Usuario) {

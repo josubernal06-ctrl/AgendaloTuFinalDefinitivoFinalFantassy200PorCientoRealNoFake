@@ -3,6 +3,7 @@ package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.ai.AiApi
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.clima.ClimaApi
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.hollidayRemote.HolidayApiService
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.remote.SqliteCloudApi
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.logging.HttpLoggingInterceptor
@@ -76,5 +77,24 @@ object RetrofitClient {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(HolidayApiService::class.java)
+    }
+
+    // --- SQLite Cloud API ---
+    private const val BASE_URL_SQLITE_CLOUD = "https://cpokzlqcdk.g3.sqlite.cloud/"
+
+    private val clienteHttpSqliteCloud: OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
+        .build()
+
+    val sqliteCloudApi: SqliteCloudApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL_SQLITE_CLOUD)
+            .client(clienteHttpSqliteCloud)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(SqliteCloudApi::class.java)
     }
 }

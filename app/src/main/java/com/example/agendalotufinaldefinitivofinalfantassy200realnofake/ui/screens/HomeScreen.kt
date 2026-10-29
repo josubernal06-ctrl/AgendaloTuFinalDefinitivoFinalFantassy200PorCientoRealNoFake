@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
@@ -67,13 +68,15 @@ fun HomeScreen(
     tema: TemaColor,
     onNavigateToProfile: () -> Unit,
     onNavigateToAlarm: () -> Unit = {},
+    onNavigateToGroups: () -> Unit = {},
     onNavigateToActivity: () -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val tabTitles = listOf("Calendar", "Alarm")
+    val tabTitles = listOf("Calendar", "Alarm", "Grupos")
     val tabIcons = listOf(
         Icons.Default.CalendarMonth,
         Icons.Default.Alarm,
+        Icons.Default.Person
     )
     val scrollState = rememberScrollState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -110,6 +113,8 @@ fun HomeScreen(
                             selectedTabIndex = index
                             if (index == 1) {
                                 onNavigateToAlarm()
+                            } else if (index == 2) {
+                                onNavigateToGroups()
                             }
                         },
                         text = {

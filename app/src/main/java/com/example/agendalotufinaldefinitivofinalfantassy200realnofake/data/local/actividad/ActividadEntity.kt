@@ -1,4 +1,4 @@
-package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.actividad
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
