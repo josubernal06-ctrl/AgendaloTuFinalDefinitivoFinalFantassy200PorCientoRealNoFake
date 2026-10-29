@@ -3,7 +3,6 @@ package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.scree
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
@@ -15,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,13 +35,13 @@ fun UserProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mi Perfil", color = tema.letras) },
+                title = { Text("Mi Perfil", color = tema.fondo) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar",
-                            tint = tema.letras
+                            tint = tema.fondo
                         )
                     }
                 },
@@ -65,7 +63,7 @@ fun UserProfileScreen(
             Box(
                 modifier = Modifier
                     .size(120.dp)
-                    .clip(RectangleShape)
+                    .clip(CircleShape)
                     .background(tema.detalles.copy(alpha = 0.3f)),
                 contentAlignment = Alignment.Center
             ) {
@@ -128,24 +126,14 @@ fun UserProfileScreen(
                     PerfilDatoItem(
                         icono = Icons.Default.Info,
                         titulo = "ID de Usuario",
-                        valor = "#Oculto",
+                        valor = "#${usuario.id}",
                         tema = tema
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
-            // Botones de acción aprovechando el componente BotonPersonalizado de AppButtons.kt
-            BotonPersonalizado(
-                texto = "Editar Perfil",
-                onClick = { /* TODO: Implementar edición */ },
-                colorFondo = tema.botones,
-                colorTexto = tema.fondo
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
             BotonPersonalizado(
                 texto = "Cerrar Sesión",
                 onClick = onLogoutClick,
@@ -153,17 +141,9 @@ fun UserProfileScreen(
                 colorTexto = tema.letras
             )
         }
-
-        Spacer(modifier = Modifier.height(32.dp))
-        Button(
-            onClick = onLogoutClick,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = tema.botones, contentColor = tema.fondo)
-        ) {
-            Text("Cerrar Sesión")
-        }
     }
 }
+
 @Composable
 fun PerfilDatoItem(
     icono: ImageVector,
@@ -201,7 +181,6 @@ fun PerfilDatoItem(
 @Preview(showBackground = true)
 @Composable
 fun UserProfileScreenPreview() {
-    // Datos y tema falsos para la vista previa
     val usuarioEjemplo = Usuario(1, nickname = "Juan Pérez", email = "juan.perez@email.com")
     val temaEjemplo = obtenerTema(1) 
     

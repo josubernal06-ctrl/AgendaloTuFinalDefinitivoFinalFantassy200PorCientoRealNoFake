@@ -59,6 +59,7 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.HolidayViewModel
 
 
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 
@@ -76,7 +77,7 @@ fun HomeScreen(
     val tabIcons = listOf(
         Icons.Default.CalendarMonth,
         Icons.Default.Alarm,
-        Icons.Default.Person
+        Icons.Default.Group
     )
     val scrollState = rememberScrollState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()

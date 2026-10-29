@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.ui.unit.sp
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Grupo
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
@@ -39,7 +40,7 @@ fun GroupListScreen(
     val tabIcons = listOf(
         Icons.Default.CalendarMonth,
         Icons.Default.Alarm,
-        Icons.Default.Person
+        Icons.Default.Group
     )
 
     Scaffold(

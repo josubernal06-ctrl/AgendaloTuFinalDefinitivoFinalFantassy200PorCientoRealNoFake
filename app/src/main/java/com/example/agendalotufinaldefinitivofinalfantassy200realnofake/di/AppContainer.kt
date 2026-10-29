@@ -4,12 +4,12 @@ import android.content.Context
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.ai.AiRepository
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.AppDatabase
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.ActividadRepository
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.GrupoRepository
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.IActividadRepository
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.IGrupoRepository
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IAiRepository
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IAuthRepository
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IGrupoRepository
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.mock.MockAuthRepository
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.mock.MockGrupoRepository
 
 class AppContainer(context: Context) {
     val database: AppDatabase by lazy {
@@ -25,10 +25,11 @@ class AppContainer(context: Context) {
     }
 
     val grupoRepository: IGrupoRepository by lazy {
-        GrupoRepository(database.grupoDao())
+        MockGrupoRepository()
     }
 
     val aiRepository: IAiRepository by lazy {
         AiRepository()
     }
 }
+

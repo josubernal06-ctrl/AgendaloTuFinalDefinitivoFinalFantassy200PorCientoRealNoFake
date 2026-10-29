@@ -37,14 +37,14 @@ class ActividadRepository(
             val rowId = dao.insertarActividad(entity)
             val realId = if (rowId > 0) rowId.toInt() else entity.id
 
-            // Programar automáticamente la alarma 40 minutos antes del inicio de la actividad
+            // Programar automáticamente la alarma 30 minutos antes del inicio de la actividad
             val inicioDateTime = try {
                 LocalDateTime.parse(entity.inicio)
             } catch (e: Exception) {
                 LocalDateTime.now().plusHours(1)
             }
 
-            val fechaHoraAlarma = inicioDateTime.minusMinutes(40)
+            val fechaHoraAlarma = inicioDateTime.minusMinutes(30)
 
             val alarmaEntity = AlarmEntity(
                 actividadId = realId,
