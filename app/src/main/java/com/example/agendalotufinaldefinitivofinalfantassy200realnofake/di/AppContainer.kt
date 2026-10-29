@@ -23,7 +23,7 @@ class AppContainer(private val context: Context) {
     // Actividades - Uses Room by default (Dev 2), but could be swapped
     val actividadRepository: IActividadRepository by lazy {
         val database = AppDatabase.getDatabase(context)
-        ActividadRepository(database.actividadDao())
+        ActividadRepository(database.actividadDao(), database.alarmDao())
     }
 
     // AI - Mock for development to avoid unnecessary real API calls

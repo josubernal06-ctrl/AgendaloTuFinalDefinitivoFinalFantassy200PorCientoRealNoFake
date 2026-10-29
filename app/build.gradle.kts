@@ -27,6 +27,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val geminiKey = properties.getProperty("GEMINI_API_KEY") ?: ""
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiKey\"")
+        val sqliteKey = properties.getProperty("SQLITE_CLOUD_KEY") ?: ""
+        buildConfigField("String", "SQLITE_CLOUD_KEY", "\"$sqliteKey\"")
     }
 
     buildTypes {

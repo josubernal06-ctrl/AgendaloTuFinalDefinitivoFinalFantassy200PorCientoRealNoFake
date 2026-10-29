@@ -1,14 +1,6 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -44,12 +36,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.Example
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.alarm.AlarmScheduler
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.AppDatabase
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.alarm.AlarmEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +71,35 @@ fun AlarmScreen(
     onNavigateToGroups: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val database = remember { AppDatabase.getDatabase(context) }
+    val scheduler = remember { AlarmScheduler(context) }
+
+    var alarmasState by remember { mutableStateOf<List<AlarmEntity>>(emptyList()) }
+
+    // Cargar las alarmas desde Room
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        database.alarmDao().obtenerTodasLasAlarmas().collect { lista ->
+            alarmasState = lista
+        }
+    }
+
+    // Solicitud de permiso de notificaciones para Android 13+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { _ -> }
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
     var selectedTabIndex by remember { mutableIntStateOf(1) } // 1 = Alarm
     val tabTitles = listOf("Calendar", "Alarm", "Grupos")
     val tabIcons = listOf(
@@ -126,13 +167,6 @@ fun AlarmScreen(
                 }
             }
         },
-        floatingActionButton = {
-            Example(
-                onClick = { /*not yet*/ },
-                colorFondo = tema.botones,
-                colorTexto = tema.fondo
-            )
-        },
         containerColor = tema.fondo
     ) { paddingValues ->
         Column(
@@ -183,7 +217,7 @@ fun AlarmScreen(
 
             // Botón para agregar o modificar la hora
             Button(
-                onClick = { /*no aun, mucha complejidad*/ },
+                onClick = { showTimePicker = true },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = tema.botones,
@@ -198,6 +232,65 @@ fun AlarmScreen(
                 )
             }
 
+            Text(
+                text = "Alarmas Programadas (${alarmasState.size}):",
+                color = tema.letras,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            if (alarmasState.isEmpty()) {
+                Text(
+                    text = "No tienes alarmas configuradas.",
+                    color = tema.letras.copy(alpha = 0.7f),
+                    fontSize = 14.sp
+                )
+            } else {
+                alarmasState.forEach { alarma ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.12f))
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = alarma.tituloActividad,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = tema.letras
+                                )
+                                Text(
+                                    text = "Programada: ${alarma.fechaHoraAlarma.replace("T", " ")}",
+                                    fontSize = 12.sp,
+                                    color = tema.letras.copy(alpha = 0.8f)
+                                )
+                            }
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch(Dispatchers.IO) {
+                                        database.alarmDao().eliminarAlarma(alarma)
+                                        scheduler.cancelarAlarma(alarma.id)
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Eliminar Alarma",
+                                    tint = tema.letras
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             // Diálogo de selector de hora temático
             if (showTimePicker) {
                 ThemedTimePickerDialog(
@@ -207,7 +300,33 @@ fun AlarmScreen(
                         val cal = Calendar.getInstance()
                         cal.set(Calendar.HOUR_OF_DAY, timePickerState.hour)
                         cal.set(Calendar.MINUTE, timePickerState.minute)
+                        cal.set(Calendar.SECOND, 0)
+
+                        if (cal.before(Calendar.getInstance())) {
+                            cal.add(Calendar.DAY_OF_YEAR, 1) // Si ya pasó hoy, programar para mañana
+                        }
+
                         selectedTimeText = formatter.format(cal.time)
+
+                        val localDateTime = LocalDateTime.of(
+                            cal.get(Calendar.YEAR),
+                            cal.get(Calendar.MONTH) + 1,
+                            cal.get(Calendar.DAY_OF_MONTH),
+                            cal.get(Calendar.HOUR_OF_DAY),
+                            cal.get(Calendar.MINUTE)
+                        )
+
+                        coroutineScope.launch(Dispatchers.IO) {
+                            val entity = AlarmEntity(
+                                actividadId = 0,
+                                tituloActividad = "Alarma Personal (${formatter.format(cal.time)})",
+                                fechaHoraAlarma = localDateTime.toString(),
+                                estaActiva = true
+                            )
+                            val newId = database.alarmDao().insertarAlarma(entity).toInt()
+                            scheduler.programarAlarma(newId, entity.tituloActividad, localDateTime)
+                        }
+
                         showTimePicker = false
                     }
                 )

@@ -9,7 +9,7 @@ interface ActividadDao {
     fun obtenerTodasLasActividades(): Flow<List<ActividadEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertarActividad(actividad: ActividadEntity)
+    fun insertarActividad(actividad: ActividadEntity): Long
 
     @Update
     fun actualizarActividad(actividad: ActividadEntity)

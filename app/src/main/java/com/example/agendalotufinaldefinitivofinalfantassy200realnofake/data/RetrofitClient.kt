@@ -9,6 +9,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.remote.SqliteCloudApi
 
 object RetrofitClient {
 
@@ -75,5 +76,26 @@ object RetrofitClient {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(HolidayApiService::class.java)
+    }
+
+    // --- SQLite Cloud API ---
+    private const val BASE_URL_SQLITE_CLOUD = "https://cpokzlqcdk.g3.sqlite.cloud/"
+
+    private val clienteHttpSqliteCloud: OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .addInterceptor(HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BASIC
+        })
+        .build()
+
+    val sqliteCloudApi: SqliteCloudApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL_SQLITE_CLOUD)
+            .client(clienteHttpSqliteCloud)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(SqliteCloudApi::class.java)
     }
 }
