@@ -87,15 +87,21 @@ fun EntradaTextoField(
     OutlinedTextField(
         value = valor,
         onValueChange = onValueChange,
-        label = { Text(label, color = tema.letras) },
+        label = { Text(label) },
+        placeholder = { Text(label, color = tema.letras.copy(alpha = 0.6f)) },
+        singleLine = true,
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
         modifier = modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = tema.letras,   // Color del texto escrito al enfocar
-            unfocusedTextColor = tema.letras, // Color del texto escrito al desenfocar
-            focusedBorderColor = tema.botones,
-            unfocusedBorderColor = tema.letras,
-            focusedLabelColor = tema.botones,
-            unfocusedLabelColor = tema.botones //antes letrascolor
+            focusedContainerColor = tema.fondo,
+            unfocusedContainerColor = tema.fondo,
+            focusedTextColor = tema.letras,
+            unfocusedTextColor = tema.letras,
+            focusedBorderColor = tema.letras,
+            unfocusedBorderColor = tema.letras.copy(alpha = 0.4f),
+            focusedLabelColor = tema.letras,
+            unfocusedLabelColor = tema.letras.copy(alpha = 0.7f),
+            cursorColor = tema.letras
         )
     )
 }

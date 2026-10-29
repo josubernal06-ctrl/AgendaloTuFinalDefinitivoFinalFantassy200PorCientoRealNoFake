@@ -1,6 +1,7 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos
 
 data class HoraClima(
+    val fechaISO: String = "",
     val hora: String,
     val temperatura: Double,
     val probabilidadLluvia: Int,
