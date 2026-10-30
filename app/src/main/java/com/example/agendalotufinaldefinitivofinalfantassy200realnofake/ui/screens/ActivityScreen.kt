@@ -1,5 +1,10 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +25,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -127,6 +134,9 @@ fun ActivityScreen(
         DateTimeFormatter.ofPattern("EEE, d 'de' MMMM", Locale("es", "ES"))
     ).replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("es", "ES")) else it.toString() }
 
+    val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -147,13 +157,36 @@ fun ActivityScreen(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onNavigateToCreate,
-                containerColor = tema.botones,
-                contentColor = tema.fondo,
-                icon = { Icon(Icons.Default.Add, contentDescription = "Nueva Actividad") },
-                text = { Text("Nueva Actividad") }
-            )
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                AnimatedVisibility(
+                    visible = scrollState.value < (scrollState.maxValue - 300).coerceAtLeast(0),
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                scrollState.animateScrollTo(scrollState.maxValue)
+                            }
+                        },
+                        containerColor = tema.botones,
+                        contentColor = tema.fondo,
+                        icon = { Icon(Icons.Default.AutoAwesome, contentDescription = "Asistente IA") },
+                        text = { Text("Asistente IA") }
+                    )
+                }
+
+                ExtendedFloatingActionButton(
+                    onClick = onNavigateToCreate,
+                    containerColor = tema.botones,
+                    contentColor = tema.fondo,
+                    icon = { Icon(Icons.Default.Add, contentDescription = "Nueva Actividad") },
+                    text = { Text("Nueva Actividad") }
+                )
+            }
         },
         containerColor = tema.fondo
     ) { innerPadding ->
@@ -163,7 +196,7 @@ fun ActivityScreen(
                 .padding(innerPadding)
                 .imePadding()
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // 1. Calendario mensual interactivo

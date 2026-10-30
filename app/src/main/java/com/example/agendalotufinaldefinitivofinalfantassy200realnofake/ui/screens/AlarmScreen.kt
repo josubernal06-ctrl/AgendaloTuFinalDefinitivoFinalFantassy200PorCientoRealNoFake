@@ -101,7 +101,7 @@ fun AlarmScreen(
     }
 
     var selectedTabIndex by remember { mutableIntStateOf(1) } // 1 = Alarm
-    val tabTitles = listOf("Calendar", "Alarm", "Grupos")
+    val tabTitles = listOf("Calendario", "Alarma", "Grupos")
     val tabIcons = listOf(
         Icons.Default.CalendarMonth,
         Icons.Default.Alarm,
@@ -126,19 +126,20 @@ fun AlarmScreen(
                 selectedTabIndex = selectedTabIndex,
                 modifier = Modifier.navigationBarsPadding(),
                 containerColor = tema.botones,
-                contentColor = tema.fondo,
+                contentColor = androidx.compose.ui.graphics.Color.White,
                 indicator = { tabPositions ->
                     if (selectedTabIndex < tabPositions.size) {
                         TabRowDefaults.SecondaryIndicator(
                             Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                            color = tema.fondo
+                            color = androidx.compose.ui.graphics.Color.White
                         )
                     }
                 }
             ) {
                 tabTitles.forEachIndexed { index, title ->
+                    val isSelected = selectedTabIndex == index
                     Tab(
-                        selected = selectedTabIndex == index,
+                        selected = isSelected,
                         onClick = {
                             selectedTabIndex = index
                             if (index == 0) {
@@ -151,18 +152,30 @@ fun AlarmScreen(
                             Text(
                                 text = title,
                                 fontSize = 12.sp,
-                                fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = androidx.compose.ui.graphics.Color.White
                             )
                         },
                         icon = {
-                            Icon(
-                                imageVector = tabIcons[index],
-                                contentDescription = title,
-                                modifier = Modifier.size(22.dp)
-                            )
+                            androidx.compose.material3.Surface(
+                                color = if (isSelected) androidx.compose.ui.graphics.Color.White.copy(alpha = 0.25f) else androidx.compose.ui.graphics.Color.Transparent,
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                androidx.compose.foundation.layout.Box(
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = tabIcons[index],
+                                        contentDescription = title,
+                                        tint = androidx.compose.ui.graphics.Color.White,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
+                            }
                         },
-                        selectedContentColor = tema.fondo,
-                        unselectedContentColor = tema.letras.copy(alpha = 0.6f)
+                        selectedContentColor = androidx.compose.ui.graphics.Color.White,
+                        unselectedContentColor = androidx.compose.ui.graphics.Color.White
                     )
                 }
             }

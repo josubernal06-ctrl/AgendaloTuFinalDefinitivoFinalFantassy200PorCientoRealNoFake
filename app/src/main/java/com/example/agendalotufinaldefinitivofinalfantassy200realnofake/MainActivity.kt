@@ -17,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.AppDatabase
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.ActividadRepository
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.ActividadSolitaria
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.SegmentoTiempo
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Usuario
@@ -57,7 +58,7 @@ class  MainActivity : ComponentActivity() {
                 val aiViewModel: AiViewModel = viewModel()
 
                 val navController = rememberNavController()
-                val temaActual = obtenerTema(1)
+                val temaActual = obtenerTema(13)
                 
                 var showSplash by remember { mutableStateOf(true) }
                 
@@ -86,9 +87,11 @@ class  MainActivity : ComponentActivity() {
                         startDestination = "home"
                     ) {
                     composable("home") {
+                        val actividadesViewModel: ActividadesViewModel = viewModel(factory = actividadFactory)
                         HomeScreen(
                             tema = temaActual,
                             grupoViewModel = grupoViewModel,
+                            actividadesViewModel = actividadesViewModel,
                             onNavigateToProfile = { navController.navigate("profile") },
                             onNavigateToAlarm = {
                                 navController.navigate("alarm") {
@@ -252,11 +255,11 @@ class  MainActivity : ComponentActivity() {
                         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                         
                         ActivityScreen(
+                            onBackClick = { navController.popBackStack() },
                             tema = temaActual,
                             uiState = uiState,
-                            onBackClick = { navController.popBackStack() },
                             onNavigateToCreate = { navController.navigate("create_activity") },
-                            onDeleteActivity = { viewModel.eliminarActividad(it) }
+                            onDeleteActivity = { act: AbstractActividad -> viewModel.eliminarActividad(act) }
                         )
                     }
 

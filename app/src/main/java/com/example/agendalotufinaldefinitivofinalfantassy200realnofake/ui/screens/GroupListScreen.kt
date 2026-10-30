@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -35,7 +36,7 @@ fun GroupListScreen(
     onGroupClick: (Grupo) -> Unit
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(2) } // 2 = Grupos
-    val tabTitles = listOf("Calendar", "Alarm", "Grupos")
+    val tabTitles = listOf("Calendario", "Alarma", "Grupos")
     val tabIcons = listOf(
         Icons.Default.CalendarMonth,
         Icons.Default.Alarm,
@@ -56,19 +57,20 @@ fun GroupListScreen(
                 selectedTabIndex = selectedTabIndex,
                 modifier = Modifier.navigationBarsPadding(),
                 containerColor = tema.botones,
-                contentColor = tema.fondo,
+                contentColor = androidx.compose.ui.graphics.Color.White,
                 indicator = { tabPositions ->
                     if (selectedTabIndex < tabPositions.size) {
                         TabRowDefaults.SecondaryIndicator(
                             Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                            color = tema.fondo
+                            color = androidx.compose.ui.graphics.Color.White
                         )
                     }
                 }
             ) {
                 tabTitles.forEachIndexed { index, title ->
+                    val isSelected = selectedTabIndex == index
                     Tab(
-                        selected = selectedTabIndex == index,
+                        selected = isSelected,
                         onClick = {
                             selectedTabIndex = index
                             if (index == 0) onNavigateToHome()
@@ -78,18 +80,30 @@ fun GroupListScreen(
                             Text(
                                 text = title,
                                 fontSize = 12.sp,
-                                fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = androidx.compose.ui.graphics.Color.White
                             )
                         },
                         icon = {
-                            Icon(
-                                imageVector = tabIcons[index],
-                                contentDescription = title,
-                                modifier = Modifier.size(22.dp)
-                            )
+                            Surface(
+                                color = if (isSelected) androidx.compose.ui.graphics.Color.White.copy(alpha = 0.25f) else androidx.compose.ui.graphics.Color.Transparent,
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = tabIcons[index],
+                                        contentDescription = title,
+                                        tint = androidx.compose.ui.graphics.Color.White,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
+                            }
                         },
-                        selectedContentColor = tema.fondo,
-                        unselectedContentColor = tema.letras.copy(alpha = 0.6f)
+                        selectedContentColor = androidx.compose.ui.graphics.Color.White,
+                        unselectedContentColor = androidx.compose.ui.graphics.Color.White
                     )
                 }
             }
@@ -98,7 +112,7 @@ fun GroupListScreen(
             Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 ExtendedFloatingActionButton(
                     onClick = onJoinGroup,
-                    containerColor = tema.detalles,
+                    containerColor = tema.botones,
                     contentColor = tema.fondo,
                     icon = { Icon(Icons.Default.PersonAdd, contentDescription = "Unirse a grupo") },
                     text = { Text("Unirse a grupo") }

@@ -1,22 +1,19 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ClearAll
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MediumTopAppBar
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -25,47 +22,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopBarNavigationExample(
-    navigateBack: () -> Unit,
-) {
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "Navigation example",
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = navigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Localized description"
-                        )
-                    }
-                },
-            )
-        },
-    ) { innerPadding ->
-        Text(
-            "Click the back button to pop from the back stack.",
-            modifier = Modifier.padding(innerPadding),
-        )
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MiTopBar(
     titulo: String,
     tema: TemaColor,
-    onBackClick: (() -> Unit)? = null, // Opcional: si es null no muestra la flecha de regresar
+    onBackClick: (() -> Unit)? = null,      // si es null no muestra la flecha de regresar
+    onPerfilClick: (() -> Unit)? = null,    // si es null no muestra el ícono de perfil
+    onSettingsClick: () -> Unit = {},
     searchQuery: String? = null,
     onSearchQueryChange: ((String) -> Unit)? = null,
     searchLabel: String = "Buscar...",
@@ -83,47 +53,57 @@ fun MiTopBar(
         modifier = Modifier
             .fillMaxWidth()
             .background(color = tema.botones)
-            .padding(bottom = 12.dp)
     ) {
-        MediumTopAppBar(
-            title = { Text(text = titulo, color = tema.fondo, fontStyle = FontStyle.Normal) },
+        TopAppBar(
+            title = {
+                Text(
+                    text = titulo,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
             navigationIcon = {
                 if (onBackClick != null) {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Regresar",
-                            tint = tema.fondo
+                            contentDescription = "Regresar"
                         )
                     }
                 }
             },
             actions = {
-                Row(
-                    modifier = Modifier.padding(end = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    IconButton(onClick = { /* Configuración */ }) {
+                if (showSearchBar && currentQuery.isNotEmpty()) {
+                    IconButton(onClick = { onQueryChange("") }) {
                         Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Configuración",
-                            tint = tema.fondo
+                            imageVector = Icons.Default.ClearAll,
+                            contentDescription = "Limpiar búsqueda"
                         )
                     }
-                    if (showSearchBar && currentQuery.isNotEmpty()) {
-                        IconButton(onClick = { onQueryChange("") }) {
-                            Icon(
-                                imageVector = Icons.Default.ClearAll,
-                                contentDescription = "Limpiar búsqueda",
-                                tint = tema.fondo
-                            )
-                        }
+                }
+                if (onPerfilClick != null) {
+                    IconButton(onClick = onPerfilClick) {
+                        Icon(
+                            imageVector = Icons.Outlined.Person,
+                            contentDescription = "Tu perfil"
+                        )
                     }
+                }
+                IconButton(onClick = onSettingsClick) {
+                    Icon(
+                        imageVector = Icons.Outlined.Settings,
+                        contentDescription = "Configuración"
+                    )
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = tema.botones,
-                scrolledContainerColor = tema.botones
+                scrolledContainerColor = tema.botones,
+                titleContentColor = tema.fondo,
+                navigationIconContentColor = tema.fondo,
+                actionIconContentColor = tema.fondo
             ),
             scrollBehavior = scrollBehavior
         )
@@ -134,7 +114,9 @@ fun MiTopBar(
                 onValueChange = onQueryChange,
                 label = searchLabel,
                 tema = tema,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 12.dp)
             )
         }
     }

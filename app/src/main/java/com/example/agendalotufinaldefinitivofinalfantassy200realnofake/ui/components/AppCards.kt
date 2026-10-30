@@ -10,14 +10,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,21 +86,21 @@ fun EntradaTextoField(
     tema: TemaColor,
     modifier: Modifier = Modifier
 ) {
-    OutlinedTextField(
+    TextField(
         value = valor,
         onValueChange = onValueChange,
-        label = { Text(label) },
-        placeholder = { Text(label, color = tema.letras.copy(alpha = 0.6f)) },
+        label = { Text(label, color = tema.letras) },
+        /*placeholder = { Text(label, color = tema.letras.copy(alpha = 0.6f)) },*/
         singleLine = true,
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(12.dp),
         modifier = modifier.fillMaxWidth(),
-        colors = OutlinedTextFieldDefaults.colors(
+        colors = TextFieldDefaults.colors(
             focusedContainerColor = tema.fondo,
             unfocusedContainerColor = tema.fondo,
             focusedTextColor = tema.letras,
             unfocusedTextColor = tema.letras,
-            focusedBorderColor = tema.letras,
-            unfocusedBorderColor = tema.letras.copy(alpha = 0.4f),
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
             focusedLabelColor = tema.letras,
             unfocusedLabelColor = tema.letras.copy(alpha = 0.7f),
             cursorColor = tema.letras
