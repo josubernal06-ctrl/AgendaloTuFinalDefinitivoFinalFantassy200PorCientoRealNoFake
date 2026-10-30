@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "71852050412",
+    "project_id": "angendalotu",
+    "storage_bucket": "angendalotu.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:71852050412:android:af8ab9d97ce5209a32e2c9",
+        "android_client_info": {
+          "package_name": "com.example.agendalotufinaldefinitivofinalfantassy200realnofake"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzEnkZs8oWZc4rkjmMdKDV0dw9Iumav4Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

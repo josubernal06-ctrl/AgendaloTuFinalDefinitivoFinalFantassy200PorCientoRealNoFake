@@ -48,8 +48,7 @@ class  MainActivity : ComponentActivity() {
                 val context = LocalContext.current
                 val appContainer = remember { AppContainer(context) }
                 
-                val authFactory = AuthViewModel.Factory(appContainer.authRepository)
-                val authViewModel: AuthViewModel = viewModel(factory = authFactory)
+                val authViewModel: AuthViewModel = viewModel()
                 val currentUser by authViewModel.currentUser.collectAsStateWithLifecycle()
                 
                 val actividadFactory = ActividadesViewModel.Factory(appContainer.actividadRepository)
@@ -75,12 +74,7 @@ class  MainActivity : ComponentActivity() {
                         onSplashFinished = { showSplash = false }
                     )
                 } else if (currentUser == null) {
-                    val testUsers by authViewModel.testUsers.collectAsStateWithLifecycle()
-                    LoginScreen(
-                        tema = temaActual,
-                        testUsers = testUsers,
-                        onLoginClick = { authViewModel.login(it) }
-                    )
+                    LoginScreen(tema = temaActual, viewModel = authViewModel)
                 } else {
                     NavHost(
                         navController = navController,
