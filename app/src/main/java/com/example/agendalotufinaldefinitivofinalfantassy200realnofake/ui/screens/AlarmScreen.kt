@@ -7,6 +7,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -100,12 +101,12 @@ fun AlarmScreen(
         }
     }
 
-    var selectedTabIndex by remember { mutableIntStateOf(1) } // 1 = Alarm
-    val tabTitles = listOf("Calendario", "Alarma", "Grupos")
+    var selectedTabIndex by remember { mutableIntStateOf(2) } // 2 = Alarm
+    val tabTitles = listOf("Home", "Grupos", "Alarma")
     val tabIcons = listOf(
         Icons.Default.CalendarMonth,
-        Icons.Default.Alarm,
-        Icons.Default.Person
+        Icons.Default.Group,
+        Icons.Default.Alarm
     )
 
     var showTimePicker by remember { mutableStateOf(false) }
@@ -144,7 +145,7 @@ fun AlarmScreen(
                             selectedTabIndex = index
                             if (index == 0) {
                                 onNavigateToHome()
-                            } else if (index == 2) {
+                            } else if (index == 1) {
                                 onNavigateToGroups()
                             }
                         },

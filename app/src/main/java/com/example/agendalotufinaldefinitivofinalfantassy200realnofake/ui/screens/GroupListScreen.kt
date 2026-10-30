@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
@@ -35,12 +35,12 @@ fun GroupListScreen(
     onJoinGroup: () -> Unit,
     onGroupClick: (Grupo) -> Unit
 ) {
-    var selectedTabIndex by remember { mutableIntStateOf(2) } // 2 = Grupos
-    val tabTitles = listOf("Calendario", "Alarma", "Grupos")
+    var selectedTabIndex by remember { mutableIntStateOf(1) } // 1 = Grupos
+    val tabTitles = listOf("Home", "Grupos", "Alarma")
     val tabIcons = listOf(
         Icons.Default.CalendarMonth,
-        Icons.Default.Alarm,
-        Icons.Default.Person
+        Icons.Default.Group,
+        Icons.Default.Alarm
     )
 
     Scaffold(
@@ -74,7 +74,7 @@ fun GroupListScreen(
                         onClick = {
                             selectedTabIndex = index
                             if (index == 0) onNavigateToHome()
-                            if (index == 1) onNavigateToAlarm()
+                            if (index == 2) onNavigateToAlarm()
                         },
                         text = {
                             Text(
@@ -128,59 +128,65 @@ fun GroupListScreen(
         },
         containerColor = tema.fondo
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            when (uiState) {
-                is GrupoUiState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = tema.botones)
+        when (uiState) {
+            is GrupoUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = tema.botones)
                 }
-                is GrupoUiState.Error -> {
-                    Text(text = uiState.message, color = tema.letras, modifier = Modifier.align(Alignment.Center))
-                }
-                is GrupoUiState.Success -> {
-                    if (uiState.grupos.isEmpty()) {
-                        Column(
-                            modifier = Modifier.fillMaxSize().padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = "Aún no perteneces a ningún grupo",
-                                color = tema.letras,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "Crea tu primer grupo o únete a uno existente usando un código de invitación.",
-                                color = tema.letras.copy(alpha = 0.7f),
-                                fontSize = 14.sp
-                            )
-                        }
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize().padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(uiState.grupos) { grupo ->
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable { onGroupClick(grupo) },
-                                    colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.15f)),
-                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-                                ) {
-                                    Column(modifier = Modifier.padding(16.dp)) {
-                                        Text(text = grupo.nombreGrupo, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = tema.botones)
-                                        if (grupo.descripcion.isNotBlank()) {
-                                            Text(text = grupo.descripcion, fontSize = 14.sp, color = tema.letras.copy(alpha = 0.7f))
-                                        }
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Text(text = "${grupo.miebros.size} miembros", fontSize = 12.sp, color = tema.letras)
+            }
+            is GrupoUiState.Success -> {
+                if (uiState.grupos.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No estás en ningún grupo todavía.", color = tema.letras)
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(uiState.grupos) { grupo ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onGroupClick(grupo) },
+                                colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.2f))
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Text(
+                                        text = grupo.nombreGrupo,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 18.sp,
+                                        color = tema.letras
+                                    )
+                                    if (grupo.descripcion.isNotEmpty()) {
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = grupo.descripcion,
+                                            fontSize = 14.sp,
+                                            color = tema.letras.copy(alpha = 0.8f)
+                                        )
                                     }
                                 }
                             }
                         }
                     }
+                }
+            }
+            is GrupoUiState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = uiState.message, color = MaterialTheme.colorScheme.error)
                 }
             }
         }

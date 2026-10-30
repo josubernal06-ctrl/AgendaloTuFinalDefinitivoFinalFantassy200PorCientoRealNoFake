@@ -1,4 +1,4 @@
-package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels
 
 import android.content.Context
 import androidx.lifecycle.ViewModel

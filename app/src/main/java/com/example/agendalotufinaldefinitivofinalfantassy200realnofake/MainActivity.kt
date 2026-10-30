@@ -15,12 +15,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.AppDatabase
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.ActividadRepository
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.ActividadSolitaria
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.SegmentoTiempo
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Usuario
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.CreateActivityScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.ActivityScreen
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.AlarmScreen
@@ -31,8 +27,7 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.di.AppContainer
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens.*
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.*
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.viewmodel.AiViewModel
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Grupo
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.AiViewModel
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.ActividadConjunta
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.Resultado
 import androidx.navigation.NavType
@@ -76,6 +71,11 @@ class  MainActivity : ComponentActivity() {
                 } else if (currentUser == null) {
                     LoginScreen(tema = temaActual, viewModel = authViewModel)
                 } else {
+                    LaunchedEffect(Unit) {
+                        navController.navigate("home") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
                     NavHost(
                         navController = navController,
                         startDestination = "home"

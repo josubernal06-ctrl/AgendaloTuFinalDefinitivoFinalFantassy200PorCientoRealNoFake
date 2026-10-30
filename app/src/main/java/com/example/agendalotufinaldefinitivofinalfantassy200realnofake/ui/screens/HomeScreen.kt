@@ -80,11 +80,11 @@ fun HomeScreen(
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
 
-    val tabTitles = listOf("Calendario", "Alarma", "Grupos")
+    val tabTitles = listOf("Home", "Grupos", "Alarma")
     val tabIcons = listOf(
         Icons.Default.CalendarMonth,
-        Icons.Default.Alarm,
-        Icons.Default.Person
+        Icons.Default.Group,
+        Icons.Default.Alarm
     )
     val scrollState = rememberScrollState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
@@ -145,9 +145,9 @@ fun HomeScreen(
                         onClick = {
                             selectedTabIndex = index
                             if (index == 1) {
-                                onNavigateToAlarm()
-                            } else if (index == 2) {
                                 onNavigateToGroups()
+                            } else if (index == 2) {
+                                onNavigateToAlarm()
                             }
                         },
                         text = {
