@@ -1,7 +1,9 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -51,7 +53,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,6 +91,7 @@ fun ActivityScreen(
 ) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var currentYearMonth by remember { mutableStateOf(YearMonth.now()) }
+    val context = LocalContext.current
 
     val promptText by aiViewModel.promptText.collectAsState()
     val responseText by aiViewModel.responseText.collectAsState()
@@ -172,6 +177,23 @@ fun ActivityScreen(
                 tema = tema
             )
 
+            // Leyenda explicativa de colores
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(modifier = Modifier.size(12.dp, 4.dp).clip(RoundedCornerShape(2.dp)).background(Color(0xFF22C55E)))
+                    Text("Feriados", fontSize = 12.sp, color = tema.letras, fontWeight = FontWeight.Medium)
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(modifier = Modifier.size(12.dp, 4.dp).clip(RoundedCornerShape(2.dp)).background(Color(0xFF3B82F6)))
+                    Text("Actividades", fontSize = 12.sp, color = tema.letras, fontWeight = FontWeight.Medium)
+                }
+            }
+
             // 2. Título de la fecha seleccionada
             Text(
                 text = formattedSelectedDate,
@@ -232,7 +254,9 @@ fun ActivityScreen(
             )
 
             Button(
-                onClick = { aiViewModel.enviarPromptAGemini() },
+                onClick = {
+                    aiViewModel.enviarPromptAGemini(context = context)
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = tema.botones),
                 modifier = Modifier.fillMaxWidth()
             ) {

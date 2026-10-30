@@ -183,36 +183,6 @@ fun AlarmScreen(
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
             )
-
-            // Tarjeta con la alarma configurada
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.15f))
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "Próxima Alarma",
-                        fontSize = 14.sp,
-                        color = tema.letras.copy(alpha = 0.7f)
-                    )
-                    Text(
-                        text = selectedTimeText,
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = tema.botones
-                    )
-                    Text(
-                        text = "Programada para tus actividades agendadas",
-                        fontSize = 14.sp,
-                        color = tema.letras
-                    )
-                }
-            }
-
             Spacer(modifier = Modifier.height(8.dp))
 
             // Botón para agregar o modificar la hora

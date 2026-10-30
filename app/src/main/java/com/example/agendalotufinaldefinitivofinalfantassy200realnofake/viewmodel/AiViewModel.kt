@@ -68,7 +68,8 @@ class AiViewModel(
     fun enviarPromptAGemini(
         context: Context? = null,
         actividadRepository: ActividadRepository? = null,
-        usuario: Usuario? = null
+        usuario: Usuario? = null,
+        onActividadCreada: ((AbstractActividad) -> Unit)? = null
     ) {
         val promptOriginal = _promptText.value
         if (promptOriginal.isBlank()) return
@@ -95,6 +96,7 @@ class AiViewModel(
                     _responseText.value = "✅ ¡Actividad agregada a tu horario con éxito!\n\n" +
                             "📌 Título: ${nuevaActividad.titulo}\n" +
                             "📝 Respuesta Gemini: ${resultado.answer}"
+                    onActividadCreada?.invoke(nuevaActividad)
                 } else {
                     _responseText.value = "Gemini respondió:\n${resultado.answer}"
                 }
