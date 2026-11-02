@@ -8,11 +8,10 @@ data class ActividadEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val titulo: String,
     val descripcion: String,
-    val esPrivada: Boolean,
-    val propietarioId: Int,
-    val propietarioNickname: String,
-    val inicio: String,
-    val fin: String,
+    val userId: String,
+    val grupoId: Int? = null,
     val esConjunta: Boolean,
-    val puntuacion: Double
+    val esPrivada: Boolean,
+    val fechaInicio: String,
+    val fechaFin: String
 )

@@ -45,10 +45,28 @@ class AuthRepository(
     }
 
     suspend fun iniciarSesion(email: String, contrasena: String): Resultado<Unit> =
-        llamar { auth.signInWithEmailAndPassword(email, contrasena).await() }
+        llamar { 
+            val authResult = auth.signInWithEmailAndPassword(email, contrasena).await()
+            authResult.user?.let { firebaseUser ->
+                com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.cloud.user.UserCloudRepository().guardarUsuarioEnCloud(
+                    uid = firebaseUser.uid,
+                    email = firebaseUser.email.orEmpty(),
+                    nickname = firebaseUser.email?.substringBefore("@").orEmpty()
+                )
+            }
+        }
 
     suspend fun registrar(email: String, contrasena: String): Resultado<Unit> =
-        llamar { auth.createUserWithEmailAndPassword(email, contrasena).await() }
+        llamar { 
+            val authResult = auth.createUserWithEmailAndPassword(email, contrasena).await()
+            authResult.user?.let { firebaseUser ->
+                com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.cloud.user.UserCloudRepository().guardarUsuarioEnCloud(
+                    uid = firebaseUser.uid,
+                    email = firebaseUser.email.orEmpty(),
+                    nickname = firebaseUser.email?.substringBefore("@").orEmpty()
+                )
+            }
+        }
 
     suspend fun enviarCorreoDeRecuperacion(email: String): Resultado<Unit> =
         llamar { auth.sendPasswordResetEmail(email).await() }

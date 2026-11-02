@@ -6,22 +6,40 @@ import java.time.LocalDateTime
 
 fun ActividadEntity.toDomain(): AbstractActividad {
     val segmento = SegmentoTiempo(
-        inicio = LocalDateTime.parse(this.inicio),
-        fin = LocalDateTime.parse(this.fin),
+        inicio = LocalDateTime.parse(this.fechaInicio),
+        fin = LocalDateTime.parse(this.fechaFin),
         esConjunta = this.esConjunta,
-        puntuacion = this.puntuacion
+        puntuacion = 1.0
     )
-    val propietario = Usuario(id = this.propietarioId, nickname = this.propietarioNickname, email = "")
+    val propietario = Usuario(
+        id = this.userId.hashCode(),
+        nickname = this.userId.substringBefore("@").ifEmpty { "Usuario" },
+        email = this.userId
+    )
 
     return if (this.esConjunta) {
-        ActividadConjunta(this.id, this.titulo, this.descripcion, propietario, this.esPrivada, segmento)
+        ActividadConjunta(
+            id = this.id,
+            titulo = this.titulo,
+            descripcion = this.descripcion,
+            propietario = propietario,
+            esPrivada = this.esPrivada,
+            segmentoTiempo = segmento,
+            grupoId = this.grupoId ?: -1
+        )
     } else {
-        ActividadSolitaria(this.id, this.titulo, this.descripcion, propietario, this.esPrivada, segmento)
+        ActividadSolitaria(
+            id = this.id,
+            titulo = this.titulo,
+            descripcion = this.descripcion,
+            propietario = propietario,
+            esPrivada = this.esPrivada,
+            segmentoTiempo = segmento
+        )
     }
 }
 
-fun AbstractActividad.toEntity(): ActividadEntity {
-    // Usamos reflection para acceder a los campos privados requeridos por el diagrama UML estricto
+fun AbstractActividad.toEntity(userId: String): ActividadEntity {
     val clazz = AbstractActividad::class.java
 
     val idField = clazz.getDeclaredField("id")
@@ -49,16 +67,18 @@ fun AbstractActividad.toEntity(): ActividadEntity {
     finField.isAccessible = true
     val fin = finField.get(seg) as LocalDateTime
 
+    val isConjunta = this is ActividadConjunta
+    val gId = if (isConjunta) (this as ActividadConjunta).grupoId.takeIf { it > 0 } else null
+
     return ActividadEntity(
         id = realId,
         titulo = this.titulo,
         descripcion = desc,
         esPrivada = priv,
-        propietarioId = 1,
-        propietarioNickname = this.propietario.nickname,
-        inicio = inicio.toString(),
-        fin = fin.toString(),
-        esConjunta = this is ActividadConjunta,
-        puntuacion = seg.puntuacion
+        userId = userId,
+        grupoId = gId,
+        esConjunta = isConjunta,
+        fechaInicio = inicio.toString(),
+        fechaFin = fin.toString()
     )
 }
