@@ -11,6 +11,12 @@ interface GrupoDao {
     @Query("SELECT * FROM `GROUP` WHERE id = :id")
     fun obtenerGrupoPorId(id: Int): Flow<GrupoEntity?>
 
+    @Query("SELECT * FROM `GROUP` WHERE codigoInvitacion = :codigo LIMIT 1")
+    suspend fun obtenerGrupoPorCodigoSync(codigo: String): GrupoEntity?
+
+    @Query("SELECT * FROM `GROUP` WHERE id = :id LIMIT 1")
+    suspend fun obtenerGrupoPorIdSync(id: Int): GrupoEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertarGrupo(grupo: GrupoEntity): Long
 

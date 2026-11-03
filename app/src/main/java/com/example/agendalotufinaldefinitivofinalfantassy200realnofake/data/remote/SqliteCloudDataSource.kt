@@ -1,6 +1,7 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.remote
 
 import android.util.Log
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.GrupoEntity
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.RetrofitClient
 
 /**
@@ -63,6 +64,49 @@ class SqliteCloudDataSource(
         } catch (e: Exception) {
             Log.e("SqliteCloud", "Excepción al conectar a SQLite Cloud: ${e.message}", e)
             false
+        }
+    }
+
+    suspend fun obtenerGrupoPorCodigoRemoto(apiKey: String, codigo: String): GrupoEntity? {
+        return try {
+            if (apiKey.isBlank()) return null
+            val authHeader = if (apiKey.startsWith("Bearer ")) apiKey else "Bearer $apiKey"
+            val cleanCodigo = codigo.replace("'", "''")
+            val sql = "USE DATABASE agendalo.sqlite; SELECT id, nombreGrupo, descripcion, propietarioId, codigoInvitacion FROM `GROUP` WHERE codigoInvitacion = '$cleanCodigo';"
+            val requestPayload = SqliteCloudRequest(database = "agendalo.sqlite", sql = sql)
+
+            for (url in candidateUrls) {
+                try {
+                    val resp = api.ejecutarSqlConUrl(url, authHeader, requestPayload)
+                    if (resp.isSuccessful && resp.body()?.data != null) {
+                        val data = resp.body()?.data as? List<*>
+                        if (!data.isNullOrEmpty()) {
+                            val firstRow = data[0]
+                            if (firstRow is Map<*, *>) {
+                                return GrupoEntity(
+                                    id = (firstRow["id"] as? Number)?.toInt() ?: 0,
+                                    nombreGrupo = (firstRow["nombreGrupo"] as? String) ?: "Grupo",
+                                    descripcion = (firstRow["descripcion"] as? String) ?: "",
+                                    propietarioId = (firstRow["propietarioId"] as? String) ?: "",
+                                    codigoInvitacion = (firstRow["codigoInvitacion"] as? String) ?: codigo
+                                )
+                            } else if (firstRow is List<*>) {
+                                return GrupoEntity(
+                                    id = (firstRow.getOrNull(0) as? Number)?.toInt() ?: 0,
+                                    nombreGrupo = (firstRow.getOrNull(1) as? String) ?: "Grupo",
+                                    descripcion = (firstRow.getOrNull(2) as? String) ?: "",
+                                    propietarioId = (firstRow.getOrNull(3) as? String) ?: "",
+                                    codigoInvitacion = (firstRow.getOrNull(4) as? String) ?: codigo
+                                )
+                            }
+                        }
+                    }
+                } catch (_: Exception) {}
+            }
+            null
+        } catch (e: Exception) {
+            Log.e("SqliteCloud", "Error obteniendo grupo remoto: ${e.message}", e)
+            null
         }
     }
 }

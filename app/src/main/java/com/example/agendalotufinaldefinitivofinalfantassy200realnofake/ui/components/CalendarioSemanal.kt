@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -46,6 +48,7 @@ import java.util.Locale
 fun CalendarioSemanal(
     tema: TemaColor,
     selectedDate: LocalDate = remember { LocalDate.now() },
+    actividades: List<AbstractActividad> = emptyList(),
     onDateSelected: (LocalDate) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -140,6 +143,14 @@ fun CalendarioSemanal(
                     val isSelected = date == selectedDate
                     val isToday = date == today
 
+                    val hasUserActivity = actividades.any { act ->
+                        try {
+                            act.segmentoTiempo.inicio.toLocalDate() == date
+                        } catch (_: Exception) {
+                            false
+                        }
+                    }
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
@@ -170,8 +181,18 @@ fun CalendarioSemanal(
                             textAlign = TextAlign.Center
                         )
 
-                        if (isToday && !isSelected) {
-                            Spacer(modifier = Modifier.height(3.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        // Línea Azul = Actividad del usuario (igual que en CalendarGridView)
+                        if (hasUserActivity) {
+                            Box(
+                                modifier = Modifier
+                                    .width(16.dp)
+                                    .height(3.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(Color(0xFF3B82F6))
+                            )
+                        } else if (isToday && !isSelected) {
                             Box(
                                 modifier = Modifier
                                     .size(5.dp)
@@ -179,7 +200,7 @@ fun CalendarioSemanal(
                                     .background(tema.botones)
                             )
                         } else {
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(3.dp))
                         }
                     }
                 }

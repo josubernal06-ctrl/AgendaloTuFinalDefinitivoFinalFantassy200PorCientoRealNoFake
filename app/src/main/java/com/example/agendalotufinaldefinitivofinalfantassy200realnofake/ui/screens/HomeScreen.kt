@@ -204,6 +204,7 @@ fun HomeScreen(
             CalendarioSemanal(
                 tema = tema,
                 selectedDate = selectedDate,
+                actividades = actividadesList,
                 onDateSelected = { selectedDate = it },
                 modifier = Modifier.padding(horizontal = 16.dp)
             )

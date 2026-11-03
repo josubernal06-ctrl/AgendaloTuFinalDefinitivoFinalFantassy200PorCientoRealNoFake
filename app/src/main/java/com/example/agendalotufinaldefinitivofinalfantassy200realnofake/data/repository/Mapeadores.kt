@@ -1,6 +1,7 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository
 
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.ActividadEntity
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.GrupoEntity
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.*
 import java.time.LocalDateTime
 
@@ -80,5 +81,26 @@ fun AbstractActividad.toEntity(userId: String): ActividadEntity {
         esConjunta = isConjunta,
         fechaInicio = inicio.toString(),
         fechaFin = fin.toString()
+    )
+}
+
+fun GrupoEntity.toDomain(): Grupo {
+    val propietario = Usuario(id = this.propietarioId.hashCode(), nickname = "Propietario", email = this.propietarioId)
+    return Grupo(
+        id = this.id,
+        nombreGrupo = this.nombreGrupo,
+        descripcion = this.descripcion,
+        propietario = propietario,
+        codigoInvitacion = this.codigoInvitacion
+    )
+}
+
+fun Grupo.toEntity(): GrupoEntity {
+    return GrupoEntity(
+        id = this.id,
+        nombreGrupo = this.nombreGrupo,
+        descripcion = this.descripcion,
+        propietarioId = this.propietario.email.ifEmpty { this.propietario.id.toString() },
+        codigoInvitacion = this.codigoInvitacion
     )
 }
