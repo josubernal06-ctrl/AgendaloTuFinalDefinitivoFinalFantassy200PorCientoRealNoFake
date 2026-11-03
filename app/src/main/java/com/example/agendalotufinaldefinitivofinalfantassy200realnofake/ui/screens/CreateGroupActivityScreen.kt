@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,7 +25,7 @@ fun CreateGroupActivityScreen(
     grupoId: Int,
     usuarioActual: Usuario,
     onBackClick: () -> Unit,
-    onSaveClick: (titulo: String, desc: String, recomendacion: String) -> Unit,
+    onSaveClick: (titulo: String, desc: String) -> Unit,
     aiRecommendationState: String,
     onSuggestClick: (prompt: String) -> Unit
 ) {
@@ -70,6 +71,18 @@ fun CreateGroupActivityScreen(
                 tema = tema,
                 modifier = Modifier.fillMaxWidth()
             )
+
+            Button(
+                onClick = {
+                    if (titulo.isNotBlank()) {
+                        onSaveClick(titulo, descripcion)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = tema.detalles, contentColor = tema.fondo)
+            ) {
+                Text("Agendar Manualmente")
+            }
             
             Spacer(modifier = Modifier.height(16.dp))
             Text("Dejar a Gemini decidir el horario", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = tema.letras)
@@ -84,7 +97,7 @@ fun CreateGroupActivityScreen(
             
             Button(
                 onClick = {
-                    onSuggestClick("Para la actividad '$titulo', preferencias: $promptAdicional")
+                    onSuggestClick("Para la actividad '$titulo', con descripción '$descripcion', preferencias: $promptAdicional")
                     showRecommendationDialog = true
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -92,7 +105,7 @@ fun CreateGroupActivityScreen(
             ) {
                 Icon(Icons.Default.AutoAwesome, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Recomendar Horarios")
+                Text("Agendar con IA")
             }
         }
     }
@@ -100,27 +113,28 @@ fun CreateGroupActivityScreen(
     if (showRecommendationDialog) {
         AlertDialog(
             onDismissRequest = { showRecommendationDialog = false },
-            title = { Text("Recomendación de Gemini", color = tema.letras) },
+            title = { Text("Asistente Gemini", color = tema.letras) },
             text = { 
                 if (aiRecommendationState.isBlank()) {
-                    CircularProgressIndicator(color = tema.botones)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(color = tema.botones, modifier = Modifier.size(24.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text("Generando y agendando...", color = tema.letras)
+                    }
+                } else if (aiRecommendationState.contains("Error")) {
+                    Text("No se pudo agendar: $aiRecommendationState", color = MaterialTheme.colorScheme.error)
                 } else {
-                    Text(aiRecommendationState, color = tema.letras)
+                    Text("¡Actividades agendadas correctamente! Se ha generado el horario sin conflictos.", color = tema.letras)
                 }
             },
             confirmButton = {
                 if (aiRecommendationState.isNotBlank()) {
                     TextButton(onClick = {
                         showRecommendationDialog = false
-                        onSaveClick(titulo, descripcion, aiRecommendationState)
+                        onBackClick()
                     }) {
-                        Text("Aceptar y Guardar", color = tema.botones)
+                        Text("Consultar agenda", color = tema.botones)
                     }
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showRecommendationDialog = false }) {
-                    Text("Cancelar", color = tema.letras)
                 }
             },
             containerColor = tema.fondo

@@ -64,8 +64,8 @@ fun AbstractActividad.toEntity(): ActividadEntity {
     finField.isAccessible = true
     val fin = finField.get(seg) as LocalDateTime
 
-    val isConjunta = this is ActividadConjunta
-    val gId = if (isConjunta) (this as ActividadConjunta).grupoId.takeIf { it > 0 } else null
+    val isConjunta = this is ActividadConjunta && this.grupoId > 0
+    val gId = if (this is ActividadConjunta) this.grupoId.takeIf { it > 0 } else null
 
     return ActividadEntity(
         id = realId,

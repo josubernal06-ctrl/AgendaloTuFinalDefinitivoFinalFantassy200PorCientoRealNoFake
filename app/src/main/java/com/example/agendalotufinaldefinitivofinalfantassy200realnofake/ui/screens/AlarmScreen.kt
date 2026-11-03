@@ -359,6 +359,8 @@ fun ThemedTimePickerDialog(
                 state = timePickerState,
                 colors = TimePickerDefaults.colors(
                     clockDialColor = tema.detalles.copy(alpha = 0.2f),
+                    clockDialSelectedContentColor = tema.fondo,
+                    clockDialUnselectedContentColor = tema.letras,
                     selectorColor = tema.botones,
                     containerColor = tema.fondo,
                     periodSelectorBorderColor = tema.botones,

@@ -34,10 +34,12 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.A
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.Resultado
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.ActividadRepository
 import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import java.time.LocalDateTime
 
+//quiero anal
 class  MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +72,7 @@ class  MainActivity : ComponentActivity() {
                         if (savedNick.isNotBlank()) {
                             currentUser!!.nickname = savedNick
                         }
-                        grupoViewModel.cargarGrupos(currentUser!!.id)
+                        grupoViewModel.init(currentUser!!.id)
                     }
                 }
 
@@ -171,7 +173,11 @@ class  MainActivity : ComponentActivity() {
                         }
                         JoinGroupScreen(
                             tema = temaActual,
-                            onBackClick = { navController.popBackStack() },
+                            actionResult = actionResult,
+                            onBackClick = {
+                                grupoViewModel.clearActionResult()
+                                navController.popBackStack()
+                            },
                             onJoinClick = { codigo -> 
                                 grupoViewModel.unirseAGrupo(codigo, currentUser!!) 
                             }
@@ -186,13 +192,21 @@ class  MainActivity : ComponentActivity() {
                         val uiState by grupoViewModel.uiState.collectAsStateWithLifecycle()
                         val grupos = (uiState as? GrupoUiState.Success)?.grupos ?: emptyList()
                         
+                        val actividadViewModel: ActividadesViewModel = viewModel(factory = actividadFactory)
+                        val actUiState by actividadViewModel.uiState.collectAsStateWithLifecycle()
+                        val actividades = actUiState.actividades.filterIsInstance<ActividadConjunta>().filter { it.grupoId == grupoId }
+                        
                         GroupDetailScreen(
                             tema = temaActual,
                             grupoId = grupoId,
                             grupos = grupos,
+                            actividades = actividades,
+                            currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: currentUser!!.email,
                             onBackClick = { navController.popBackStack() },
                             onNavigateToCalendar = { id -> navController.navigate("group_calendar/$id") },
                             onDeleteGroupClick = { grupo -> grupoViewModel.eliminarGrupo(grupo, currentUser!!.id) },
+                            onLeaveGroupClick = { grupo -> grupoViewModel.salirDelGrupo(grupo, currentUser!!.id) },
+                            onEditActivityClick = { _ -> },
                             onAiScheduleClick = { prompt ->
                                 val grupo = grupos.find { it.id == grupoId }
                                 aiViewModel.onPromptChanged("Para el grupo ${grupo?.nombreGrupo ?: grupoId}: $prompt")
@@ -242,7 +256,7 @@ class  MainActivity : ComponentActivity() {
                             grupoId = grupoId,
                             usuarioActual = currentUser!!,
                             onBackClick = { navController.popBackStack() },
-                            onSaveClick = { titulo, desc, _ ->
+                            onSaveClick = { titulo, desc ->
                                 val nuevaActividad = ActividadConjunta(
                                     id = (1000..9999).random(),
                                     titulo = titulo,
@@ -347,7 +361,7 @@ class  MainActivity : ComponentActivity() {
                         )
                     }
                 }
-                } // End of else block
+                } 
             }
         }
     }

@@ -20,9 +20,17 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
     private val _actionResult = MutableStateFlow<Resultado<String>?>(null)
     val actionResult: StateFlow<Resultado<String>?> = _actionResult.asStateFlow()
 
-    fun cargarGrupos(userId: Int) {
+    fun sincronizarGrupos(userId: Int) {
+        viewModelScope.launch {
+            grupoRepository.sincronizarGrupos(userId)
+        }
+    }
+
+    fun init(userId: Int) {
         viewModelScope.launch {
             _uiState.value = GrupoUiState.Loading
+            grupoRepository.sincronizarGrupos(userId)
+            
             grupoRepository.obtenerGrupos(userId)
                 .collect { resultado ->
                     when (resultado) {
@@ -52,9 +60,25 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
 
     fun eliminarGrupo(grupo: Grupo, userId: Int) {
         viewModelScope.launch {
-            grupoRepository.eliminarGrupo(grupo)
-            _actionResult.value = Resultado.Exito("Grupo eliminado exitosamente")
-            cargarGrupos(userId)
+            try {
+                grupoRepository.eliminarGrupo(grupo)
+                _actionResult.value = Resultado.Exito("Grupo eliminado exitosamente")
+                sincronizarGrupos(userId)
+            } catch (e: Exception) {
+                _actionResult.value = Resultado.Error(e)
+            }
+        }
+    }
+
+    fun salirDelGrupo(grupo: Grupo, userId: Int) {
+        viewModelScope.launch {
+            try {
+                grupoRepository.salirDelGrupo(grupo)
+                _actionResult.value = Resultado.Exito("Has salido del grupo")
+                sincronizarGrupos(userId)
+            } catch (e: Exception) {
+                _actionResult.value = Resultado.Error(e)
+            }
         }
     }
 
@@ -65,7 +89,7 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
             when (resultado) {
                 is Resultado.Exito -> {
                     _actionResult.value = Resultado.Exito("Te has unido al grupo ${resultado.data.nombreGrupo}")
-                    cargarGrupos(usuario.id)
+                    sincronizarGrupos(usuario.id)
                 }
                 is Resultado.Error -> _actionResult.value = Resultado.Error(resultado.excepcion)
                 Resultado.Cargando -> {}

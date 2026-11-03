@@ -145,22 +145,20 @@ fun CalendarioSemanal(
                     val isToday = date == today
 
                     val hasGroupActivity = actividades.any { act ->
-                        try {
-                            act.segmentoTiempo.inicio.toLocalDate() == date &&
-                                ((act as? ActividadConjunta)?.grupoId ?: -1 > 0 || act.segmentoTiempo.esConjunta)
-                        } catch (_: Exception) {
-                            false
-                        }
+                    try {
+                        act.segmentoTiempo.inicio.toLocalDate() == date && act is ActividadConjunta
+                    } catch (_: Exception) {
+                        false
                     }
+                }
 
-                    val hasPersonalActivity = actividades.any { act ->
-                        try {
-                            act.segmentoTiempo.inicio.toLocalDate() == date &&
-                                !((act as? ActividadConjunta)?.grupoId ?: -1 > 0 || act.segmentoTiempo.esConjunta)
-                        } catch (_: Exception) {
-                            false
-                        }
+                val hasPersonalActivity = actividades.any { act ->
+                    try {
+                        act.segmentoTiempo.inicio.toLocalDate() == date && act is com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.ActividadSolitaria
+                    } catch (_: Exception) {
+                        false
                     }
+                }
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,

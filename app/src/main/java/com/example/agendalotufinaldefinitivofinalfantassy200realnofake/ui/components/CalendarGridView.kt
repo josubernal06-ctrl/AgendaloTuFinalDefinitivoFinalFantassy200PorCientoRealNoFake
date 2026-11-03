@@ -153,8 +153,7 @@ fun CalendarGridView(
                 // Verificar si hay actividad de grupo (Conjunta) en esta fecha -> Línea Roja
                 val hasGroupActivity = actividades.any { act ->
                     try {
-                        act.segmentoTiempo.inicio.toLocalDate() == dayDate &&
-                            ((act as? ActividadConjunta)?.grupoId ?: -1 > 0 || act.segmentoTiempo.esConjunta)
+                        act.segmentoTiempo.inicio.toLocalDate() == dayDate && act is ActividadConjunta
                     } catch (_: Exception) {
                         false
                     }
@@ -163,8 +162,7 @@ fun CalendarGridView(
                 // Verificar si hay actividad personal (Solitaria) en esta fecha -> Línea Azul
                 val hasPersonalActivity = actividades.any { act ->
                     try {
-                        act.segmentoTiempo.inicio.toLocalDate() == dayDate &&
-                            !((act as? ActividadConjunta)?.grupoId ?: -1 > 0 || act.segmentoTiempo.esConjunta)
+                        act.segmentoTiempo.inicio.toLocalDate() == dayDate && act is com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.ActividadSolitaria
                     } catch (_: Exception) {
                         false
                     }

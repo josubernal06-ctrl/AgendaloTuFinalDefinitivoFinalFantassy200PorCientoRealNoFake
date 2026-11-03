@@ -1,7 +1,6 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,35 +19,24 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.UserPreferences
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 
@@ -59,19 +46,14 @@ fun SettingsScreen(
     tema: TemaColor,
     selectedThemeId: Int,
     onThemeSelected: (Int) -> Unit,
-    userPreferences: UserPreferences = UserPreferences(LocalContext.current),
     onBackClick: () -> Unit
 ) {
-    var notificacionesEnabled by remember { mutableStateOf(userPreferences.isNotificacionesEnabled()) }
-    var sonidoAlarmasEnabled by remember { mutableStateOf(userPreferences.isSonidoAlarmasEnabled()) }
-    var is24HourFormat by remember { mutableStateOf(false) }
-
     val textColor = tema.letras
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Configuración", color = tema.fondo, fontWeight = FontWeight.Bold) },
+                title = { Text("Configuración de Tema", color = tema.fondo, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -94,7 +76,7 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Sección 1: Selección de Tema de Color
+            // Selección de Tema de Color
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -120,7 +102,7 @@ fun SettingsScreen(
                     color = textColor.copy(alpha = 0.7f)
                 )
 
-                // Grid/Lista de los 13 temas
+                // Grid de los 13 temas
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     (1..13).chunked(3).forEach { rowThemeIds ->
                         Row(
@@ -185,144 +167,6 @@ fun SettingsScreen(
                                 }
                             }
                         }
-                    }
-                }
-            }
-
-            // Sección 2: Notificaciones y Alarmas
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.12f))
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Notifications,
-                            contentDescription = null,
-                            tint = tema.botones,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Text(
-                            text = "Notificaciones y Recordatorios",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = textColor
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("Recordatorios de Actividades", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = textColor)
-                            Text("Recibe alertas antes de tus eventos", fontSize = 12.sp, color = textColor.copy(alpha = 0.7f))
-                        }
-                        Switch(
-                            checked = notificacionesEnabled,
-                            onCheckedChange = { 
-                                notificacionesEnabled = it
-                                userPreferences.setNotificacionesEnabled(it)
-                            },
-                            colors = SwitchDefaults.colors(checkedThumbColor = tema.fondo, checkedTrackColor = tema.botones)
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("Sonido de Alarmas", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = textColor)
-                            Text("Reproduce tono para alarmas configuradas", fontSize = 12.sp, color = textColor.copy(alpha = 0.7f))
-                        }
-                        Switch(
-                            checked = sonidoAlarmasEnabled,
-                            onCheckedChange = { 
-                                sonidoAlarmasEnabled = it
-                                userPreferences.setSonidoAlarmasEnabled(it)
-                            },
-                            colors = SwitchDefaults.colors(checkedThumbColor = tema.fondo, checkedTrackColor = tema.botones)
-                        )
-                    }
-                }
-            }
-
-            // Sección 3: Preferencias de Formato de Hora
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.12f))
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Schedule,
-                            contentDescription = null,
-                            tint = tema.botones,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Text(
-                            text = "Formato de Hora",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = textColor
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("Formato de 24 Horas", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = textColor)
-                            Text(if (is24HourFormat) "Ej: 15:00 hrs" else "Ej: 03:00 PM", fontSize = 12.sp, color = textColor.copy(alpha = 0.7f))
-                        }
-                        Switch(
-                            checked = is24HourFormat,
-                            onCheckedChange = { is24HourFormat = it },
-                            colors = SwitchDefaults.colors(checkedThumbColor = tema.fondo, checkedTrackColor = tema.botones)
-                        )
-                    }
-                }
-            }
-
-            // Sección 4: Información de la Aplicación
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.12f))
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = null,
-                        tint = tema.botones,
-                        modifier = Modifier.size(26.dp)
-                    )
-                    Column {
-                        Text("AgendaloTú", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = textColor)
-                        Text("Versión 1.0.0 · Gestión Personal & Grupal", fontSize = 12.sp, color = textColor.copy(alpha = 0.7f))
                     }
                 }
             }

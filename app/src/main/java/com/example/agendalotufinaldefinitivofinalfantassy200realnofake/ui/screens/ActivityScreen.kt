@@ -45,6 +45,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -211,7 +212,7 @@ fun ActivityScreen(
             // Leyenda explicativa de colores
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -221,7 +222,12 @@ fun ActivityScreen(
 
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Box(modifier = Modifier.size(12.dp, 4.dp).clip(RoundedCornerShape(2.dp)).background(Color(0xFF3B82F6)))
-                    Text("Actividades", fontSize = 12.sp, color = tema.letras, fontWeight = FontWeight.Medium)
+                    Text("Personales", fontSize = 12.sp, color = tema.letras, fontWeight = FontWeight.Medium)
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(modifier = Modifier.size(12.dp, 4.dp).clip(RoundedCornerShape(2.dp)).background(Color(0xFFEF4444)))
+                    Text("Grupales", fontSize = 12.sp, color = tema.letras, fontWeight = FontWeight.Medium)
                 }
             }
 
@@ -345,14 +351,22 @@ fun ActivityScreen(
                                     strokeWidth = 2.dp
                                 )
                                 Text(
-                                    text = "Procesando con Gemini IA...",
+                                    text = "Generando y agendando...",
                                     fontSize = 14.sp,
                                     color = tema.letras.copy(alpha = 0.8f)
                                 )
                             }
-                        } else {
+                        } else if (responseText.contains("Error")) {
                             Text(
-                                text = responseText,
+                                text = "No se pudo agendar: $responseText",
+                                color = MaterialTheme.colorScheme.error,
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        } else if (responseText.isNotBlank()) {
+                            Text(
+                                text = "¡Actividades agendadas correctamente! Se han guardado en tu calendario.",
                                 color = tema.letras,
                                 fontSize = 14.sp,
                                 lineHeight = 20.sp,
@@ -649,7 +663,7 @@ fun ActividadItem(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Visibilidad: ${if (actividad.esPrivada) "Privada" else "Pública"}",
+                    text = "Creador: ${actividad.propietario.nickname}",
                     fontSize = 13.sp,
                     color = tema.letras.copy(alpha = 0.7f)
                 )

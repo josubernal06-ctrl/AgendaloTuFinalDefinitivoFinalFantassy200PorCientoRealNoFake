@@ -232,11 +232,11 @@ fun CreateActivityScreen(
                     val segmento = SegmentoTiempo(
                         inicio = inicio,
                         fin = fin,
-                        esConjunta = true,
+                        esConjunta = false,
                         puntuacion = 0.0
                     )
 
-                    val actividad = ActividadConjunta(
+                    val actividad = ActividadSolitaria(
                         id = (1000..9999).random(),
                         titulo = titulo,
                         descripcion = descripcion,
@@ -365,6 +365,8 @@ fun ThemedTimePickerDialog(
                 state = timePickerState,
                 colors = TimePickerDefaults.colors(
                     clockDialColor = tema.detalles.copy(alpha = 0.2f),
+                    clockDialSelectedContentColor = tema.fondo,
+                    clockDialUnselectedContentColor = tema.letras,
                     selectorColor = tema.botones,
                     containerColor = tema.fondo,
                     periodSelectorBorderColor = tema.botones,

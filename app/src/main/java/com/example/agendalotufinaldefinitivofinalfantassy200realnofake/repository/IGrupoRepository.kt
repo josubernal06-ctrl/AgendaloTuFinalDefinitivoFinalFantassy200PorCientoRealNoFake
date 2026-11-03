@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface IGrupoRepository {
     fun obtenerGrupos(userId: Int): Flow<Resultado<List<Grupo>>>
+    suspend fun sincronizarGrupos(userId: Int)
     suspend fun crearGrupo(grupo: Grupo)
     suspend fun unirseAGrupo(codigo: String, user: Usuario): Resultado<Grupo>
+    suspend fun salirDelGrupo(grupo: Grupo)
     suspend fun eliminarGrupo(grupo: Grupo)
 }

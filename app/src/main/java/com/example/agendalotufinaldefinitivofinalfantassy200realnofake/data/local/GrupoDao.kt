@@ -26,6 +26,9 @@ interface GrupoDao {
     @Delete
     suspend fun eliminarGrupo(grupo: GrupoEntity)
 
+    @Delete
+    suspend fun eliminarMiembro(miembro: MiembroGrupoEntity)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertarMiembro(miembro: MiembroGrupoEntity)
 

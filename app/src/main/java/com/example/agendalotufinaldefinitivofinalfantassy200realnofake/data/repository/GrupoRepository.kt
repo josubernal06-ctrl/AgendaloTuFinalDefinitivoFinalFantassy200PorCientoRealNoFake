@@ -1,5 +1,6 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository
 
+import android.util.Log
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.BuildConfig
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.GrupoDao
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.GrupoEntity
@@ -9,11 +10,13 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.G
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Usuario
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IGrupoRepository
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class GrupoRepository(
@@ -22,9 +25,12 @@ class GrupoRepository(
 ) : IGrupoRepository {
 
     override fun obtenerGrupos(userId: Int): Flow<Resultado<List<Grupo>>> {
-        val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: userId.toString()
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
+        val currentUid = firebaseUser?.uid ?: userId.toString()
+
+        val apiKey = BuildConfig.SQLITE_CLOUD_KEY
+
         return dao.obtenerGruposPorUsuario(currentUid).map { entities ->
-            val apiKey = BuildConfig.SQLITE_CLOUD_KEY
             val remoteNicknames = if (apiKey.isNotBlank()) {
                 remoteDataSource.obtenerNicknamesRemotos(apiKey)
             } else {
@@ -35,7 +41,7 @@ class GrupoRepository(
                 val miembrosEntities = dao.obtenerMiembrosDeGrupoSync(entity.id)
                 val usuarios = miembrosEntities.map { miembro ->
                     val uid = miembro.userId
-                    val nickname = remoteNicknames[uid] ?: remoteNicknames[miembro.userId] ?: uid.substringBefore("@").ifEmpty { "Usuario" }
+                    val nickname = remoteNicknames[uid] ?: miembro.userId.substringBefore("@").ifEmpty { "Usuario" }
                     Usuario(
                         id = uid.hashCode(),
                         nickname = nickname,
@@ -52,106 +58,162 @@ class GrupoRepository(
         }
     }
 
+    override suspend fun sincronizarGrupos(userId: Int) {
+        val firebaseUser = FirebaseAuth.getInstance().currentUser ?: return
+        val apiKey = BuildConfig.SQLITE_CLOUD_KEY
+        if (apiKey.isNotBlank()) {
+            withContext(Dispatchers.IO) {
+                sincronizarGruposEIntegrantesRemotos(apiKey, firebaseUser.uid)
+            }
+        }
+    }
+
+    private suspend fun sincronizarGruposEIntegrantesRemotos(apiKey: String, uid: String) {
+        try {
+            val remoteGroups = remoteDataSource.obtenerGruposRemotosDeUsuario(apiKey, uid)
+            for (remoteGroup in remoteGroups) {
+                dao.insertarGrupo(remoteGroup)
+                val memberUids = remoteDataSource.obtenerMiembrosDeGrupoRemoto(apiKey, remoteGroup.id)
+                val allMemberUids = (memberUids + remoteGroup.propietarioId + uid).filter { it.isNotBlank() }.distinct()
+                for (memberUid in allMemberUids) {
+                    dao.insertarMiembro(MiembroGrupoEntity(grupoId = remoteGroup.id, userId = memberUid))
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("GrupoRepository", "Error sincronizando grupos remotos: ${e.message}")
+        }
+    }
+
     override suspend fun crearGrupo(grupo: Grupo) {
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
+            ?: throw IllegalStateException("Debes iniciar sesión para crear un grupo")
+        val currentUid = firebaseUser.uid
+
         if (grupo.codigoInvitacion.isBlank()) {
             grupo.codigoInvitacion = "GRP" + (100000..999999).random()
         }
-        val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: grupo.propietario.email.ifEmpty { grupo.propietario.id.toString() }
-        val entity = grupo.toEntity().copy(propietarioId = currentUid)
 
-        withContext(Dispatchers.IO) {
-            val rowId = dao.insertarGrupo(entity)
-            val realId = if (rowId > 0L) rowId.toInt() else entity.id
-            // Agregar al creador como miembro localmente
-            dao.insertarMiembro(MiembroGrupoEntity(grupoId = realId, userId = currentUid))
+        val apiKey = BuildConfig.SQLITE_CLOUD_KEY
+        if (apiKey.isBlank()) {
+            throw IllegalStateException("SQLITE_CLOUD_KEY vacía en la configuración")
         }
 
-        withContext(Dispatchers.IO + NonCancellable) {
-            val apiKey = BuildConfig.SQLITE_CLOUD_KEY
-            if (apiKey.isNotBlank()) {
-                val nombreClean = entity.nombreGrupo.replace("'", "''")
-                val descClean = entity.descripcion.replace("'", "''")
-                val ownerClean = entity.propietarioId.replace("'", "''")
-                val codigoClean = entity.codigoInvitacion.replace("'", "''")
+        val nombreClean = grupo.nombreGrupo.replace("'", "''")
+        val descClean = grupo.descripcion.replace("'", "''")
+        val ownerClean = currentUid.replace("'", "''")
+        val codigoClean = grupo.codigoInvitacion.replace("'", "''")
 
-                val sqlInsertGroup = """
-                    INSERT INTO `GROUP` (nombreGrupo, descripcion, propietarioId, codigoInvitacion)
-                    VALUES ('$nombreClean', '$descClean', '$ownerClean', '$codigoClean');
-                """.trimIndent()
+        // 1. Insertar en SQLite Cloud
+        val sqlInsertGroup = """
+            INSERT INTO `GROUP` (nombreGrupo, descripcion, propietarioId, codigoInvitacion)
+            VALUES ('$nombreClean', '$descClean', '$ownerClean', '$codigoClean');
+        """.trimIndent()
 
-                remoteDataSource.ejecutarConsulta(apiKey, sqlInsertGroup)
+        val exitoInsert = remoteDataSource.ejecutarConsulta(apiKey, sqlInsertGroup)
+        if (!exitoInsert) {
+            throw RuntimeException("Error al registrar el grupo en SQLite Cloud")
+        }
 
-                val sqlInsertMember = """
-                    INSERT OR IGNORE INTO `GROUP_MEMBER` (grupoId, userId) 
-                    SELECT id, '$currentUid' FROM `GROUP` WHERE codigoInvitacion = '$codigoClean';
-                """.trimIndent()
+        // 2. Obtener el ID asignado por SQLite Cloud
+        val remoteGroup = remoteDataSource.obtenerGrupoPorCodigoRemoto(apiKey, codigoClean)
+            ?: throw RuntimeException("No se pudo verificar el grupo creado en SQLite Cloud")
 
-                remoteDataSource.ejecutarConsulta(apiKey, sqlInsertMember)
-            }
+        // 3. Registrar al propietario en GROUP_MEMBER en SQLite Cloud
+        val sqlInsertMember = """
+            INSERT OR IGNORE INTO `GROUP_MEMBER` (grupoId, userId) 
+            VALUES (${remoteGroup.id}, '$ownerClean');
+        """.trimIndent()
+        remoteDataSource.ejecutarConsulta(apiKey, sqlInsertMember)
+
+        // 4. Guardar localmente en Room con el ID real de SQLite Cloud
+        withContext(Dispatchers.IO) {
+            dao.insertarGrupo(remoteGroup)
+            dao.insertarMiembro(MiembroGrupoEntity(grupoId = remoteGroup.id, userId = currentUid))
         }
     }
 
     override suspend fun unirseAGrupo(codigo: String, user: Usuario): Resultado<Grupo> {
         return try {
-            val firebaseUid = FirebaseAuth.getInstance().currentUser?.uid ?: user.email.ifEmpty { user.id.toString() }
-            val cleanCodigo = codigo.trim()
-            val cleanUserId = firebaseUid.replace("'", "''")
+            val firebaseUser = FirebaseAuth.getInstance().currentUser
+                ?: return Resultado.Error(IllegalStateException("Debes iniciar sesión para unirte a un grupo"))
+            val cleanUserId = firebaseUser.uid.replace("'", "''")
+
+            val cleanCodigo = codigo.trim().uppercase()
+            if (cleanCodigo.isBlank()) {
+                return Resultado.Error(IllegalArgumentException("El código de invitación no puede estar vacío"))
+            }
+
             val apiKey = BuildConfig.SQLITE_CLOUD_KEY
-
-            // 1. Buscar el grupo real en SQLite Cloud por código de invitación
-            var remoteGroupEntity: GrupoEntity? = null
-            if (apiKey.isNotBlank()) {
-                remoteGroupEntity = remoteDataSource.obtenerGrupoPorCodigoRemoto(apiKey, cleanCodigo)
+            if (apiKey.isBlank()) {
+                return Resultado.Error(IllegalStateException("Error de configuración de red (SQLITE_CLOUD_KEY vacía)"))
             }
 
-            if (remoteGroupEntity == null) {
-                return Resultado.Error(RuntimeException("No se encontró ningún grupo con el código: $codigo"))
-            }
+            // 1. Buscar grupo en SQLite Cloud por código de invitación
+            val remoteGroupEntity = remoteDataSource.obtenerGrupoPorCodigoRemoto(apiKey, cleanCodigo)
+                ?: return Resultado.Error(RuntimeException("No existe un grupo con el código: $cleanCodigo"))
 
-            // 2. Unir miembro en SQLite Cloud a ese grupo específico
-            withContext(Dispatchers.IO + NonCancellable) {
-                if (apiKey.isNotBlank()) {
-                    val sqlInsertMember = """
-                        INSERT OR IGNORE INTO `GROUP_MEMBER` (grupoId, userId) 
-                        VALUES (${remoteGroupEntity.id}, '$cleanUserId');
-                    """.trimIndent()
-                    remoteDataSource.ejecutarConsulta(apiKey, sqlInsertMember)
+            // 2. Verificar si el usuario ya pertenece al grupo
+            val miembrosLocales = withContext(Dispatchers.IO) { dao.obtenerMiembrosDeGrupoSync(remoteGroupEntity.id) }
+            val miembrosRemotos = remoteDataSource.obtenerMiembrosDeGrupoRemoto(apiKey, remoteGroupEntity.id)
+            val yaEsMiembro = miembrosLocales.any { it.userId == firebaseUser.uid } || miembrosRemotos.contains(firebaseUser.uid)
+
+            if (yaEsMiembro) {
+                withContext(Dispatchers.IO) {
+                    dao.insertarGrupo(remoteGroupEntity)
+                    dao.insertarMiembro(MiembroGrupoEntity(grupoId = remoteGroupEntity.id, userId = firebaseUser.uid))
                 }
+                return Resultado.Error(IllegalStateException("Ya perteneces a este grupo"))
             }
 
-            // 3. Guardar el grupo real y la membresía localmente en Room
-            val grupoDomain = withContext(Dispatchers.IO) {
+            // 3. Insertar membresía en SQLite Cloud
+            val sqlInsertMember = """
+                INSERT OR IGNORE INTO `GROUP_MEMBER` (grupoId, userId) 
+                VALUES (${remoteGroupEntity.id}, '$cleanUserId');
+            """.trimIndent()
+            val exitoMiembro = remoteDataSource.ejecutarConsulta(apiKey, sqlInsertMember)
+
+            if (!exitoMiembro) {
+                return Resultado.Error(RuntimeException("Error al registrar la membresía en SQLite Cloud"))
+            }
+
+            // 4. Traer integrantes e insertar en Room local
+            val todosMiembrosUids = (miembrosRemotos + firebaseUser.uid + remoteGroupEntity.propietarioId).distinct()
+            val remoteNicknames = remoteDataSource.obtenerNicknamesRemotos(apiKey)
+
+            withContext(Dispatchers.IO) {
                 dao.insertarGrupo(remoteGroupEntity)
-                dao.insertarMiembro(MiembroGrupoEntity(grupoId = remoteGroupEntity.id, userId = cleanUserId))
-                
-                val miembrosEntities = dao.obtenerMiembrosDeGrupoSync(remoteGroupEntity.id)
-                val remoteNicknames = if (apiKey.isNotBlank()) {
-                    remoteDataSource.obtenerNicknamesRemotos(apiKey)
-                } else {
-                    emptyMap()
+                for (memberUid in todosMiembrosUids) {
+                    dao.insertarMiembro(MiembroGrupoEntity(grupoId = remoteGroupEntity.id, userId = memberUid))
                 }
-
-                val usuarios = miembrosEntities.map { miembro ->
-                    val uid = miembro.userId
-                    val nickname = remoteNicknames[uid] ?: remoteNicknames[miembro.userId] ?: uid.substringBefore("@").ifEmpty { "Usuario" }
-                    Usuario(
-                        id = uid.hashCode(),
-                        nickname = nickname,
-                        email = uid
-                    )
-                }
-                val domainGroup = remoteGroupEntity.toDomain()
-                domainGroup.miebros = usuarios
-                domainGroup
             }
 
-            Resultado.Exito(grupoDomain)
+            val usuariosDomain = todosMiembrosUids.map { uid ->
+                val nickname = remoteNicknames[uid] ?: uid.substringBefore("@").ifEmpty { "Usuario" }
+                Usuario(
+                    id = uid.hashCode(),
+                    nickname = nickname,
+                    email = uid
+                )
+            }
+
+            val domainGroup = remoteGroupEntity.toDomain()
+            domainGroup.miebros = usuariosDomain
+
+            Resultado.Exito(domainGroup)
         } catch (e: Exception) {
             Resultado.Error(e)
         }
     }
 
     override suspend fun eliminarGrupo(grupo: Grupo) {
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
+            ?: throw IllegalStateException("Debes iniciar sesión para eliminar un grupo")
+
+        val currentUid = firebaseUser.uid
+        if (grupo.propietario.email != currentUid && grupo.propietario.id.toString() != currentUid) {
+            throw IllegalStateException("Solo el propietario puede eliminar el grupo")
+        }
+
         val entity = grupo.toEntity()
 
         withContext(Dispatchers.IO) {
@@ -164,6 +226,29 @@ class GrupoRepository(
                 val nombreClean = entity.nombreGrupo.replace("'", "''")
                 val sqlDelete = "DELETE FROM `GROUP` WHERE nombreGrupo = '$nombreClean';"
                 remoteDataSource.ejecutarConsulta(apiKey, sqlDelete)
+            }
+        }
+    }
+
+    override suspend fun salirDelGrupo(grupo: Grupo) {
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
+            ?: throw IllegalStateException("Debes iniciar sesión para salir de un grupo")
+            
+        val currentUid = firebaseUser.uid
+        if (grupo.propietario.email == currentUid || grupo.propietario.id.toString() == currentUid) {
+            throw IllegalStateException("Eres el propietario del grupo. Primero debes transferir la propiedad o eliminar el grupo.")
+        }
+
+        withContext(Dispatchers.IO) {
+            dao.eliminarMiembro(MiembroGrupoEntity(grupoId = grupo.id, userId = currentUid))
+        }
+
+        withContext(Dispatchers.IO + NonCancellable) {
+            val apiKey = BuildConfig.SQLITE_CLOUD_KEY
+            if (apiKey.isNotBlank()) {
+                val currentUidClean = currentUid.replace("'", "''")
+                val sqlDeleteMember = "DELETE FROM `GROUP_MEMBER` WHERE grupoId = ${grupo.id} AND userId = '$currentUidClean';"
+                remoteDataSource.ejecutarConsulta(apiKey, sqlDeleteMember)
             }
         }
     }

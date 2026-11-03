@@ -19,14 +19,19 @@ class MockGrupoRepository : IGrupoRepository {
         )
     )
 
+    private var isCollecting = false
+
     override fun obtenerGrupos(userId: Int): Flow<Resultado<List<Grupo>>> {
-        // En este mock simplificado, devolvemos los grupos de los que el usuario es miembro
         return inMemoryGrupos.map { grupos ->
             val gruposDelUsuario = grupos.filter { grupo -> 
                 grupo.miebros.any { it.id == userId } 
             }
             Resultado.Exito(gruposDelUsuario)
         }
+    }
+
+    override suspend fun sincronizarGrupos(userId: Int) {
+        delay(100)
     }
 
     override suspend fun unirseAGrupo(codigo: String, user: Usuario): Resultado<Grupo> {
@@ -65,5 +70,9 @@ class MockGrupoRepository : IGrupoRepository {
         val current = inMemoryGrupos.value.toMutableList()
         current.remove(grupo)
         inMemoryGrupos.value = current
+    }
+
+    override suspend fun salirDelGrupo(grupo: Grupo) {
+        delay(300)
     }
 }
