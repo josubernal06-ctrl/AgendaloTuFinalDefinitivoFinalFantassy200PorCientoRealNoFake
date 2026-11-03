@@ -10,14 +10,13 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repositor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow<GrupoUiState>(GrupoUiState.Loading)
     val uiState: StateFlow<GrupoUiState> = _uiState.asStateFlow()
-    
+
     private val _actionResult = MutableStateFlow<Resultado<String>?>(null)
     val actionResult: StateFlow<Resultado<String>?> = _actionResult.asStateFlow()
 
@@ -25,44 +24,47 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
         viewModelScope.launch {
             _uiState.value = GrupoUiState.Loading
             grupoRepository.obtenerGrupos(userId)
-                .catch { e ->
-                    _uiState.value = GrupoUiState.Error(e.message ?: "Error desconocido")
-                }
                 .collect { resultado ->
                     when (resultado) {
                         is Resultado.Exito -> _uiState.value = GrupoUiState.Success(resultado.data)
-                        is Resultado.Error -> _uiState.value = GrupoUiState.Error(resultado.excepcion.message ?: "Error")
+                        is Resultado.Error -> _uiState.value = GrupoUiState.Error(resultado.excepcion.message ?: "Error al cargar grupos")
                         is Resultado.Cargando -> _uiState.value = GrupoUiState.Loading
                     }
                 }
         }
     }
-    
+
     fun crearGrupo(nombre: String, descripcion: String, usuario: Usuario) {
         viewModelScope.launch {
+            val randomCode = "GRP" + (100000..999999).random()
             val nuevoGrupo = Grupo(
-                id = (1000..9999).random(), // ID simulado
+                id = 0,
                 nombreGrupo = nombre,
                 descripcion = descripcion,
                 propietario = usuario,
+                codigoInvitacion = randomCode,
                 miebros = listOf(usuario)
             )
             grupoRepository.crearGrupo(nuevoGrupo)
             _actionResult.value = Resultado.Exito("Grupo creado exitosamente")
         }
     }
-    
+
     fun unirseAGrupo(codigo: String, usuario: Usuario) {
         viewModelScope.launch {
+            _actionResult.value = Resultado.Cargando
             val resultado = grupoRepository.unirseAGrupo(codigo, usuario)
             when (resultado) {
-                is Resultado.Exito -> _actionResult.value = Resultado.Exito("Te has unido a ${resultado.data.nombreGrupo}")
+                is Resultado.Exito -> {
+                    _actionResult.value = Resultado.Exito("Te has unido al grupo ${resultado.data.nombreGrupo}")
+                    cargarGrupos(usuario.id)
+                }
                 is Resultado.Error -> _actionResult.value = Resultado.Error(resultado.excepcion)
-                is Resultado.Cargando -> {}
+                Resultado.Cargando -> {}
             }
         }
     }
-    
+
     fun clearActionResult() {
         _actionResult.value = null
     }
@@ -73,7 +75,7 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
                 @Suppress("UNCHECKED_CAST")
                 return GrupoViewModel(grupoRepository) as T
             }
-            throw IllegalArgumentException("Unknown ViewModel class")
+            throw IllegalArgumentException("Clase ViewModel desconocida")
         }
     }
 }

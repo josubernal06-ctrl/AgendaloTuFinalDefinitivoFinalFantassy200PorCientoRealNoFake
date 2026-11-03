@@ -1,10 +1,7 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository
 
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.BuildConfig
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.alarm.AlarmScheduler
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.ActividadDao
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.alarm.AlarmDao
-import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.alarm.AlarmEntity
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.remote.SqliteCloudDataSource
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IActividadRepository
@@ -15,11 +12,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.time.LocalDateTime
 
 class ActividadRepository(
     private val dao: ActividadDao,
-    private val alarmDao: AlarmDao? = null,
     private val remoteDataSource: SqliteCloudDataSource = SqliteCloudDataSource()
 ) : IActividadRepository {
 
@@ -36,7 +31,6 @@ class ActividadRepository(
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: "local_user"
         val entity = actividad.toEntity(currentUserId)
 
-        // 1. Guardar primero en Room local (inmediato) + Alarma automática
         withContext(Dispatchers.IO) {
             val rowId = dao.insertarActividad(entity)
             val realId = if (rowId > 0L) rowId.toInt() else entity.id
@@ -47,6 +41,8 @@ class ActividadRepository(
             } catch (e: Exception) {
                 LocalDateTime.now().plusHours(1)
             }
+            dao.insertarActividad(entity)
+        }
 
             val fechaHoraAlarma = inicioDateTime.minusMinutes(30)
 
@@ -72,8 +68,8 @@ class ActividadRepository(
                 val esConjuntaVal = if (entity.esConjunta) 1 else 0
 
                 val sqlInsert = """
-                    INSERT INTO ACTIVITY (id, titulo, descripcion, userId, grupoId, esConjunta, esPrivada, fechaInicio, fechaFin)
-                    VALUES (${entity.id}, '$tituloClean', '$descClean', '$userIdClean', $grupoIdVal, $esConjuntaVal, $esPrivadaVal, '${entity.fechaInicio}', '${entity.fechaFin}');
+                    INSERT INTO ACTIVITY (titulo, descripcion, userId, grupoId, esConjunta, esPrivada, fechaInicio, fechaFin)
+                    VALUES ('$tituloClean', '$descClean', '$userIdClean', $grupoIdVal, $esConjuntaVal, $esPrivadaVal, '${entity.fechaInicio}', '${entity.fechaFin}');
                 """.trimIndent()
 
                 remoteDataSource.ejecutarConsulta(apiKey, sqlInsert)
@@ -87,13 +83,13 @@ class ActividadRepository(
 
         withContext(Dispatchers.IO) {
             dao.eliminarActividad(entity)
-            alarmDao?.eliminarAlarmaPorActividadId(entity.id)
         }
 
         withContext(Dispatchers.IO + NonCancellable) {
             val apiKey = BuildConfig.SQLITE_CLOUD_KEY
             if (apiKey.isNotBlank()) {
-                val sqlDelete = "DELETE FROM ACTIVITY WHERE id = ${entity.id};"
+                val tituloClean = entity.titulo.replace("'", "''")
+                val sqlDelete = "DELETE FROM ACTIVITY WHERE titulo = '$tituloClean';"
                 remoteDataSource.ejecutarConsulta(apiKey, sqlDelete)
             }
         }

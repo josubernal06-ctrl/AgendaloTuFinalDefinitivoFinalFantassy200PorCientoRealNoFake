@@ -8,12 +8,13 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.loca
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.alarm.AlarmEntity
 
 @Database(
-    entities = [ActividadEntity::class, AlarmEntity::class],
-    version = 3,
+    entities = [ActividadEntity::class, GrupoEntity::class, MiembroGrupoEntity::class, AlarmEntity::class],
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun actividadDao(): ActividadDao
+    abstract fun grupoDao(): GrupoDao
     abstract fun alarmDao(): AlarmDao
 
     companion object {
