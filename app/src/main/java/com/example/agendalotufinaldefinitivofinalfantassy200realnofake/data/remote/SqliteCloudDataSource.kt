@@ -78,17 +78,19 @@ class SqliteCloudDataSource(
             for (url in candidateUrls) {
                 try {
                     val resp = api.ejecutarSqlConUrl(url, authHeader, requestPayload)
+                    Log.d("SqliteCloud", "obtenerGrupoPorCodigoRemoto response code: ${resp.code()}, body: ${resp.body()}")
                     if (resp.isSuccessful && resp.body()?.data != null) {
-                        val data = resp.body()?.data as? List<*>
+                        val body = resp.body()
+                        val data = body?.data as? List<*>
                         if (!data.isNullOrEmpty()) {
                             val firstRow = data[0]
                             if (firstRow is Map<*, *>) {
                                 return GrupoEntity(
-                                    id = (firstRow["id"] as? Number)?.toInt() ?: 0,
-                                    nombreGrupo = (firstRow["nombreGrupo"] as? String) ?: "Grupo",
-                                    descripcion = (firstRow["descripcion"] as? String) ?: "",
-                                    propietarioId = (firstRow["propietarioId"] as? String) ?: "",
-                                    codigoInvitacion = (firstRow["codigoInvitacion"] as? String) ?: codigo
+                                    id = (firstRow["id"] as? Number)?.toInt() ?: (firstRow["ID"] as? Number)?.toInt() ?: 0,
+                                    nombreGrupo = (firstRow["nombreGrupo"] as? String) ?: (firstRow["NOMBREGRUPO"] as? String) ?: "Grupo",
+                                    descripcion = (firstRow["descripcion"] as? String) ?: (firstRow["DESCRIPCION"] as? String) ?: "",
+                                    propietarioId = (firstRow["propietarioId"] as? String) ?: (firstRow["PROPIETARIOID"] as? String) ?: "",
+                                    codigoInvitacion = (firstRow["codigoInvitacion"] as? String) ?: (firstRow["CODIGOINVITACION"] as? String) ?: codigo
                                 )
                             } else if (firstRow is List<*>) {
                                 return GrupoEntity(
@@ -101,7 +103,9 @@ class SqliteCloudDataSource(
                             }
                         }
                     }
-                } catch (_: Exception) {}
+                } catch (e: Exception) {
+                    Log.e("SqliteCloud", "Error en url $url: ${e.message}", e)
+                }
             }
             null
         } catch (e: Exception) {
