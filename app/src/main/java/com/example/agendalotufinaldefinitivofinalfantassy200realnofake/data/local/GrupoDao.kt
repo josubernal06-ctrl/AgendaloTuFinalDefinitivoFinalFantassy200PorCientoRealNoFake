@@ -1,0 +1,25 @@
+package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local
+
+import androidx.room.*
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface GrupoDao {
+    @Query("SELECT * FROM `GROUP`")
+    fun obtenerTodosLosGrupos(): Flow<List<GrupoEntity>>
+
+    @Query("SELECT * FROM `GROUP` WHERE id = :id")
+    fun obtenerGrupoPorId(id: Int): Flow<GrupoEntity?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertarGrupo(grupo: GrupoEntity): Long
+
+    @Delete
+    suspend fun eliminarGrupo(grupo: GrupoEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertarMiembro(miembro: MiembroGrupoEntity)
+
+    @Query("SELECT * FROM `GROUP_MEMBER` WHERE grupoId = :grupoId")
+    fun obtenerMiembrosDeGrupo(grupoId: Int): Flow<List<MiembroGrupoEntity>>
+}

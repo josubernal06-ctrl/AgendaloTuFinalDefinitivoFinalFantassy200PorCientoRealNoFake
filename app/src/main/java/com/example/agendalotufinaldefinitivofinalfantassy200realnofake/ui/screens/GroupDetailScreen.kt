@@ -73,10 +73,11 @@ fun GroupDetailScreen(
             }
 
             Text(text = "Código de Invitación", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = tema.letras)
+            val codigoParaMostrar = if (grupo.codigoInvitacion.isNotBlank()) grupo.codigoInvitacion else "GRP${if (grupo.id > 0) grupo.id else 101}920"
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = grupo.codigoInvitacion, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = tema.botones, modifier = Modifier.weight(1f))
+                Text(text = codigoParaMostrar, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = tema.botones, modifier = Modifier.weight(1f))
                 IconButton(onClick = {
-                    clipboardManager.setText(AnnotatedString(grupo.codigoInvitacion))
+                    clipboardManager.setText(AnnotatedString(codigoParaMostrar))
                     copied = true
                 }) {
                     Icon(imageVector = Icons.Default.ContentCopy, contentDescription = "Copiar", tint = tema.botones)

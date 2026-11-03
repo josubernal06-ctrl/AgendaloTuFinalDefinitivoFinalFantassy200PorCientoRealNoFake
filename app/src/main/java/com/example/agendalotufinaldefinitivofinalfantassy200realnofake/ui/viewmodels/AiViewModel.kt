@@ -49,7 +49,7 @@ class AiViewModel(
         if (actividad != null) {
             val repoToUse = actividadRepository ?: context?.let {
                 val db = AppDatabase.getDatabase(it)
-                ActividadRepository(db.actividadDao(), db.alarmDao())
+                ActividadRepository(db.actividadDao())
             }
             repoToUse?.let { repo ->
                 withContext(Dispatchers.IO) {

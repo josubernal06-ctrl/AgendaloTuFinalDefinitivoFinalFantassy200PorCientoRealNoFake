@@ -1,18 +1,22 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos
 
 class Grupo(
-    val id: Int,
+    val id: Int = 0,
     var nombreGrupo: String,
-    var propietario: Usuario,
     var descripcion: String = "",
+    var propietario: Usuario,
     var codigoInvitacion: String = "",
     var miebros: List<Usuario> = emptyList()
 ) {
     fun agregarMiembro(user: Usuario) {
-        miebros = miebros + user
+        if (miebros is MutableList) {
+            (miebros as MutableList).add(user)
+        }
     }
 
     fun eleiminarMiembro(user: Usuario) {
-        miebros = miebros - user
+        if (miebros is MutableList) {
+            (miebros as MutableList).remove(user)
+        }
     }
 }
