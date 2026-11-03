@@ -71,6 +71,7 @@ import java.util.Locale
 fun HomeScreen(
     tema: TemaColor,
     onNavigateToProfile: () -> Unit,
+    onNavigateToSettings: () -> Unit = {},
     onNavigateToAlarm: () -> Unit = {},
     onNavigateToGroups: () -> Unit = {},
     onNavigateToActivity: () -> Unit = {},
@@ -119,7 +120,7 @@ fun HomeScreen(
                 titulo = "AgendaloTú",
                 tema = tema,
                 onPerfilClick = onNavigateToProfile,
-                onSettingsClick = {},
+                onSettingsClick = onNavigateToSettings,
                 scrollBehavior = scrollBehavior
             )
         },

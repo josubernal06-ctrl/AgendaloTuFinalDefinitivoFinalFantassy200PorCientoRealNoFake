@@ -70,6 +70,7 @@ fun AlarmScreen(
     tema: TemaColor,
     onNavigateToHome: () -> Unit,
     onNavigateToGroups: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -119,7 +120,7 @@ fun AlarmScreen(
                 titulo = "Alarmas",
                 tema = tema,
                 onBackClick = null,
-                showSearchBar = true
+                onSettingsClick = onNavigateToSettings
             )
         },
         bottomBar = {

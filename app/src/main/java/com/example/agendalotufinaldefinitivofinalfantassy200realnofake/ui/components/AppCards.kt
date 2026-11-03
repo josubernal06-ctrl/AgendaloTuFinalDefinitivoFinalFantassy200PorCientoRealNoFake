@@ -16,8 +16,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
@@ -86,24 +86,24 @@ fun EntradaTextoField(
     tema: TemaColor,
     modifier: Modifier = Modifier
 ) {
-    TextField(
+    OutlinedTextField(
         value = valor,
         onValueChange = onValueChange,
-        label = { Text(label, color = tema.letras) },
-        /*placeholder = { Text(label, color = tema.letras.copy(alpha = 0.6f)) },*/
+        label = { Text(label) },
+        placeholder = { Text(label, color = tema.letras.copy(alpha = 0.5f)) },
         singleLine = true,
         shape = RoundedCornerShape(12.dp),
         modifier = modifier.fillMaxWidth(),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = tema.fondo,
-            unfocusedContainerColor = tema.fondo,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = tema.detalles.copy(alpha = 0.12f),
+            unfocusedContainerColor = tema.detalles.copy(alpha = 0.12f),
             focusedTextColor = tema.letras,
             unfocusedTextColor = tema.letras,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            focusedLabelColor = tema.letras,
+            focusedBorderColor = tema.botones,
+            unfocusedBorderColor = tema.letras.copy(alpha = 0.4f),
+            focusedLabelColor = tema.botones,
             unfocusedLabelColor = tema.letras.copy(alpha = 0.7f),
-            cursorColor = tema.letras
+            cursorColor = tema.botones
         )
     )
 }

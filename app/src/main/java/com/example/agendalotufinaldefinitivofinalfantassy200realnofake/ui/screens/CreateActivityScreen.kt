@@ -39,8 +39,6 @@ fun CreateActivityScreen(
 ) {
     var titulo by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
-    var esPrivada by remember { mutableStateOf(false) }
-    var esConjunta by remember { mutableStateOf(false) }
 
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var startTime by remember { mutableStateOf(LocalTime.of(10, 0)) }
@@ -108,24 +106,6 @@ fun CreateActivityScreen(
                     unfocusedBorderColor = textColor.copy(alpha = 0.5f)
                 )
             )
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = esPrivada,
-                    onCheckedChange = { esPrivada = it },
-                    colors = CheckboxDefaults.colors(checkedColor = tema.botones)
-                )
-                Text("Es Privada", color = textColor, fontSize = 14.sp)
-            }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = esConjunta,
-                    onCheckedChange = { esConjunta = it },
-                    colors = CheckboxDefaults.colors(checkedColor = tema.botones)
-                )
-                Text("Es Conjunta (Actividad de Grupo)", color = textColor, fontSize = 14.sp)
-            }
 
             Text("Fecha y Horarios", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = textColor)
 
@@ -249,13 +229,21 @@ fun CreateActivityScreen(
                         return@Button
                     }
 
-                    val segmento = SegmentoTiempo(inicio, fin, esConjunta, 0.0)
+                    val segmento = SegmentoTiempo(
+                        inicio = inicio,
+                        fin = fin,
+                        esConjunta = true,
+                        puntuacion = 0.0
+                    )
 
-                    val actividad = if (esConjunta) {
-                        ActividadConjunta(0, titulo, descripcion, usuarioActual, esPrivada, segmento)
-                    } else {
-                        ActividadSolitaria(0, titulo, descripcion, usuarioActual, esPrivada, segmento)
-                    }
+                    val actividad = ActividadConjunta(
+                        id = (1000..9999).random(),
+                        titulo = titulo,
+                        descripcion = descripcion,
+                        propietario = usuarioActual,
+                        esPrivada = false,
+                        segmentoTiempo = segmento
+                    )
 
                     onSaveClick(actividad)
                     onBackClick()
@@ -277,25 +265,43 @@ fun CreateActivityScreen(
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
                             selectedDate = Instant.ofEpochMilli(millis).atZone(ZoneId.of("UTC")).toLocalDate()
                         }
                         showDatePicker = false
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = tema.botones,
+                        contentColor = tema.fondo
+                    ),
+                    shape = RoundedCornerShape(10.dp)
                 ) {
-                    Text("Aceptar", color = tema.botones, fontWeight = FontWeight.Bold)
+                    Text("Aceptar", color = tema.fondo, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancelar", color = textColor)
+                Button(
+                    onClick = { showDatePicker = false },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = tema.detalles.copy(alpha = 0.4f),
+                        contentColor = textColor
+                    ),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text("Cancelar", color = textColor, fontWeight = FontWeight.Bold)
                 }
             }
         ) {
             DatePicker(
-                state = datePickerState
+                state = datePickerState,
+                colors = DatePickerDefaults.colors(
+                    selectedDayContainerColor = tema.botones,
+                    selectedDayContentColor = tema.fondo,
+                    todayDateBorderColor = tema.botones,
+                    todayContentColor = tema.botones
+                )
             )
         }
     }

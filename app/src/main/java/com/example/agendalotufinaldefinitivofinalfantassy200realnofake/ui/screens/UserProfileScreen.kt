@@ -32,7 +32,8 @@ fun UserProfileScreen(
     usuario: Usuario,
     tema: TemaColor,
     onBackClick: () -> Unit,
-    onLogoutClick: () -> Unit = {}
+    onLogoutClick: () -> Unit = {},
+    onNicknameChanged: (String) -> Unit = {}
 ) {
     var currentNickname by remember(usuario.nickname) { mutableStateOf(usuario.nickname) }
     var showEditDialog by remember { mutableStateOf(false) }
@@ -46,17 +47,31 @@ fun UserProfileScreen(
                 OutlinedTextField(
                     value = nuevoNicknameInput,
                     onValueChange = { nuevoNicknameInput = it },
-                    label = { Text("Nuevo Nickname") },
+                    label = { Text("Nuevo Nickname", color = tema.letras) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = tema.fondo,
+                        unfocusedContainerColor = tema.fondo,
+                        focusedTextColor = tema.letras,
+                        unfocusedTextColor = tema.letras,
+                        focusedLabelColor = tema.letras,
+                        unfocusedLabelColor = tema.letras.copy(alpha = 0.7f),
+                        focusedBorderColor = tema.botones,
+                        unfocusedBorderColor = tema.letras.copy(alpha = 0.5f),
+                        cursorColor = tema.letras
+                    )
                 )
             },
             confirmButton = {
                 Button(
                     onClick = {
                         if (nuevoNicknameInput.isNotBlank()) {
-                            usuario.nickname = nuevoNicknameInput.trim()
-                            currentNickname = nuevoNicknameInput.trim()
+                            val newNick = nuevoNicknameInput.trim()
+                            usuario.nickname = newNick
+                            currentNickname = newNick
+                            onNicknameChanged(newNick)
                             showEditDialog = false
                         }
                     },
@@ -105,15 +120,15 @@ fun UserProfileScreen(
             Box(
                 modifier = Modifier
                     .size(120.dp)
-                    .clip(RectangleShape)
-                    .background(tema.detalles.copy(alpha = 0.3f)),
+                    .clip(CircleShape)
+                    .background(tema.botones.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = "Avatar del usuario",
-                    modifier = Modifier.size(80.dp),
-                    tint = tema.letras
+                    modifier = Modifier.size(72.dp),
+                    tint = tema.botones
                 )
             }
 
@@ -160,15 +175,6 @@ fun UserProfileScreen(
                         icono = Icons.Default.Email,
                         titulo = "Correo Electrónico",
                         valor = usuario.email,
-                        tema = tema
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    PerfilDatoItem(
-                        icono = Icons.Default.Info,
-                        titulo = "ID de Usuario",
-                        valor = "#Oculto",
                         tema = tema
                     )
                 }

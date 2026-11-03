@@ -20,12 +20,12 @@ val tema1_botones = Color(0xFF07575B)    // Ocean (botones/header)
 val tema1_letras = Color(0xFF002B36)     // Deep Dark Aqua (Contraste alto)
 
 // ==========================================
-// TEMA 2: AZULES HELADOS Y GRISES
+// TEMA 2: AZUL CORPORATIVO (ENROQUE CON 5)
 // ==========================================
-val tema2_fondo = Color(0xFFF1F5F9)      // Overcast helado claro
-val tema2_secundario = Color(0xFFBCBABE) // Warm Gray
-val tema2_detalles = Color(0xFFCBD5E1)   // Ice tarjetas
-val tema2_botones = Color(0xFF0F4C81)    // Glacier Blue oscuro
+val tema2_fondo = Color(0xFFF5F7FA)      // Fondo claro
+val tema2_secundario = Color(0xFF4A90E2) // Secundario
+val tema2_detalles = Color(0xFFE2E8F0)   // Tarjetas suaves
+val tema2_botones = Color(0xFF1E293B)    // CTA/botones
 val tema2_letras = Color(0xFF0F172A)     // Dark Slate (Contraste alto)
 
 // ==========================================
@@ -45,12 +45,12 @@ val tema4_detalles = Color(0xFFD3E0DC)   // Waterway detalles
 val tema4_letras = Color(0xFF0F292F)     // Dark Blue-Green (Contraste alto)
 
 // ==========================================
-// TEMA 5: AZUL CORPORATIVO
+// TEMA 5: AZULES HELADOS Y GLACIALES (ENROQUE CON 2)
 // ==========================================
-val tema5_fondo = Color(0xFFF5F7FA)      // Fondo claro
-val tema5_secundario = Color(0xFF4A90E2) // Secundario
-val tema5_detalles = Color(0xFFE2E8F0)   // Tarjetas suaves
-val tema5_botones = Color(0xFF1E293B)    // CTA/botones
+val tema5_fondo = Color(0xFFF1F5F9)      // Overcast helado claro
+val tema5_secundario = Color(0xFFBCBABE) // Warm Gray
+val tema5_detalles = Color(0xFFCBD5E1)   // Ice tarjetas
+val tema5_botones = Color(0xFF0F4C81)    // Glacier Blue oscuro
 val tema5_letras = Color(0xFF0F172A)     // Dark Slate (Contraste alto)
 
 // ==========================================
@@ -81,13 +81,13 @@ val tema8_botones = Color(0xFF1E3A8A)    // Azul profundo
 val tema8_letras = Color(0xFF0F172A)     // Deep Slate (Contraste alto)
 
 // ==========================================
-// TEMA 9: ELEGANTE Y MODERNO
+// TEMA 9: GRIS CARBÓN Y PLATINO
 // ==========================================
-val tema9_fondo = Color(0xFFE2E8F0)      // Gris claro
-val tema9_secundario = Color(0xFFFFFFFF) // Blanco
-val tema9_detalles = Color(0xFFCBD5E1)   // Detalles
-val tema9_botones = Color(0xFF1E293B)    // Azul cobalto oscuro
-val tema9_letras = Color(0xFF09090B)     // Charcoal Black (Contraste alto)
+val tema9_fondo = Color(0xFFECEFF1)      // Gris platino claro
+val tema9_secundario = Color(0xFF90A4AE) // Blue Grey medio
+val tema9_detalles = Color(0xFFCFD8DC)   // Tarjetas gris frío
+val tema9_botones = Color(0xFF37474F)    // Gris Carbón oscuro
+val tema9_letras = Color(0xFF102027)     // Charcoal Black (Contraste alto)
 
 // ==========================================
 // TEMA 10: TERRACOTA Y GRIS AZULADO
@@ -108,13 +108,13 @@ val tema11_botones = Color(0xFF78281F)   // Borgoña/Naranja oscuro
 val tema11_letras = Color(0xFF2C0B07)    // Dark Mocha Black (Contraste alto)
 
 // ==========================================
-// TEMA 12: ALTO CONTRASTE PREMIUM
+// TEMA 12: BERRY VELVET / PÚRPURA CEREZO
 // ==========================================
-val tema12_fondo = Color(0xFFF8FAFC)      // Fondo ultra limpio y nítido
-val tema12_secundario = Color(0xFF334155) // Slate medio
-val tema12_detalles = Color(0xFFE2E8F0)   // Tarjetas y contenedores legibles
-val tema12_botones = Color(0xFF0F172A)    // Botones y headers en Slate Negro Profundo
-val tema12_letras = Color(0xFF020617)     // Texto Negro Noche (Contraste Duro WCAG AAA)
+val tema12_fondo = Color(0xFFFBF7F9)      // Fondo rosado/crema suave
+val tema12_secundario = Color(0xFF9333EA) // Violeta vibrante
+val tema12_detalles = Color(0xFFF3E8EE)   // Tarjetas malva suave
+val tema12_botones = Color(0xFF581C87)    // Púrpura Berry Profundo
+val tema12_letras = Color(0xFF2E1035)     // Texto púrpura oscuro (Contraste alto)
 
 // ==========================================
 // TEMA 13: ALTO CONTRASTE (CALENDARIO)

@@ -35,7 +35,8 @@ fun MiTopBar(
     tema: TemaColor,
     onBackClick: (() -> Unit)? = null,      // si es null no muestra la flecha de regresar
     onPerfilClick: (() -> Unit)? = null,    // si es null no muestra el ícono de perfil
-    onSettingsClick: () -> Unit = {},
+    onSettingsClick: (() -> Unit)? = null,  // handler para configuración
+    showSettingsIcon: Boolean = (onBackClick == null), // Por defecto sólo en pantallas principales
     searchQuery: String? = null,
     onSearchQueryChange: ((String) -> Unit)? = null,
     searchLabel: String = "Buscar...",
@@ -53,12 +54,13 @@ fun MiTopBar(
         modifier = Modifier
             .fillMaxWidth()
             .background(color = tema.botones)
+            .padding(vertical = 12.dp)
     ) {
         TopAppBar(
             title = {
                 Text(
                     text = titulo,
-                    fontSize = 20.sp,
+                    fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -91,11 +93,13 @@ fun MiTopBar(
                         )
                     }
                 }
-                IconButton(onClick = onSettingsClick) {
-                    Icon(
-                        imageVector = Icons.Outlined.Settings,
-                        contentDescription = "Configuración"
-                    )
+                if (showSettingsIcon && onSettingsClick != null) {
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(
+                            imageVector = Icons.Outlined.Settings,
+                            contentDescription = "Configuración"
+                        )
+                    }
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
@@ -104,8 +108,7 @@ fun MiTopBar(
                 titleContentColor = tema.fondo,
                 navigationIconContentColor = tema.fondo,
                 actionIconContentColor = tema.fondo
-            ),
-            scrollBehavior = scrollBehavior
+            )
         )
 
         if (showSearchBar) {

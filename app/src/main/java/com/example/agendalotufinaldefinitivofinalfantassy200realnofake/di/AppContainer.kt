@@ -30,4 +30,12 @@ class AppContainer(private val context: Context) {
     val aiRepository: IAiRepository by lazy {
         MockAiRepository() // Use AiRepository() for real API
     }
+
+    val themePreferences: com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.ThemePreferences by lazy {
+        com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.ThemePreferences(context)
+    }
+
+    val userPreferences: com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.UserPreferences by lazy {
+        com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.UserPreferences(context)
+    }
 }

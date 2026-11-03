@@ -17,6 +17,10 @@ class ActividadesViewModel(private val repository: IActividadRepository) : ViewM
     private val _uiState = MutableStateFlow(ActividadUiState())
     val uiState: StateFlow<ActividadUiState> = _uiState.asStateFlow()
 
+    init {
+        cargarActividades()
+    }
+
     fun cargarActividades(propietarioId: Int? = null) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }

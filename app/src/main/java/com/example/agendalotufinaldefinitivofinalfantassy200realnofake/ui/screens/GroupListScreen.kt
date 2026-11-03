@@ -6,11 +6,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -32,6 +32,7 @@ fun GroupListScreen(
     uiState: GrupoUiState,
     onNavigateToHome: () -> Unit,
     onNavigateToAlarm: () -> Unit,
+    onNavigateToSettings: () -> Unit = {},
     onCreateGroup: () -> Unit,
     onJoinGroup: () -> Unit,
     onGroupClick: (Grupo) -> Unit,
@@ -51,7 +52,7 @@ fun GroupListScreen(
                 titulo = "Mis Grupos",
                 tema = tema,
                 onBackClick = null,
-                showSearchBar = true
+                onSettingsClick = onNavigateToSettings
             )
         },
         bottomBar = {
@@ -110,88 +111,143 @@ fun GroupListScreen(
                 }
             }
         },
-        floatingActionButton = {
-            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                ExtendedFloatingActionButton(
-                    onClick = onJoinGroup,
-                    containerColor = tema.botones,
-                    contentColor = tema.fondo,
-                    icon = { Icon(Icons.Default.PersonAdd, contentDescription = "Unirse a grupo") },
-                    text = { Text("Unirse a grupo") }
-                )
-                ExtendedFloatingActionButton(
-                    onClick = onCreateGroup,
-                    containerColor = tema.botones,
-                    contentColor = tema.fondo,
-                    icon = { Icon(Icons.Default.Add, contentDescription = "Crear grupo") },
-                    text = { Text("Crear grupo") }
-                )
-            }
-        },
         containerColor = tema.fondo
     ) { paddingValues ->
-        when (uiState) {
-            is GrupoUiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize().padding(paddingValues),
-                    contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Acciones superiores principales
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = onCreateGroup,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = tema.botones,
+                        contentColor = tema.fondo
+                    )
                 ) {
-                    CircularProgressIndicator(color = tema.botones)
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = tema.fondo,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Crear Grupo", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = tema.fondo)
+                }
+
+                Button(
+                    onClick = onJoinGroup,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = tema.botones,
+                        contentColor = tema.fondo
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PersonAdd,
+                        contentDescription = null,
+                        tint = tema.fondo,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Unirse a Grupo", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = tema.fondo)
                 }
             }
-            is GrupoUiState.Success -> {
-                if (uiState.grupos.isEmpty()) {
+
+            Text(
+                text = "Grupos Activos",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = tema.letras
+            )
+
+            // Contenido de Grupos
+            when (uiState) {
+                is GrupoUiState.Loading -> {
                     Box(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        modifier = Modifier.fillMaxWidth().weight(1f),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No estás en ningún grupo todavía.", color = tema.letras)
+                        CircularProgressIndicator(color = tema.botones)
                     }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(uiState.grupos) { grupo ->
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onGroupClick(grupo) },
-                                colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.2f))
-                            ) {
-                                Row(
+                }
+                is GrupoUiState.Success -> {
+                    if (uiState.grupos.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Aún no perteneces a ningún grupo. ¡Crea uno o únete con un código!",
+                                color = tema.letras.copy(alpha = 0.7f),
+                                fontSize = 14.sp
+                            )
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxWidth().weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(uiState.grupos) { grupo ->
+                                Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(16.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
+                                        .clickable { onGroupClick(grupo) },
+                                    colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.2f)),
+                                    shape = RoundedCornerShape(14.dp)
                                 ) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = grupo.nombreGrupo,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 18.sp,
-                                            color = tema.letras
-                                        )
-                                        if (grupo.descripcion.isNotEmpty()) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = grupo.nombreGrupo,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 17.sp,
+                                                color = tema.letras
+                                            )
+                                            if (grupo.descripcion.isNotEmpty()) {
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Text(
+                                                    text = grupo.descripcion,
+                                                    fontSize = 13.sp,
+                                                    color = tema.letras.copy(alpha = 0.8f)
+                                                )
+                                            }
                                             Spacer(modifier = Modifier.height(4.dp))
                                             Text(
-                                                text = grupo.descripcion,
-                                                fontSize = 14.sp,
-                                                color = tema.letras.copy(alpha = 0.8f)
+                                                text = "${grupo.miebros.size} miembro${if (grupo.miebros.size != 1) "s" else ""}",
+                                                fontSize = 12.sp,
+                                                color = tema.botones,
+                                                fontWeight = FontWeight.SemiBold
                                             )
                                         }
-                                    }
-                                    if (onDeleteGroupClick != null) {
-                                        IconButton(onClick = { onDeleteGroupClick(grupo) }) {
-                                            Icon(
-                                                imageVector = Icons.Default.Delete,
-                                                contentDescription = "Eliminar grupo",
-                                                tint = tema.letras
-                                            )
+                                        if (onDeleteGroupClick != null) {
+                                            IconButton(onClick = { onDeleteGroupClick(grupo) }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Delete,
+                                                    contentDescription = "Eliminar grupo",
+                                                    tint = tema.letras
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -199,13 +255,13 @@ fun GroupListScreen(
                         }
                     }
                 }
-            }
-            is GrupoUiState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize().padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = uiState.message, color = MaterialTheme.colorScheme.error)
+                is GrupoUiState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = uiState.message, color = MaterialTheme.colorScheme.error)
+                    }
                 }
             }
         }

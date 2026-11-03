@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -52,13 +53,20 @@ class  MainActivity : ComponentActivity() {
                 val aiViewModel: AiViewModel = viewModel()
 
                 val navController = rememberNavController()
-                val temaActual = obtenerTema(13)
+                val themePreferences = remember { appContainer.themePreferences }
+                val userPreferences = remember { appContainer.userPreferences }
+                var temaId by remember { mutableIntStateOf(themePreferences.getSelectedThemeId()) }
+                val temaActual = obtenerTema(temaId)
                 
                 var showSplash by remember { mutableStateOf(true) }
                 
-                // Cargar grupos cuando el usuario inicie sesión
+                // Cargar grupos y aplicar nickname guardado cuando el usuario inicie sesión
                 LaunchedEffect(currentUser) {
                     if (currentUser != null) {
+                        val savedNick = userPreferences.getNickname(currentUser!!.email, currentUser!!.nickname)
+                        if (savedNick.isNotBlank()) {
+                            currentUser!!.nickname = savedNick
+                        }
                         grupoViewModel.cargarGrupos(currentUser!!.id)
                     }
                 }
@@ -87,6 +95,7 @@ class  MainActivity : ComponentActivity() {
                             grupoViewModel = grupoViewModel,
                             actividadesViewModel = actividadesViewModel,
                             onNavigateToProfile = { navController.navigate("profile") },
+                            onNavigateToSettings = { navController.navigate("settings") },
                             onNavigateToAlarm = {
                                 navController.navigate("alarm") {
                                     popUpTo("home") { saveState = true }
@@ -124,6 +133,7 @@ class  MainActivity : ComponentActivity() {
                                     restoreState = true
                                 }
                             },
+                            onNavigateToSettings = { navController.navigate("settings") },
                             onCreateGroup = { navController.navigate("create_group") },
                             onJoinGroup = { navController.navigate("join_group") },
                             onGroupClick = { grupo -> navController.navigate("group_detail/${grupo.id}") },
@@ -288,16 +298,39 @@ class  MainActivity : ComponentActivity() {
                                     restoreState = true
                                 }
                             },
+                            onNavigateToSettings = { navController.navigate("settings") },
                             onNavigateToProfile = { navController.navigate("profile") }
                         )
                     }
 
+                    composable("settings") {
+                        SettingsScreen(
+                            tema = temaActual,
+                            selectedThemeId = temaId,
+                            onThemeSelected = { newThemeId ->
+                                temaId = newThemeId
+                                themePreferences.setSelectedThemeId(newThemeId)
+                            },
+                            onBackClick = { navController.popBackStack() }
+                        )
+                    }
+
                     composable("profile") {
+                        val user = currentUser!!
+                        val savedNick = remember(user.email) { userPreferences.getNickname(user.email, user.nickname) }
+                        if (savedNick.isNotBlank()) {
+                            user.nickname = savedNick
+                        }
+
                         UserProfileScreen(
-                            usuario = currentUser!!,
+                            usuario = user,
                             tema = temaActual,
                             onBackClick = { navController.popBackStack() },
-                            onLogoutClick = { authViewModel.logout() }
+                            onLogoutClick = { authViewModel.logout() },
+                            onNicknameChanged = { newNick ->
+                                userPreferences.setNickname(user.email, newNick)
+                                user.nickname = newNick
+                            }
                         )
                     }
                 }
