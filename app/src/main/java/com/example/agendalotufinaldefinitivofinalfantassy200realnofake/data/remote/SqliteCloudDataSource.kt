@@ -109,4 +109,45 @@ class SqliteCloudDataSource(
             null
         }
     }
+
+    suspend fun obtenerNicknamesRemotos(apiKey: String): Map<String, String> {
+        val result = mutableMapOf<String, String>()
+        try {
+            if (apiKey.isBlank()) return result
+            val authHeader = if (apiKey.startsWith("Bearer ")) apiKey else "Bearer $apiKey"
+            val sql = "USE DATABASE agendalo.sqlite; SELECT uid, nickname, email FROM USER;"
+            val requestPayload = SqliteCloudRequest(database = "agendalo.sqlite", sql = sql)
+
+            for (url in candidateUrls) {
+                try {
+                    val resp = api.ejecutarSqlConUrl(url, authHeader, requestPayload)
+                    if (resp.isSuccessful && resp.body()?.data != null) {
+                        val data = resp.body()?.data as? List<*>
+                        if (!data.isNullOrEmpty()) {
+                            for (row in data) {
+                                if (row is Map<*, *>) {
+                                    val uid = (row["uid"] as? String) ?: (row["email"] as? String) ?: continue
+                                    val nick = (row["nickname"] as? String) ?: (row["email"] as? String)?.substringBefore("@") ?: "Usuario"
+                                    if (uid.isNotBlank() && nick.isNotBlank()) {
+                                        result[uid] = nick
+                                        (row["email"] as? String)?.let { email -> result[email] = nick }
+                                    }
+                                } else if (row is List<*>) {
+                                    val uid = row.getOrNull(0) as? String ?: row.getOrNull(1) as? String ?: continue
+                                    val nick = (row.getOrNull(2) as? String) ?: (row.getOrNull(1) as? String)?.substringBefore("@") ?: "Usuario"
+                                    if (uid.isNotBlank() && nick.isNotBlank()) {
+                                        result[uid] = nick
+                                    }
+                                }
+                            }
+                            return result
+                        }
+                    }
+                } catch (_: Exception) {}
+            }
+        } catch (e: Exception) {
+            Log.e("SqliteCloud", "Error obteniendo nicknames remotos: ${e.message}", e)
+        }
+        return result
+    }
 }

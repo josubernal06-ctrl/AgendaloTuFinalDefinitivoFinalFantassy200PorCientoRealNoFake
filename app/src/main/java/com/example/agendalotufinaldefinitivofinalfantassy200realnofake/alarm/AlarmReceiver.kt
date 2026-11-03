@@ -11,6 +11,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.MainActivity
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.R
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.UserPreferences
 
 class AlarmReceiver : BroadcastReceiver() {
     @SuppressLint("MissingPermission")
@@ -18,16 +19,27 @@ class AlarmReceiver : BroadcastReceiver() {
         val titulo = intent.getStringExtra("EXTRA_TITULO") ?: "Alarma de Actividad"
         val mensaje = intent.getStringExtra("EXTRA_MENSAJE") ?: "¡Tienes una actividad programada ahora!"
 
+        val userPrefs = UserPreferences(context)
+        if (!userPrefs.isNotificacionesEnabled()) {
+            return
+        }
+        val sonidoEnabled = userPrefs.isSonidoAlarmasEnabled()
+
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "agendalotu_alarm_channel"
 
         val channel = NotificationChannel(
             channelId,
             "Alarmas de AgendaloTu",
-            NotificationManager.IMPORTANCE_HIGH
+            if (sonidoEnabled) NotificationManager.IMPORTANCE_HIGH else NotificationManager.IMPORTANCE_LOW
         ).apply {
             description = "Notificaciones de alarmas y actividades programadas"
-            enableVibration(true)
+            if (sonidoEnabled) {
+                enableVibration(true)
+            } else {
+                setSound(null, null)
+                enableVibration(false)
+            }
         }
         notificationManager.createNotificationChannel(channel)
 
@@ -46,7 +58,7 @@ class AlarmReceiver : BroadcastReceiver() {
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(titulo)
             .setContentText(mensaje)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(if (sonidoEnabled) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_LOW)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .build()

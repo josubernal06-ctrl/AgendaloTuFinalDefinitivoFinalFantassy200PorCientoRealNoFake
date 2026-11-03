@@ -8,6 +8,9 @@ interface GrupoDao {
     @Query("SELECT * FROM `GROUP`")
     fun obtenerTodosLosGrupos(): Flow<List<GrupoEntity>>
 
+    @Query("SELECT * FROM `GROUP` WHERE propietarioId = :userId OR id IN (SELECT grupoId FROM `GROUP_MEMBER` WHERE userId = :userId)")
+    fun obtenerGruposPorUsuario(userId: String): Flow<List<GrupoEntity>>
+
     @Query("SELECT * FROM `GROUP` WHERE id = :id")
     fun obtenerGrupoPorId(id: Int): Flow<GrupoEntity?>
 
@@ -28,4 +31,7 @@ interface GrupoDao {
 
     @Query("SELECT * FROM `GROUP_MEMBER` WHERE grupoId = :grupoId")
     fun obtenerMiembrosDeGrupo(grupoId: Int): Flow<List<MiembroGrupoEntity>>
+
+    @Query("SELECT * FROM `GROUP_MEMBER` WHERE grupoId = :grupoId")
+    suspend fun obtenerMiembrosDeGrupoSync(grupoId: Int): List<MiembroGrupoEntity>
 }

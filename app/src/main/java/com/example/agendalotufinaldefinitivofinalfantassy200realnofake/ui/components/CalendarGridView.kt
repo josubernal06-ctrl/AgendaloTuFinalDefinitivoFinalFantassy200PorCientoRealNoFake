@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.ActividadConjunta
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Holiday
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
 import java.time.LocalDate
@@ -149,10 +150,21 @@ fun CalendarGridView(
                     }
                 }
 
-                // Verificar si hay actividad del usuario en esta fecha
-                val hasUserActivity = actividades.any { act ->
+                // Verificar si hay actividad de grupo (Conjunta) en esta fecha -> Línea Roja
+                val hasGroupActivity = actividades.any { act ->
                     try {
-                        act.segmentoTiempo.inicio.toLocalDate() == dayDate
+                        act.segmentoTiempo.inicio.toLocalDate() == dayDate &&
+                            ((act as? ActividadConjunta)?.grupoId ?: -1 > 0 || act.segmentoTiempo.esConjunta)
+                    } catch (_: Exception) {
+                        false
+                    }
+                }
+
+                // Verificar si hay actividad personal (Solitaria) en esta fecha -> Línea Azul
+                val hasPersonalActivity = actividades.any { act ->
+                    try {
+                        act.segmentoTiempo.inicio.toLocalDate() == dayDate &&
+                            !((act as? ActividadConjunta)?.grupoId ?: -1 > 0 || act.segmentoTiempo.esConjunta)
                     } catch (_: Exception) {
                         false
                     }
@@ -213,8 +225,19 @@ fun CalendarGridView(
                                 )
                             }
 
-                            // Línea Azul = Actividad del usuario
-                            if (hasUserActivity) {
+                            // Línea Roja = Actividad de Grupo
+                            if (hasGroupActivity) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(16.dp)
+                                        .height(3.dp)
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .background(Color(0xFFEF4444))
+                                )
+                            }
+
+                            // Línea Azul = Actividad Personal
+                            if (hasPersonalActivity) {
                                 Box(
                                     modifier = Modifier
                                         .width(16.dp)

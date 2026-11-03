@@ -41,15 +41,16 @@ class AiViewModel(
      */
     suspend fun agregarActividad(
         respuestaApi: String,
+        grupoId: Int? = null,
         context: Context? = null,
         actividadRepository: ActividadRepository? = null,
         usuario: Usuario? = null
     ): AbstractActividad? {
-        val actividad = GestorHorarios.parsearActividadDesdeRespuesta(respuestaApi, usuario)
+        val actividad = GestorHorarios.parsearActividadDesdeRespuesta(respuestaApi, usuario, grupoId)
         if (actividad != null) {
             val repoToUse = actividadRepository ?: context?.let { ctx ->
                 val db = AppDatabase.getDatabase(ctx)
-                ActividadRepository(db.actividadDao())
+                ActividadRepository(db.actividadDao(), db.alarmDao(), ctx)
             }
             repoToUse?.let { repo ->
                 withContext(Dispatchers.IO) {
@@ -66,6 +67,7 @@ class AiViewModel(
      * y delega en agregarActividad() el procesamiento de la respuesta para crear la actividad.
      */
     fun enviarPromptAGemini(
+        grupoId: Int? = null,
         context: Context? = null,
         actividadRepository: ActividadRepository? = null,
         usuario: Usuario? = null,
@@ -87,13 +89,14 @@ class AiViewModel(
                 // 3. Crear la actividad pasando la respuesta de la API a agregarActividad()
                 val nuevaActividad = agregarActividad(
                     respuestaApi = resultado.answer,
+                    grupoId = grupoId,
                     context = context,
                     actividadRepository = actividadRepository,
                     usuario = usuario
                 )
 
                 if (nuevaActividad != null) {
-                    _responseText.value = "✅ ¡Actividad agregada a tu horario con éxito!\n\n" +
+                    _responseText.value = "✅ ¡Actividad de grupo agregada con éxito!\n\n" +
                             "📌 Título: ${nuevaActividad.titulo}\n" +
                             "📝 Respuesta Gemini: ${resultado.answer}"
                     onActividadCreada?.invoke(nuevaActividad)

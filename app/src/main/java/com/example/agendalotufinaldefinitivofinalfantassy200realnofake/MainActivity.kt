@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,6 +32,8 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmo
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.AiViewModel
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.ActividadConjunta
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.Resultado
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.ActividadRepository
+import kotlinx.coroutines.launch
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import java.time.LocalDateTime
@@ -189,7 +192,17 @@ class  MainActivity : ComponentActivity() {
                             grupos = grupos,
                             onBackClick = { navController.popBackStack() },
                             onNavigateToCalendar = { id -> navController.navigate("group_calendar/$id") },
-                            onDeleteGroupClick = { grupo -> grupoViewModel.eliminarGrupo(grupo, currentUser!!.id) }
+                            onDeleteGroupClick = { grupo -> grupoViewModel.eliminarGrupo(grupo, currentUser!!.id) },
+                            onAiScheduleClick = { prompt ->
+                                val grupo = grupos.find { it.id == grupoId }
+                                aiViewModel.onPromptChanged("Para el grupo ${grupo?.nombreGrupo ?: grupoId}: $prompt")
+                                aiViewModel.enviarPromptAGemini(
+                                    grupoId = grupoId,
+                                    context = context,
+                                    actividadRepository = appContainer.actividadRepository as ActividadRepository,
+                                    usuario = currentUser
+                                )
+                            }
                         )
                     }
                     

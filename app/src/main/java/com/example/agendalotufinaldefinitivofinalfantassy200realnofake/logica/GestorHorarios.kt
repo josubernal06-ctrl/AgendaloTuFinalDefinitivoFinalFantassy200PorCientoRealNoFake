@@ -16,7 +16,7 @@ class GestorHorarios {
     companion object {
         /**
          * Concatena el mensaje del usuario con un prompt optimizado y especializado
-         * en la creación de ACTIVIDADES para el horario del usuario.
+         * en la creación de ACTIVIDADES para el horario del usuario o del grupo.
          */
         fun construirPromptActividad(mensajeUsuario: String): String {
             val ahora = LocalDateTime.now()
@@ -29,7 +29,7 @@ class GestorHorarios {
                 Hoy es $diaSemanaHoy, $fechaHoyStr.
 
                 TU TAREA:
-                Interpreta la solicitud del usuario y genera la información estructurada de la ACTIVIDAD que desea agendar en su horario.
+                Interpreta la solicitud del usuario y genera la información estructurada de la ACTIVIDAD que desea agendar en su horario o en conjunto con su grupo (evitando conflictos con otros miembros si se indica).
                 Debes responder ÚNICAMENTE con un objeto JSON válido, sin bloques de código markdown ```json, sin explicaciones ni ningún texto adicional.
 
                 ESTRUCTURA JSON REQUERIDA:
@@ -38,11 +38,11 @@ class GestorHorarios {
                   "descripcion": "Descripción o detalles",
                   "inicio": "YYYY-MM-DDTHH:mm:ss",
                   "fin": "YYYY-MM-DDTHH:mm:ss",
-                  "esConjunta": false,
+                  "esConjunta": true,
                   "esPrivada": false
                 }
 
-                REGLAS DE INTERPRETACIONAL:
+                REGLAS DE INTERPRETACIÓN:
                 1. "inicio" y "fin" DEBEN ser fechas ISO-8601 válidas (formato: YYYY-MM-DDTHH:mm:ss).
                 2. Si el usuario menciona días relativos como "el viernes", "mañana", "hoy", "este lunes", calcula la fecha correspondiente basada en HOY ($fechaHoyStr).
                 3. Si el usuario especifica horas como "de 3 a 4" o "de 15 a 16", asume el horario razonable (ej. 15:00:00 a 16:00:00).
@@ -55,7 +55,7 @@ class GestorHorarios {
         /**
          * Procesa el texto de respuesta de la API de Gemini y lo convierte en un objeto AbstractActividad.
          */
-        fun parsearActividadDesdeRespuesta(respuestaApi: String, usuarioActual: Usuario? = null): AbstractActividad? {
+        fun parsearActividadDesdeRespuesta(respuestaApi: String, usuarioActual: Usuario? = null, grupoId: Int? = null): AbstractActividad? {
             return try {
                 var jsonLimpio = respuestaApi.trim()
                 if (jsonLimpio.startsWith("```json")) {
@@ -78,7 +78,7 @@ class GestorHorarios {
                 val descripcion = jsonObject.optString("descripcion", "Creado con Gemini AI")
                 val inicioStr = jsonObject.optString("inicio", "")
                 val finStr = jsonObject.optString("fin", "")
-                val esConjunta = jsonObject.optBoolean("esConjunta", false)
+                val esConjunta = jsonObject.optBoolean("esConjunta", false) || grupoId != null
                 val esPrivada = jsonObject.optBoolean("esPrivada", false)
 
                 val inicio = parsearFecha(inicioStr)
@@ -99,14 +99,15 @@ class GestorHorarios {
 
                 val idGenerado = (System.currentTimeMillis() % 100000).toInt()
 
-                if (esConjunta) {
+                if (esConjunta || grupoId != null) {
                     ActividadConjunta(
                         id = idGenerado,
                         titulo = titulo,
                         descripcion = descripcion,
                         propietario = propietario,
                         esPrivada = esPrivada,
-                        segmentoTiempo = segmento
+                        segmentoTiempo = segmento,
+                        grupoId = grupoId ?: -1
                     )
                 } else {
                     ActividadSolitaria(
@@ -119,29 +120,21 @@ class GestorHorarios {
                     )
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
                 null
             }
         }
 
         private fun parsearFecha(fechaStr: String): LocalDateTime {
-            if (fechaStr.isBlank()) return LocalDateTime.now().plusHours(1)
             return try {
                 LocalDateTime.parse(fechaStr)
             } catch (e: Exception) {
                 try {
-                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm[:ss]")
-                    LocalDateTime.parse(fechaStr, formatter)
-                } catch (e2: Exception) {
-                    try {
-                        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm[:ss]")
-                        LocalDateTime.parse(fechaStr, formatter)
-                    } catch (e3: Exception) {
-                        LocalDateTime.now().plusHours(1)
-                    }
+                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                    LocalDateTime.parse(fechaStr.replace("T", " "), formatter)
+                } catch (ex: Exception) {
+                    LocalDateTime.now().plusHours(1)
                 }
             }
         }
     }
 }
-

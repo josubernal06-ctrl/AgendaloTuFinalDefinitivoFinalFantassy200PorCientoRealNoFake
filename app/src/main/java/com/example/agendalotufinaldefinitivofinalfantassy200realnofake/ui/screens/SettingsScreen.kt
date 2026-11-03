@@ -45,9 +45,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.UserPreferences
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 
@@ -57,10 +59,11 @@ fun SettingsScreen(
     tema: TemaColor,
     selectedThemeId: Int,
     onThemeSelected: (Int) -> Unit,
+    userPreferences: UserPreferences = UserPreferences(LocalContext.current),
     onBackClick: () -> Unit
 ) {
-    var notificacionesEnabled by remember { mutableStateOf(true) }
-    var sonidoAlarmasEnabled by remember { mutableStateOf(true) }
+    var notificacionesEnabled by remember { mutableStateOf(userPreferences.isNotificacionesEnabled()) }
+    var sonidoAlarmasEnabled by remember { mutableStateOf(userPreferences.isSonidoAlarmasEnabled()) }
     var is24HourFormat by remember { mutableStateOf(false) }
 
     val textColor = tema.letras
@@ -225,7 +228,10 @@ fun SettingsScreen(
                         }
                         Switch(
                             checked = notificacionesEnabled,
-                            onCheckedChange = { notificacionesEnabled = it },
+                            onCheckedChange = { 
+                                notificacionesEnabled = it
+                                userPreferences.setNotificacionesEnabled(it)
+                            },
                             colors = SwitchDefaults.colors(checkedThumbColor = tema.fondo, checkedTrackColor = tema.botones)
                         )
                     }
@@ -241,7 +247,10 @@ fun SettingsScreen(
                         }
                         Switch(
                             checked = sonidoAlarmasEnabled,
-                            onCheckedChange = { sonidoAlarmasEnabled = it },
+                            onCheckedChange = { 
+                                sonidoAlarmasEnabled = it
+                                userPreferences.setSonidoAlarmasEnabled(it)
+                            },
                             colors = SwitchDefaults.colors(checkedThumbColor = tema.fondo, checkedTrackColor = tema.botones)
                         )
                     }

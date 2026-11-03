@@ -22,8 +22,31 @@ class GrupoRepository(
 ) : IGrupoRepository {
 
     override fun obtenerGrupos(userId: Int): Flow<Resultado<List<Grupo>>> {
-        return dao.obtenerTodosLosGrupos().map { entities ->
-            Resultado.Exito(entities.map { it.toDomain() }) as Resultado<List<Grupo>>
+        val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: userId.toString()
+        return dao.obtenerGruposPorUsuario(currentUid).map { entities ->
+            val apiKey = BuildConfig.SQLITE_CLOUD_KEY
+            val remoteNicknames = if (apiKey.isNotBlank()) {
+                remoteDataSource.obtenerNicknamesRemotos(apiKey)
+            } else {
+                emptyMap()
+            }
+
+            val grupos = entities.map { entity ->
+                val miembrosEntities = dao.obtenerMiembrosDeGrupoSync(entity.id)
+                val usuarios = miembrosEntities.map { miembro ->
+                    val uid = miembro.userId
+                    val nickname = remoteNicknames[uid] ?: remoteNicknames[miembro.userId] ?: uid.substringBefore("@").ifEmpty { "Usuario" }
+                    Usuario(
+                        id = uid.hashCode(),
+                        nickname = nickname,
+                        email = uid
+                    )
+                }
+                val domainGroup = entity.toDomain()
+                domainGroup.miebros = usuarios
+                domainGroup
+            }
+            Resultado.Exito(grupos) as Resultado<List<Grupo>>
         }.catch { e ->
             emit(Resultado.Error(e))
         }
@@ -33,13 +56,13 @@ class GrupoRepository(
         if (grupo.codigoInvitacion.isBlank()) {
             grupo.codigoInvitacion = "GRP" + (100000..999999).random()
         }
-        val entity = grupo.toEntity()
+        val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: grupo.propietario.email.ifEmpty { grupo.propietario.id.toString() }
+        val entity = grupo.toEntity().copy(propietarioId = currentUid)
 
         withContext(Dispatchers.IO) {
             val rowId = dao.insertarGrupo(entity)
             val realId = if (rowId > 0L) rowId.toInt() else entity.id
             // Agregar al creador como miembro localmente
-            val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: grupo.propietario.email
             dao.insertarMiembro(MiembroGrupoEntity(grupoId = realId, userId = currentUid))
         }
 
@@ -51,12 +74,19 @@ class GrupoRepository(
                 val ownerClean = entity.propietarioId.replace("'", "''")
                 val codigoClean = entity.codigoInvitacion.replace("'", "''")
 
-                val sqlInsert = """
+                val sqlInsertGroup = """
                     INSERT INTO `GROUP` (nombreGrupo, descripcion, propietarioId, codigoInvitacion)
                     VALUES ('$nombreClean', '$descClean', '$ownerClean', '$codigoClean');
                 """.trimIndent()
 
-                remoteDataSource.ejecutarConsulta(apiKey, sqlInsert)
+                remoteDataSource.ejecutarConsulta(apiKey, sqlInsertGroup)
+
+                val sqlInsertMember = """
+                    INSERT OR IGNORE INTO `GROUP_MEMBER` (grupoId, userId) 
+                    SELECT id, '$currentUid' FROM `GROUP` WHERE codigoInvitacion = '$codigoClean';
+                """.trimIndent()
+
+                remoteDataSource.ejecutarConsulta(apiKey, sqlInsertMember)
             }
         }
     }
@@ -93,7 +123,26 @@ class GrupoRepository(
             val grupoDomain = withContext(Dispatchers.IO) {
                 dao.insertarGrupo(remoteGroupEntity)
                 dao.insertarMiembro(MiembroGrupoEntity(grupoId = remoteGroupEntity.id, userId = cleanUserId))
-                remoteGroupEntity.toDomain()
+                
+                val miembrosEntities = dao.obtenerMiembrosDeGrupoSync(remoteGroupEntity.id)
+                val remoteNicknames = if (apiKey.isNotBlank()) {
+                    remoteDataSource.obtenerNicknamesRemotos(apiKey)
+                } else {
+                    emptyMap()
+                }
+
+                val usuarios = miembrosEntities.map { miembro ->
+                    val uid = miembro.userId
+                    val nickname = remoteNicknames[uid] ?: remoteNicknames[miembro.userId] ?: uid.substringBefore("@").ifEmpty { "Usuario" }
+                    Usuario(
+                        id = uid.hashCode(),
+                        nickname = nickname,
+                        email = uid
+                    )
+                }
+                val domainGroup = remoteGroupEntity.toDomain()
+                domainGroup.miebros = usuarios
+                domainGroup
             }
 
             Resultado.Exito(grupoDomain)

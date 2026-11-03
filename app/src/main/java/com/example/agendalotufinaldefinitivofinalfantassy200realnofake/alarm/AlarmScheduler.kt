@@ -14,9 +14,10 @@ class AlarmScheduler(private val context: Context) {
 
     @SuppressLint("ScheduleExactAlarm")
     fun programarAlarma(id: Int, titulo: String, fechaHora: LocalDateTime) {
-        if (fechaHora.isBefore(LocalDateTime.now())) {
-            // No programar si la fecha/hora ya transcurrió
-            return
+        val targetTime = if (fechaHora.isBefore(LocalDateTime.now())) {
+            LocalDateTime.now().plusSeconds(5) // Programar para dentro de 5 segundos si ya pasó o es inmediata
+        } else {
+            fechaHora
         }
 
         val intent = Intent(context, AlarmReceiver::class.java).apply {
@@ -31,7 +32,7 @@ class AlarmScheduler(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val triggerAtMillis = fechaHora.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val triggerAtMillis = targetTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmManager.setExactAndAllowWhileIdle(

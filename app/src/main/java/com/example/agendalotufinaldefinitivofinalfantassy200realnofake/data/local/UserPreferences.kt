@@ -14,4 +14,20 @@ class UserPreferences(context: Context) {
     fun setNickname(emailKey: String, newNickname: String) {
         prefs.edit().putString("nickname_$emailKey", newNickname).apply()
     }
+
+    fun isNotificacionesEnabled(): Boolean {
+        return prefs.getBoolean("notificaciones_enabled", true)
+    }
+
+    fun setNotificacionesEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean("notificaciones_enabled", enabled).apply()
+    }
+
+    fun isSonidoAlarmasEnabled(): Boolean {
+        return prefs.getBoolean("sonido_alarmas_enabled", true)
+    }
+
+    fun setSonidoAlarmasEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean("sonido_alarmas_enabled", enabled).apply()
+    }
 }

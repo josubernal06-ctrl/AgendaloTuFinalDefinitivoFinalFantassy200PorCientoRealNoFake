@@ -3,7 +3,9 @@ package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.scree
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
@@ -31,7 +33,8 @@ fun GroupDetailScreen(
     grupos: List<Grupo>,
     onBackClick: () -> Unit,
     onNavigateToCalendar: (Int) -> Unit,
-    onDeleteGroupClick: ((Grupo) -> Unit)? = null
+    onDeleteGroupClick: ((Grupo) -> Unit)? = null,
+    onAiScheduleClick: (String) -> Unit = {}
 ) {
     val grupo = grupos.find { it.id == grupoId }
     val clipboardManager = LocalClipboardManager.current
@@ -51,6 +54,8 @@ fun GroupDetailScreen(
     var showAddMemberDialog by remember { mutableStateOf(false) }
     var nuevoNombreMiembro by remember { mutableStateOf("") }
     var showDeleteGroupDialog by remember { mutableStateOf(false) }
+    var aiPrompt by remember { mutableStateOf("") }
+    var showAiDialog by remember { mutableStateOf(false) }
 
     if (showDeleteGroupDialog) {
         AlertDialog(
@@ -72,6 +77,20 @@ fun GroupDetailScreen(
             dismissButton = {
                 TextButton(onClick = { showDeleteGroupDialog = false }) {
                     Text("Cancelar", color = tema.letras)
+                }
+            },
+            containerColor = tema.fondo
+        )
+    }
+
+    if (showAiDialog) {
+        AlertDialog(
+            onDismissRequest = { showAiDialog = false },
+            title = { Text("Agendando Actividad Grupal con IA", color = tema.letras) },
+            text = { Text("Gemini está analizando la solicitud y las agendas de los miembros para programar esta actividad en conjunto sin conflictos.", color = tema.letras) },
+            confirmButton = {
+                Button(onClick = { showAiDialog = false }, colors = ButtonDefaults.buttonColors(containerColor = tema.botones)) {
+                    Text("Aceptar", color = tema.fondo)
                 }
             },
             containerColor = tema.fondo
@@ -149,7 +168,6 @@ fun GroupDetailScreen(
             if (grupo.descripcion.isNotBlank()) {
                 Text(text = "Descripción", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = tema.letras)
                 Text(text = grupo.descripcion, color = tema.letras.copy(alpha = 0.8f))
-                Spacer(modifier = Modifier.height(8.dp))
             }
 
             Text(text = "Código de Invitación", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = tema.letras)
@@ -167,7 +185,42 @@ fun GroupDetailScreen(
                 Text("¡Copiado al portapapeles!", color = tema.detalles, fontSize = 12.sp)
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            // Sección de Agendar Actividad Grupal con IA (Gemini)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.15f)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Icon(imageVector = Icons.Default.AutoAwesome, contentDescription = null, tint = tema.botones, modifier = Modifier.size(20.dp))
+                        Text(text = "Agendar Actividad con IA (Gemini)", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = tema.letras)
+                    }
+                    OutlinedTextField(
+                        value = aiPrompt,
+                        onValueChange = { aiPrompt = it },
+                        label = { Text("Ej. Reunión de equipo el 3 de noviembre") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    Button(
+                        onClick = {
+                            if (aiPrompt.isNotBlank()) {
+                                onAiScheduleClick(aiPrompt)
+                                showAiDialog = true
+                                aiPrompt = ""
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = tema.botones, contentColor = tema.fondo)
+                    ) {
+                        Text("Analizar y Agendar en Grupo")
+                    }
+                }
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.ActividadConjunta
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -143,9 +144,19 @@ fun CalendarioSemanal(
                     val isSelected = date == selectedDate
                     val isToday = date == today
 
-                    val hasUserActivity = actividades.any { act ->
+                    val hasGroupActivity = actividades.any { act ->
                         try {
-                            act.segmentoTiempo.inicio.toLocalDate() == date
+                            act.segmentoTiempo.inicio.toLocalDate() == date &&
+                                ((act as? ActividadConjunta)?.grupoId ?: -1 > 0 || act.segmentoTiempo.esConjunta)
+                        } catch (_: Exception) {
+                            false
+                        }
+                    }
+
+                    val hasPersonalActivity = actividades.any { act ->
+                        try {
+                            act.segmentoTiempo.inicio.toLocalDate() == date &&
+                                !((act as? ActividadConjunta)?.grupoId ?: -1 > 0 || act.segmentoTiempo.esConjunta)
                         } catch (_: Exception) {
                             false
                         }
@@ -183,24 +194,43 @@ fun CalendarioSemanal(
 
                         Spacer(modifier = Modifier.height(4.dp))
 
-                        // Línea Azul = Actividad del usuario (igual que en CalendarGridView)
-                        if (hasUserActivity) {
-                            Box(
-                                modifier = Modifier
-                                    .width(16.dp)
-                                    .height(3.dp)
-                                    .clip(RoundedCornerShape(2.dp))
-                                    .background(Color(0xFF3B82F6))
-                            )
-                        } else if (isToday && !isSelected) {
-                            Box(
-                                modifier = Modifier
-                                    .size(5.dp)
-                                    .clip(CircleShape)
-                                    .background(tema.botones)
-                            )
-                        } else {
-                            Spacer(modifier = Modifier.height(3.dp))
+                        // Indicadores: Línea Roja para Grupo, Línea Azul para Personal
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (hasGroupActivity) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(14.dp)
+                                        .height(3.dp)
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .background(Color(0xFFEF4444))
+                                )
+                            }
+                            if (hasPersonalActivity) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(14.dp)
+                                        .height(3.dp)
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .background(Color(0xFF3B82F6))
+                                )
+                            }
+                        }
+
+                        if (!hasGroupActivity && !hasPersonalActivity) {
+                            if (isToday && !isSelected) {
+                                Spacer(modifier = Modifier.height(3.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(5.dp)
+                                        .clip(CircleShape)
+                                        .background(tema.botones)
+                                )
+                            } else {
+                                Spacer(modifier = Modifier.height(3.dp))
+                            }
                         }
                     }
                 }
