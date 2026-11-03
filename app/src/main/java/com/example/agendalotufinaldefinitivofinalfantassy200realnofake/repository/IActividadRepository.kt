@@ -5,7 +5,7 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.A
 import kotlinx.coroutines.flow.Flow
 
 interface IActividadRepository {
-    fun obtenerActividades(): Flow<Resultado<List<AbstractActividad>>>
+    fun obtenerActividades(propietarioId: Int? = null): Flow<Resultado<List<AbstractActividad>>>
     suspend fun insertarActividad(actividad: AbstractActividad)
     suspend fun eliminarActividad(actividad: AbstractActividad)
 }

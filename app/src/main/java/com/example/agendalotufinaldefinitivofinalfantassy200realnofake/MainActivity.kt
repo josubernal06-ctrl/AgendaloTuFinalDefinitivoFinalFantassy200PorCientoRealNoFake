@@ -126,7 +126,8 @@ class  MainActivity : ComponentActivity() {
                             },
                             onCreateGroup = { navController.navigate("create_group") },
                             onJoinGroup = { navController.navigate("join_group") },
-                            onGroupClick = { grupo -> navController.navigate("group_detail/${grupo.id}") }
+                            onGroupClick = { grupo -> navController.navigate("group_detail/${grupo.id}") },
+                            onDeleteGroupClick = { grupo -> grupoViewModel.eliminarGrupo(grupo, currentUser!!.id) }
                         )
                     }
 
@@ -177,7 +178,8 @@ class  MainActivity : ComponentActivity() {
                             grupoId = grupoId,
                             grupos = grupos,
                             onBackClick = { navController.popBackStack() },
-                            onNavigateToCalendar = { id -> navController.navigate("group_calendar/$id") }
+                            onNavigateToCalendar = { id -> navController.navigate("group_calendar/$id") },
+                            onDeleteGroupClick = { grupo -> grupoViewModel.eliminarGrupo(grupo, currentUser!!.id) }
                         )
                     }
                     

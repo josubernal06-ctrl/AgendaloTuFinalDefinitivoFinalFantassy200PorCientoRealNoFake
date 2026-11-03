@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -33,7 +34,8 @@ fun GroupListScreen(
     onNavigateToAlarm: () -> Unit,
     onCreateGroup: () -> Unit,
     onJoinGroup: () -> Unit,
-    onGroupClick: (Grupo) -> Unit
+    onGroupClick: (Grupo) -> Unit,
+    onDeleteGroupClick: ((Grupo) -> Unit)? = null
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(1) } // 1 = Grupos
     val tabTitles = listOf("Home", "Grupos", "Alarma")
@@ -160,20 +162,37 @@ fun GroupListScreen(
                                     .clickable { onGroupClick(grupo) },
                                 colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.2f))
                             ) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Text(
-                                        text = grupo.nombreGrupo,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 18.sp,
-                                        color = tema.letras
-                                    )
-                                    if (grupo.descripcion.isNotEmpty()) {
-                                        Spacer(modifier = Modifier.height(4.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            text = grupo.descripcion,
-                                            fontSize = 14.sp,
-                                            color = tema.letras.copy(alpha = 0.8f)
+                                            text = grupo.nombreGrupo,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 18.sp,
+                                            color = tema.letras
                                         )
+                                        if (grupo.descripcion.isNotEmpty()) {
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(
+                                                text = grupo.descripcion,
+                                                fontSize = 14.sp,
+                                                color = tema.letras.copy(alpha = 0.8f)
+                                            )
+                                        }
+                                    }
+                                    if (onDeleteGroupClick != null) {
+                                        IconButton(onClick = { onDeleteGroupClick(grupo) }) {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = "Eliminar grupo",
+                                                tint = tema.letras
+                                            )
+                                        }
                                     }
                                 }
                             }

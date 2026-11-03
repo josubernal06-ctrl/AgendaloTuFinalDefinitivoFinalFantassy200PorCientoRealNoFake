@@ -10,7 +10,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +34,46 @@ fun UserProfileScreen(
     onBackClick: () -> Unit,
     onLogoutClick: () -> Unit = {}
 ) {
+    var currentNickname by remember(usuario.nickname) { mutableStateOf(usuario.nickname) }
+    var showEditDialog by remember { mutableStateOf(false) }
+    var nuevoNicknameInput by remember { mutableStateOf("") }
+
+    if (showEditDialog) {
+        AlertDialog(
+            onDismissRequest = { showEditDialog = false },
+            title = { Text("Editar Nickname", color = tema.letras) },
+            text = {
+                OutlinedTextField(
+                    value = nuevoNicknameInput,
+                    onValueChange = { nuevoNicknameInput = it },
+                    label = { Text("Nuevo Nickname") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (nuevoNicknameInput.isNotBlank()) {
+                            usuario.nickname = nuevoNicknameInput.trim()
+                            currentNickname = nuevoNicknameInput.trim()
+                            showEditDialog = false
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = tema.botones, contentColor = tema.fondo)
+                ) {
+                    Text("Guardar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditDialog = false }) {
+                    Text("Cancelar", color = tema.letras)
+                }
+            },
+            containerColor = tema.fondo
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -76,18 +116,18 @@ fun UserProfileScreen(
                     tint = tema.letras
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
-            // Nombre del usuario
+
+            // Nombre del usuario (Nickname)
             Text(
-                text = usuario.nickname,
+                text = currentNickname,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 color = tema.letras
             )
-            
-            // Estado de disponibilidad usando su método getDisponibilidad()
+
+            // Estado de disponibilidad
             Text(
                 text = if (usuario.getDisponibilidad()) "Disponible" else "Ocupado",
                 fontSize = 16.sp,
@@ -115,16 +155,16 @@ fun UserProfileScreen(
                         color = tema.letras,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
-                    
+
                     PerfilDatoItem(
                         icono = Icons.Default.Email,
                         titulo = "Correo Electrónico",
                         valor = usuario.email,
                         tema = tema
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     PerfilDatoItem(
                         icono = Icons.Default.Info,
                         titulo = "ID de Usuario",
@@ -136,16 +176,19 @@ fun UserProfileScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Botones de acción aprovechando el componente BotonPersonalizado de AppButtons.kt
+            // Botón Editar Perfil (Editar Nickname)
             BotonPersonalizado(
-                texto = "Editar Perfil",
-                onClick = { /* TODO: Implementar edición */ },
+                texto = "Editar Nickname",
+                onClick = {
+                    nuevoNicknameInput = currentNickname
+                    showEditDialog = true
+                },
                 colorFondo = tema.botones,
                 colorTexto = tema.fondo
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             BotonPersonalizado(
                 texto = "Cerrar Sesión",
                 onClick = onLogoutClick,
@@ -153,17 +196,9 @@ fun UserProfileScreen(
                 colorTexto = tema.letras
             )
         }
-
-        Spacer(modifier = Modifier.height(32.dp))
-        Button(
-            onClick = onLogoutClick,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = tema.botones, contentColor = tema.fondo)
-        ) {
-            Text("Cerrar Sesión")
-        }
     }
 }
+
 @Composable
 fun PerfilDatoItem(
     icono: ImageVector,
@@ -201,10 +236,9 @@ fun PerfilDatoItem(
 @Preview(showBackground = true)
 @Composable
 fun UserProfileScreenPreview() {
-    // Datos y tema falsos para la vista previa
     val usuarioEjemplo = Usuario(1, nickname = "Juan Pérez", email = "juan.perez@email.com")
-    val temaEjemplo = obtenerTema(1) 
-    
+    val temaEjemplo = obtenerTema(1)
+
     UserProfileScreen(
         usuario = usuarioEjemplo,
         tema = temaEjemplo,

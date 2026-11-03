@@ -9,7 +9,7 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.loca
 
 @Database(
     entities = [ActividadEntity::class, GrupoEntity::class, MiembroGrupoEntity::class, AlarmEntity::class],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

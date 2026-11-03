@@ -50,6 +50,14 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
         }
     }
 
+    fun eliminarGrupo(grupo: Grupo, userId: Int) {
+        viewModelScope.launch {
+            grupoRepository.eliminarGrupo(grupo)
+            _actionResult.value = Resultado.Exito("Grupo eliminado exitosamente")
+            cargarGrupos(userId)
+        }
+    }
+
     fun unirseAGrupo(codigo: String, usuario: Usuario) {
         viewModelScope.launch {
             _actionResult.value = Resultado.Cargando

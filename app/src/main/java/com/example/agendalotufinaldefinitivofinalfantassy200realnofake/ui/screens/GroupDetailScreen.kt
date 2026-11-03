@@ -6,16 +6,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Grupo
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Usuario
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
 
@@ -23,10 +27,11 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.
 @Composable
 fun GroupDetailScreen(
     tema: TemaColor,
-    grupoId: Int, // En la realidad, cargaríamos el grupo desde el repositorio usando el ID
-    grupos: List<Grupo>, // Por simplicidad, pasamos la lista actual y filtramos
+    grupoId: Int,
+    grupos: List<Grupo>,
     onBackClick: () -> Unit,
-    onNavigateToCalendar: (Int) -> Unit
+    onNavigateToCalendar: (Int) -> Unit,
+    onDeleteGroupClick: ((Grupo) -> Unit)? = null
 ) {
     val grupo = grupos.find { it.id == grupoId }
     val clipboardManager = LocalClipboardManager.current
@@ -38,6 +43,81 @@ fun GroupDetailScreen(
             Button(onClick = onBackClick) { Text("Volver") }
         }
         return
+    }
+
+    var integrantesList by remember(grupo) {
+        mutableStateOf(if (grupo.miebros.isNotEmpty()) grupo.miebros else listOf(grupo.propietario))
+    }
+    var showAddMemberDialog by remember { mutableStateOf(false) }
+    var nuevoNombreMiembro by remember { mutableStateOf("") }
+    var showDeleteGroupDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteGroupDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteGroupDialog = false },
+            title = { Text("Eliminar Grupo", color = tema.letras) },
+            text = { Text("¿Estás seguro de que deseas eliminar el grupo \"${grupo.nombreGrupo}\"?", color = tema.letras) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteGroupDialog = false
+                        onDeleteGroupClick?.invoke(grupo)
+                        onBackClick()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = Color.White)
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteGroupDialog = false }) {
+                    Text("Cancelar", color = tema.letras)
+                }
+            },
+            containerColor = tema.fondo
+        )
+    }
+
+    if (showAddMemberDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddMemberDialog = false },
+            title = { Text("Añadir Integrante al Grupo", color = tema.letras) },
+            text = {
+                OutlinedTextField(
+                    value = nuevoNombreMiembro,
+                    onValueChange = { nuevoNombreMiembro = it },
+                    label = { Text("Nickname del Integrante") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (nuevoNombreMiembro.isNotBlank()) {
+                            val nuevoUsuario = Usuario(
+                                id = (1000..9999).random(),
+                                nickname = nuevoNombreMiembro.trim(),
+                                email = "${nuevoNombreMiembro.trim().lowercase().replace(" ", "")}@gmail.com"
+                            )
+                            grupo.agregarMiembro(nuevoUsuario)
+                            integrantesList = integrantesList + nuevoUsuario
+                            nuevoNombreMiembro = ""
+                            showAddMemberDialog = false
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = tema.botones, contentColor = tema.fondo)
+                ) {
+                    Text("Añadir")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAddMemberDialog = false }) {
+                    Text("Cancelar", color = tema.letras)
+                }
+            },
+            containerColor = tema.fondo
+        )
     }
 
     Scaffold(
@@ -86,33 +166,78 @@ fun GroupDetailScreen(
             if (copied) {
                 Text("¡Copiado al portapapeles!", color = tema.detalles, fontSize = 12.sp)
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Integrantes (${grupo.miebros.size})", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = tema.letras)
-            
-            LazyColumn(
+
+            Row(
                 modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Integrantes (${integrantesList.size})",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = tema.letras
+                )
+                Button(
+                    onClick = { showAddMemberDialog = true },
+                    colors = ButtonDefaults.buttonColors(containerColor = tema.botones, contentColor = tema.fondo),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Añadir", fontSize = 12.sp)
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(grupo.miebros) { miembro ->
+                items(integrantesList) { miembro ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = tema.detalles.copy(alpha = 0.1f))
                     ) {
-                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = miembro.nickname, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = tema.letras)
-                            if (miembro.id == grupo.propietario.id) {
-                                Spacer(modifier = Modifier.width(8.dp))
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = miembro.nickname,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = tema.letras,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (miembro.id == grupo.propietario.id || miembro.nickname == grupo.propietario.nickname) {
                                 Surface(
                                     color = tema.botones,
                                     shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
                                 ) {
-                                    Text("Admin", color = tema.fondo, fontSize = 10.sp, modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp))
+                                    Text(
+                                        "Admin",
+                                        color = tema.fondo,
+                                        fontSize = 10.sp,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
                                 }
                             }
                         }
                     }
                 }
+            }
+
+            // Botón para eliminar el grupo
+            Button(
+                onClick = { showDeleteGroupDialog = true },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = Color.White)
+            ) {
+                Icon(imageVector = Icons.Default.Delete, contentDescription = "Eliminar Grupo")
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Eliminar Grupo")
             }
         }
     }
