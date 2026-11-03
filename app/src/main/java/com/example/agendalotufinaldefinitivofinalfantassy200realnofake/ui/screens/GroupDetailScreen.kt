@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PersonAdd
@@ -17,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -147,15 +147,6 @@ fun GroupDetailScreen(
                 onBackClick = onBackClick
             )
         },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { onNavigateToCalendar(grupo.id) },
-                containerColor = tema.botones,
-                contentColor = tema.fondo,
-                icon = { Icon(Icons.Default.CalendarMonth, contentDescription = "Calendario Grupal") },
-                text = { Text("Calendario") }
-            )
-        },
         containerColor = tema.fondo
     ) { paddingValues ->
         Column(
@@ -202,7 +193,16 @@ fun GroupDetailScreen(
                     OutlinedTextField(
                         value = aiPrompt,
                         onValueChange = { aiPrompt = it },
-                        label = { Text("Ej. Reunión de equipo el 3 de noviembre") },
+                        label = { Text("Ej. Reunión de equipo el 3 de noviembre", color = tema.letras) },
+                        textStyle = TextStyle(color = Color.Black),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            focusedLabelColor = tema.letras,
+                            unfocusedLabelColor = tema.letras.copy(alpha = 0.7f),
+                            focusedBorderColor = tema.botones,
+                            unfocusedBorderColor = tema.detalles
+                        ),
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )

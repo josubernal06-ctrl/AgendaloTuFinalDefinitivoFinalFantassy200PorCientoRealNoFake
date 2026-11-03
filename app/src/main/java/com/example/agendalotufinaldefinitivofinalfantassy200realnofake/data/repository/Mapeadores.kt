@@ -12,11 +12,7 @@ fun ActividadEntity.toDomain(): AbstractActividad {
         esConjunta = this.esConjunta,
         puntuacion = this.puntuacion
     )
-    val propietario = Usuario(
-        id = this.propietarioId,
-        nickname = this.propietarioNickname,
-        email = ""
-    )
+    val propietario = Usuario(id = this.propietarioId, nickname = this.propietarioNickname, email = "")
 
     return if (this.esConjunta) {
         ActividadConjunta(
@@ -25,7 +21,8 @@ fun ActividadEntity.toDomain(): AbstractActividad {
             descripcion = this.descripcion,
             propietario = propietario,
             esPrivada = this.esPrivada,
-            segmentoTiempo = segmento
+            segmentoTiempo = segmento,
+            grupoId = this.grupoId ?: -1
         )
     } else {
         ActividadSolitaria(
@@ -39,30 +36,60 @@ fun ActividadEntity.toDomain(): AbstractActividad {
     }
 }
 
-fun AbstractActividad.toEntity(userId: String = ""): ActividadEntity {
+fun AbstractActividad.toEntity(): ActividadEntity {
+    val clazz = AbstractActividad::class.java
+
+    val idField = clazz.getDeclaredField("id")
+    idField.isAccessible = true
+    val realId = idField.get(this) as Int
+    
+    val descField = clazz.getDeclaredField("descripcion")
+    descField.isAccessible = true
+    val desc = descField.get(this) as String
+    
+    val privField = clazz.getDeclaredField("esPrivada")
+    privField.isAccessible = true
+    val priv = privField.get(this) as Boolean
+    
+    val segField = clazz.getDeclaredField("segmentoTiempo")
+    segField.isAccessible = true
+    val seg = segField.get(this) as SegmentoTiempo
+
+    val segClazz = SegmentoTiempo::class.java
+    val inicioField = segClazz.getDeclaredField("inicio")
+    inicioField.isAccessible = true
+    val inicio = inicioField.get(seg) as LocalDateTime
+    
+    val finField = segClazz.getDeclaredField("fin")
+    finField.isAccessible = true
+    val fin = finField.get(seg) as LocalDateTime
+
+    val isConjunta = this is ActividadConjunta
+    val gId = if (isConjunta) (this as ActividadConjunta).grupoId.takeIf { it > 0 } else null
+
     return ActividadEntity(
-        id = this.id,
+        id = realId,
         titulo = this.titulo,
-        descripcion = this.descripcion,
-        esPrivada = this.esPrivada,
+        descripcion = desc,
+        esPrivada = priv,
         propietarioId = this.propietario.id,
         propietarioNickname = this.propietario.nickname,
-        inicio = this.segmentoTiempo.inicio.toString(),
-        fin = this.segmentoTiempo.fin.toString(),
-        esConjunta = this is ActividadConjunta,
-        puntuacion = this.segmentoTiempo.puntuacion
+        inicio = inicio.toString(),
+        fin = fin.toString(),
+        esConjunta = isConjunta,
+        puntuacion = seg.puntuacion,
+        grupoId = gId
     )
 }
 
 fun GrupoEntity.toDomain(): Grupo {
-    val propietario = Usuario(id = 0, nickname = "Propietario", email = this.propietarioId)
-    val code = if (this.codigoInvitacion.isNotBlank()) this.codigoInvitacion else "GRP${if (this.id > 0) this.id else 101}920"
+    val propietario = Usuario(id = this.propietarioId.hashCode(), nickname = "Propietario", email = this.propietarioId)
     return Grupo(
         id = this.id,
         nombreGrupo = this.nombreGrupo,
         descripcion = this.descripcion,
         propietario = propietario,
-        codigoInvitacion = code
+        codigoInvitacion = this.codigoInvitacion
     )
 }
 

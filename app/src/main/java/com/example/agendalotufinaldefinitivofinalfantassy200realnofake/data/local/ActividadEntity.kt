@@ -14,5 +14,6 @@ data class ActividadEntity(
     val inicio: String,
     val fin: String,
     val esConjunta: Boolean,
-    val puntuacion: Double
+    val puntuacion: Double,
+    val grupoId: Int? = null
 )
