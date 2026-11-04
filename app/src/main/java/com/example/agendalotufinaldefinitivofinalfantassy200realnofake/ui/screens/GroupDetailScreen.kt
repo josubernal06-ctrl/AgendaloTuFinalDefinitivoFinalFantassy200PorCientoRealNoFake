@@ -26,7 +26,9 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.A
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Grupo
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Usuario
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,11 +57,7 @@ fun GroupDetailScreen(
         return
     }
 
-    var integrantesList by remember(grupo) {
-        mutableStateOf(if (grupo.miebros.isNotEmpty()) grupo.miebros else listOf(grupo.propietario))
-    }
-    var showAddMemberDialog by remember { mutableStateOf(false) }
-    var nuevoNombreMiembro by remember { mutableStateOf("") }
+    val integrantesList = if (grupo.miebros.isNotEmpty()) grupo.miebros else listOf(grupo.propietario)
     var showDeleteGroupDialog by remember { mutableStateOf(false) }
     var aiPrompt by remember { mutableStateOf("") }
     var showAiDialog by remember { mutableStateOf(false) }
@@ -146,48 +144,6 @@ fun GroupDetailScreen(
             confirmButton = {
                 Button(onClick = { showAiDialog = false }, colors = ButtonDefaults.buttonColors(containerColor = tema.botones)) {
                     Text("Aceptar", color = tema.fondo)
-                }
-            },
-            containerColor = tema.fondo
-        )
-    }
-
-    if (showAddMemberDialog) {
-        AlertDialog(
-            onDismissRequest = { showAddMemberDialog = false },
-            title = { Text("Añadir Integrante al Grupo", color = tema.letras) },
-            text = {
-                OutlinedTextField(
-                    value = nuevoNombreMiembro,
-                    onValueChange = { nuevoNombreMiembro = it },
-                    label = { Text("Nickname del Integrante") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (nuevoNombreMiembro.isNotBlank()) {
-                            val nuevoUsuario = Usuario(
-                                id = (1000..9999).random(),
-                                nickname = nuevoNombreMiembro.trim(),
-                                email = "${nuevoNombreMiembro.trim().lowercase().replace(" ", "")}@gmail.com"
-                            )
-                            grupo.agregarMiembro(nuevoUsuario)
-                            integrantesList = integrantesList + nuevoUsuario
-                            nuevoNombreMiembro = ""
-                            showAddMemberDialog = false
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = tema.botones, contentColor = tema.fondo)
-                ) {
-                    Text("Añadir")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showAddMemberDialog = false }) {
-                    Text("Cancelar", color = tema.letras)
                 }
             },
             containerColor = tema.fondo
@@ -283,27 +239,12 @@ fun GroupDetailScreen(
             }
 
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Integrantes (${integrantesList.size})",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = tema.letras
-                    )
-                    Button(
-                        onClick = { showAddMemberDialog = true },
-                        colors = ButtonDefaults.buttonColors(containerColor = tema.botones, contentColor = tema.fondo),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Icon(imageVector = Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Añadir", fontSize = 12.sp)
-                    }
-                }
+                Text(
+                    text = "Integrantes (${integrantesList.size})",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = tema.letras
+                )
             }
 
             items(integrantesList) { miembro ->
@@ -404,4 +345,26 @@ fun GroupDetailScreen(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GroupDetailScreenPreview() {
+    val sampleUser = Usuario(id = 1, nickname = "Josue", email = "josue@example.com")
+    val sampleGroup = Grupo(
+        id = 1,
+        nombreGrupo = "Estudio Kotlin",
+        descripcion = "Grupo de práctica y desarrollo",
+        propietario = sampleUser,
+        codigoInvitacion = "GRP123456",
+        miebros = listOf(sampleUser)
+    )
+    GroupDetailScreen(
+        tema = obtenerTema(1),
+        grupoId = 1,
+        grupos = listOf(sampleGroup),
+        currentUserId = "josue@example.com",
+        onBackClick = {},
+        onNavigateToCalendar = {}
+    )
 }

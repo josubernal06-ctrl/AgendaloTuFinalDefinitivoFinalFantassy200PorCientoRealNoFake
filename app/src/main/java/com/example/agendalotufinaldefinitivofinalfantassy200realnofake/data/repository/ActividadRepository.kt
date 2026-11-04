@@ -13,11 +13,13 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.remo
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IActividadRepository
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 
@@ -34,11 +36,32 @@ class ActividadRepository(
     }
 
     override fun obtenerActividades(propietarioId: Int?): Flow<Resultado<List<AbstractActividad>>> {
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid?.hashCode() ?: propietarioId
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
+        val currentUserId = firebaseUser?.uid?.hashCode() ?: propietarioId
+        val currentUid = firebaseUser?.uid ?: ""
+
+        val apiKey = BuildConfig.SQLITE_CLOUD_KEY
+        if (apiKey.isNotBlank() && currentUid.isNotBlank()) {
+            CoroutineScope(Dispatchers.IO).launch {
+                sincronizarActividadesRemotas(apiKey, currentUid)
+            }
+        }
+
         return dao.obtenerTodasLasActividades(currentUserId).map { entities ->
             Resultado.Exito(entities.map { it.toDomain() }) as Resultado<List<AbstractActividad>>
         }.catch { e ->
             emit(Resultado.Error(e))
+        }
+    }
+
+    private suspend fun sincronizarActividadesRemotas(apiKey: String, userUid: String) {
+        try {
+            val remoteActivities = remoteDataSource.obtenerActividadesRemotas(apiKey, userUid)
+            for (remoteAct in remoteActivities) {
+                dao.insertarActividad(remoteAct)
+            }
+        } catch (e: Exception) {
+            Log.e("ActividadRepository", "Error sincronizando actividades remotas: ${e.message}")
         }
     }
 
@@ -88,18 +111,29 @@ class ActividadRepository(
         withContext(Dispatchers.IO + NonCancellable) {
             val apiKey = BuildConfig.SQLITE_CLOUD_KEY
             if (apiKey.isNotBlank()) {
+                val firebaseUser = FirebaseAuth.getInstance().currentUser
+                val userUid = firebaseUser?.uid ?: ""
+                val cleanUid = userUid.replace("'", "''")
+
                 val tituloClean = entity.titulo.replace("'", "''")
                 val descClean = entity.descripcion.replace("'", "''")
-                val ownerClean = entity.propietarioNickname.replace("'", "''")
                 val esPrivadaVal = if (entity.esPrivada) 1 else 0
                 val esConjuntaVal = if (entity.esConjunta) 1 else 0
+                val grupoIdVal = entity.grupoId?.let { if (it > 0) it.toString() else "NULL" } ?: "NULL"
+                val userIdVal = if (cleanUid.isNotBlank()) "'$cleanUid'" else "NULL"
 
                 val sqlInsert = """
-                    INSERT INTO ACTIVIDAD (titulo, descripcion, esPrivada, propietarioId, propietarioNickname, inicio, fin, esConjunta, puntuacion)
-                    VALUES ('$tituloClean', '$descClean', $esPrivadaVal, ${entity.propietarioId}, '$ownerClean', '${entity.inicio}', '${entity.fin}', $esConjuntaVal, ${entity.puntuacion});
+                    INSERT INTO ACTIVITY (titulo, descripcion, userId, grupoId, esConjunta, esPrivada, fechaInicio, fechaFin)
+                    VALUES ('$tituloClean', '$descClean', $userIdVal, $grupoIdVal, $esConjuntaVal, $esPrivadaVal, '${entity.inicio}', '${entity.fin}');
                 """.trimIndent()
 
-                remoteDataSource.ejecutarConsulta(apiKey, sqlInsert)
+                Log.d("ActividadRepository", "Ejecutando SQL INSERT en ACTIVITY: $sqlInsert")
+                val exito = remoteDataSource.ejecutarConsulta(apiKey, sqlInsert)
+                if (!exito) {
+                    Log.e("ActividadRepository", "Fallo al insertar la actividad en tabla ACTIVITY de SQLite Cloud")
+                } else {
+                    Log.d("ActividadRepository", "Actividad insertada con éxito en tabla ACTIVITY de SQLite Cloud: ${entity.titulo}")
+                }
             }
         }
     }
@@ -125,7 +159,7 @@ class ActividadRepository(
             val apiKey = BuildConfig.SQLITE_CLOUD_KEY
             if (apiKey.isNotBlank()) {
                 val tituloClean = entity.titulo.replace("'", "''")
-                val sqlDelete = "DELETE FROM ACTIVIDAD WHERE titulo = '$tituloClean';"
+                val sqlDelete = "DELETE FROM ACTIVITY WHERE titulo = '$tituloClean';"
                 remoteDataSource.ejecutarConsulta(apiKey, sqlDelete)
             }
         }

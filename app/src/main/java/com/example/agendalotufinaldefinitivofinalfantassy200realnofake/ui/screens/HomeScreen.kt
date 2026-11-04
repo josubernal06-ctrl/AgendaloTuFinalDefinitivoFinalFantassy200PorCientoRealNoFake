@@ -58,7 +58,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.CalendarioSemanal
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.ActividadesViewModel
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.GrupoUiState
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.GrupoViewModel
@@ -88,7 +90,6 @@ fun HomeScreen(
         Icons.Default.Alarm
     )
     val scrollState = rememberScrollState()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     val actividadesUiState = actividadesViewModel?.uiState?.collectAsState()?.value
     val actividadesList = actividadesUiState?.actividades ?: emptyList()
@@ -114,14 +115,12 @@ fun HomeScreen(
     }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             MiTopBar(
                 titulo = "AgendaloTú",
                 tema = tema,
                 onPerfilClick = onNavigateToProfile,
-                onSettingsClick = onNavigateToSettings,
-                scrollBehavior = scrollBehavior
+                onSettingsClick = onNavigateToSettings
             )
         },
         bottomBar = {
@@ -402,7 +401,16 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(88.dp))
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    HomeScreen(
+        tema = obtenerTema(1),
+        onNavigateToProfile = {}
+    )
 }

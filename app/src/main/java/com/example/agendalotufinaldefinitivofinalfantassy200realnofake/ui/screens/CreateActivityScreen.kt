@@ -19,7 +19,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.*
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -382,5 +384,17 @@ fun ThemedTimePickerDialog(
             )
         },
         containerColor = tema.fondo
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CreateActivityScreenPreview() {
+    val sampleUser = Usuario(id = 1, nickname = "Josue", email = "josue@example.com")
+    CreateActivityScreen(
+        tema = obtenerTema(1),
+        usuarioActual = sampleUser,
+        onBackClick = {},
+        onSaveClick = {}
     )
 }

@@ -168,13 +168,70 @@ class SqliteCloudDataSource(
         return result
     }
 
-    suspend fun obtenerGruposRemotosDeUsuario(apiKey: String, userUid: String): List<GrupoEntity> {
-        val result = mutableListOf<GrupoEntity>()
+    suspend fun obtenerGruposRemotosDeUsuario(apiKey: String, userUid: String): List<GrupoEntity>? {
+        if (apiKey.isBlank() || userUid.isBlank()) return null
+        val authHeader = if (apiKey.startsWith("Bearer ")) apiKey else "Bearer $apiKey"
+        val cleanUid = userUid.replace("'", "''")
+        val sql = "USE DATABASE agendalo.sqlite; SELECT g.id, g.nombreGrupo, g.descripcion, g.propietarioId, g.codigoInvitacion FROM `GROUP` g JOIN `GROUP_MEMBER` gm ON g.id = gm.grupoId WHERE gm.userId = '$cleanUid' UNION SELECT id, nombreGrupo, descripcion, propietarioId, codigoInvitacion FROM `GROUP` WHERE propietarioId = '$cleanUid';"
+        val requestPayload = SqliteCloudRequest(database = "agendalo.sqlite", sql = sql)
+
+        var lastException: Exception? = null
+
+        for (url in candidateUrls) {
+            try {
+                val resp = api.ejecutarSqlConUrl(url, authHeader, requestPayload)
+                if (resp.isSuccessful) {
+                    val result = mutableListOf<GrupoEntity>()
+                    val data = resp.body()?.data as? List<*>
+                    if (!data.isNullOrEmpty()) {
+                        for (row in data) {
+                            if (row is Map<*, *>) {
+                                val idVal = row["id"].toIntSafe().let { if (it != 0) it else row["ID"].toIntSafe() }
+                                val nombre = (row["nombreGrupo"] as? String) ?: (row["NOMBREGRUPO"] as? String) ?: "Grupo"
+                                val desc = (row["descripcion"] as? String) ?: (row["DESCRIPCION"] as? String) ?: ""
+                                val owner = (row["propietarioId"] as? String) ?: (row["PROPIETARIOID"] as? String) ?: ""
+                                val codigo = (row["codigoInvitacion"] as? String) ?: (row["CODIGOINVITACION"] as? String) ?: ""
+                                result.add(GrupoEntity(idVal, nombre, desc, owner, codigo))
+                            } else if (row is List<*>) {
+                                val idVal = row.getOrNull(0).toIntSafe()
+                                val nombre = (row.getOrNull(1) as? String) ?: "Grupo"
+                                val desc = (row.getOrNull(2) as? String) ?: ""
+                                val owner = (row.getOrNull(3) as? String) ?: ""
+                                val codigo = (row.getOrNull(4) as? String) ?: ""
+                                result.add(GrupoEntity(idVal, nombre, desc, owner, codigo))
+                            }
+                        }
+                    }
+                    return result
+                } else {
+                    lastException = RuntimeException("Error HTTP ${resp.code()}: ${resp.errorBody()?.string()}")
+                }
+            } catch (e: Exception) {
+                lastException = e
+            }
+        }
+        Log.e("SqliteCloud", "Error obteniendo grupos remotos de usuario: ${lastException?.message}")
+        return null
+    }
+
+    private fun Any?.toIntSafe(): Int = when (this) {
+        is Double -> this.toInt()
+        is Float -> this.toInt()
+        is Number -> this.toInt()
+        is String -> this.toDoubleOrNull()?.toInt() ?: 0
+        else -> 0
+    }
+
+    suspend fun obtenerActividadesRemotas(apiKey: String, userUid: String): List<com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.ActividadEntity> {
+        val result = mutableListOf<com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.ActividadEntity>()
         try {
             if (apiKey.isBlank() || userUid.isBlank()) return result
             val authHeader = if (apiKey.startsWith("Bearer ")) apiKey else "Bearer $apiKey"
             val cleanUid = userUid.replace("'", "''")
-            val sql = "USE DATABASE agendalo.sqlite; SELECT g.id, g.nombreGrupo, g.descripcion, g.propietarioId, g.codigoInvitacion FROM `GROUP` g JOIN `GROUP_MEMBER` gm ON g.id = gm.grupoId WHERE gm.userId = '$cleanUid' UNION SELECT id, nombreGrupo, descripcion, propietarioId, codigoInvitacion FROM `GROUP` WHERE propietarioId = '$cleanUid';"
+            
+            val remoteNicknames = obtenerNicknamesRemotos(apiKey)
+
+            val sql = "USE DATABASE agendalo.sqlite; SELECT id, titulo, descripcion, userId, grupoId, esConjunta, esPrivada, fechaInicio, fechaFin FROM ACTIVITY WHERE userId = '$cleanUid' OR grupoId IN (SELECT grupoId FROM GROUP_MEMBER WHERE userId = '$cleanUid');"
             val requestPayload = SqliteCloudRequest(database = "agendalo.sqlite", sql = sql)
 
             for (url in candidateUrls) {
@@ -186,18 +243,60 @@ class SqliteCloudDataSource(
                             for (row in data) {
                                 if (row is Map<*, *>) {
                                     val idVal = row["id"].toIntSafe().let { if (it != 0) it else row["ID"].toIntSafe() }
-                                    val nombre = (row["nombreGrupo"] as? String) ?: (row["NOMBREGRUPO"] as? String) ?: "Grupo"
+                                    val titulo = (row["titulo"] as? String) ?: (row["TITULO"] as? String) ?: "Actividad"
                                     val desc = (row["descripcion"] as? String) ?: (row["DESCRIPCION"] as? String) ?: ""
-                                    val owner = (row["propietarioId"] as? String) ?: (row["PROPIETARIOID"] as? String) ?: ""
-                                    val codigo = (row["codigoInvitacion"] as? String) ?: (row["CODIGOINVITACION"] as? String) ?: ""
-                                    result.add(GrupoEntity(idVal, nombre, desc, owner, codigo))
+                                    val uId = (row["userId"] as? String) ?: (row["USERID"] as? String) ?: cleanUid
+                                    val propId = uId.hashCode()
+                                    val propNick = remoteNicknames[uId] ?: uId.substringBefore("@").ifEmpty { "Usuario" }
+                                    val gId = row["grupoId"].toIntSafe().takeIf { it > 0 } ?: row["GRUPOID"].toIntSafe().takeIf { it > 0 }
+                                    val esConj = (row["esConjunta"].toIntSafe() == 1) || (gId != null && gId > 0)
+                                    val priv = (row["esPrivada"].toIntSafe() == 1)
+                                    val inicio = (row["fechaInicio"] as? String) ?: (row["FECHAINICIO"] as? String) ?: ""
+                                    val fin = (row["fechaFin"] as? String) ?: (row["FECHAFIN"] as? String) ?: ""
+                                    
+                                    if (inicio.isNotBlank()) {
+                                        result.add(com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.ActividadEntity(
+                                            id = idVal,
+                                            titulo = titulo,
+                                            descripcion = desc,
+                                            esPrivada = priv,
+                                            propietarioId = propId,
+                                            propietarioNickname = propNick,
+                                            inicio = inicio,
+                                            fin = if (fin.isNotBlank()) fin else inicio,
+                                            esConjunta = esConj,
+                                            puntuacion = 0.0,
+                                            grupoId = gId
+                                        ))
+                                    }
                                 } else if (row is List<*>) {
                                     val idVal = row.getOrNull(0).toIntSafe()
-                                    val nombre = (row.getOrNull(1) as? String) ?: "Grupo"
+                                    val titulo = (row.getOrNull(1) as? String) ?: "Actividad"
                                     val desc = (row.getOrNull(2) as? String) ?: ""
-                                    val owner = (row.getOrNull(3) as? String) ?: ""
-                                    val codigo = (row.getOrNull(4) as? String) ?: ""
-                                    result.add(GrupoEntity(idVal, nombre, desc, owner, codigo))
+                                    val uId = (row.getOrNull(3) as? String) ?: cleanUid
+                                    val propId = uId.hashCode()
+                                    val propNick = remoteNicknames[uId] ?: uId.substringBefore("@").ifEmpty { "Usuario" }
+                                    val gId = row.getOrNull(4).toIntSafe().takeIf { it > 0 }
+                                    val esConj = (row.getOrNull(5).toIntSafe() == 1) || (gId != null && gId > 0)
+                                    val priv = (row.getOrNull(6).toIntSafe() == 1)
+                                    val inicio = (row.getOrNull(7) as? String) ?: ""
+                                    val fin = (row.getOrNull(8) as? String) ?: ""
+                                    
+                                    if (inicio.isNotBlank()) {
+                                        result.add(com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.ActividadEntity(
+                                            id = idVal,
+                                            titulo = titulo,
+                                            descripcion = desc,
+                                            esPrivada = priv,
+                                            propietarioId = propId,
+                                            propietarioNickname = propNick,
+                                            inicio = inicio,
+                                            fin = if (fin.isNotBlank()) fin else inicio,
+                                            esConjunta = esConj,
+                                            puntuacion = 0.0,
+                                            grupoId = gId
+                                        ))
+                                    }
                                 }
                             }
                             return result
@@ -206,17 +305,9 @@ class SqliteCloudDataSource(
                 } catch (_: Exception) {}
             }
         } catch (e: Exception) {
-            Log.e("SqliteCloud", "Error obteniendo grupos remotos de usuario: ${e.message}", e)
+            Log.e("SqliteCloud", "Error obteniendo actividades remotas: ${e.message}", e)
         }
         return result
-    }
-
-    private fun Any?.toIntSafe(): Int = when (this) {
-        is Double -> this.toInt()
-        is Float -> this.toInt()
-        is Number -> this.toInt()
-        is String -> this.toDoubleOrNull()?.toInt() ?: 0
-        else -> 0
     }
 
     suspend fun obtenerNicknamesRemotos(apiKey: String): Map<String, String> {

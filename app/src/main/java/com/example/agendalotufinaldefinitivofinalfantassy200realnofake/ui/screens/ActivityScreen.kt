@@ -1,6 +1,8 @@
 package com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -676,4 +678,13 @@ fun ActividadItem(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ActivityScreenPreview() {
+    ActivityScreen(
+        tema = obtenerTema(1),
+        onBackClick = {}
+    )
 }

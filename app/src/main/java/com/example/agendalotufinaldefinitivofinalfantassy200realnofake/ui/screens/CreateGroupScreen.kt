@@ -8,7 +8,9 @@ import androidx.compose.ui.unit.dp
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.BotonPersonalizado
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.EntradaTextoField
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,4 +70,14 @@ fun CreateGroupScreen(
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CreateGroupScreenPreview() {
+    CreateGroupScreen(
+        tema = obtenerTema(1),
+        onBackClick = {},
+        onSaveClick = { _, _ -> }
+    )
 }

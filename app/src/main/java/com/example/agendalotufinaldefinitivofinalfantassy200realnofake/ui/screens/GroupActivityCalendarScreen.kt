@@ -16,7 +16,10 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.A
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.CalendarioSemanal
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.HorarioCard
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Usuario
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,4 +90,18 @@ fun GroupActivityCalendarScreen(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GroupActivityCalendarScreenPreview() {
+    val sampleUser = Usuario(id = 1, nickname = "Josue", email = "josue@example.com")
+    val sampleGroup = Grupo(id = 1, nombreGrupo = "Estudios", propietario = sampleUser)
+    GroupActivityCalendarScreen(
+        tema = obtenerTema(1),
+        grupo = sampleGroup,
+        actividades = emptyList(),
+        onBackClick = {},
+        onNavigateToCreateActivity = {}
+    )
 }

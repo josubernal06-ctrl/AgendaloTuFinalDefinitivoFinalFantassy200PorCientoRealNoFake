@@ -11,7 +11,9 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repo
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.BotonPersonalizado
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.EntradaTextoField
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,4 +96,14 @@ fun JoinGroupScreen(
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun JoinGroupScreenPreview() {
+    JoinGroupScreen(
+        tema = obtenerTema(1),
+        onBackClick = {},
+        onJoinClick = {}
+    )
 }

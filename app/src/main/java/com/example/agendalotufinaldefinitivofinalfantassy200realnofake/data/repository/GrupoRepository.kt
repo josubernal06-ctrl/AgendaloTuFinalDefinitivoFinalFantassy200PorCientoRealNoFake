@@ -71,10 +71,37 @@ class GrupoRepository(
     private suspend fun sincronizarGruposEIntegrantesRemotos(apiKey: String, uid: String) {
         try {
             val remoteGroups = remoteDataSource.obtenerGruposRemotosDeUsuario(apiKey, uid)
+            if (remoteGroups == null) {
+                Log.w("GrupoRepository", "Sincronización remota omitida debido a falla de conexión con SQLite Cloud")
+                return
+            }
+
+            val remoteGroupIds = remoteGroups.map { it.id }.toSet()
+
+            // 1. Reconciliar y borrar de Room los grupos locales que ya no existen remotamente
+            val localGroups = dao.obtenerGruposPorUsuarioSync(uid)
+            for (localGroup in localGroups) {
+                if (!remoteGroupIds.contains(localGroup.id)) {
+                    Log.d("GrupoRepository", "Eliminando grupo obsoleto de Room local: ${localGroup.nombreGrupo} (id: ${localGroup.id})")
+                    dao.eliminarGrupo(localGroup)
+                    dao.eliminarTodosLosMiembrosDeGrupo(localGroup.id)
+                }
+            }
+
+            // 2. Insertar/actualizar grupos y miembros vigentes recibidos de SQLite Cloud
             for (remoteGroup in remoteGroups) {
                 dao.insertarGrupo(remoteGroup)
                 val memberUids = remoteDataSource.obtenerMiembrosDeGrupoRemoto(apiKey, remoteGroup.id)
-                val allMemberUids = (memberUids + remoteGroup.propietarioId + uid).filter { it.isNotBlank() }.distinct()
+                val allMemberUids = (memberUids + remoteGroup.propietarioId).filter { it.isNotBlank() }.distinct()
+                
+                // Limpiar miembros obsoletos de Room
+                val miembrosLocales = dao.obtenerMiembrosDeGrupoSync(remoteGroup.id)
+                for (miembroLocal in miembrosLocales) {
+                    if (!allMemberUids.contains(miembroLocal.userId)) {
+                        dao.eliminarMiembroPorId(remoteGroup.id, miembroLocal.userId)
+                    }
+                }
+
                 for (memberUid in allMemberUids) {
                     dao.insertarMiembro(MiembroGrupoEntity(grupoId = remoteGroup.id, userId = memberUid))
                 }
@@ -218,14 +245,18 @@ class GrupoRepository(
 
         withContext(Dispatchers.IO) {
             dao.eliminarGrupo(entity)
+            dao.eliminarMiembroPorId(entity.id, currentUid)
         }
 
         withContext(Dispatchers.IO + NonCancellable) {
             val apiKey = BuildConfig.SQLITE_CLOUD_KEY
             if (apiKey.isNotBlank()) {
                 val nombreClean = entity.nombreGrupo.replace("'", "''")
-                val sqlDelete = "DELETE FROM `GROUP` WHERE nombreGrupo = '$nombreClean';"
+                val sqlDelete = "DELETE FROM `GROUP` WHERE id = ${entity.id} OR (nombreGrupo = '$nombreClean' AND propietarioId = '$currentUid');"
                 remoteDataSource.ejecutarConsulta(apiKey, sqlDelete)
+
+                val sqlDeleteMembers = "DELETE FROM `GROUP_MEMBER` WHERE grupoId = ${entity.id};"
+                remoteDataSource.ejecutarConsulta(apiKey, sqlDeleteMembers)
             }
         }
     }
@@ -240,7 +271,7 @@ class GrupoRepository(
         }
 
         withContext(Dispatchers.IO) {
-            dao.eliminarMiembro(MiembroGrupoEntity(grupoId = grupo.id, userId = currentUid))
+            dao.eliminarMiembroPorId(grupo.id, currentUid)
         }
 
         withContext(Dispatchers.IO + NonCancellable) {

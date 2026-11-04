@@ -13,7 +13,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import kotlinx.coroutines.delay
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 
 @Composable
 fun SplashScreen(tema: TemaColor, onSplashFinished: () -> Unit) {
@@ -46,4 +48,13 @@ fun SplashScreen(tema: TemaColor, onSplashFinished: () -> Unit) {
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SplashScreenPreview() {
+    SplashScreen(
+        tema = obtenerTema(1),
+        onSplashFinished = {}
+    )
 }

@@ -38,7 +38,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -376,5 +378,15 @@ fun ThemedTimePickerDialog(
             )
         },
         containerColor = tema.fondo
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AlarmScreenPreview() {
+    AlarmScreen(
+        tema = obtenerTema(1),
+        onNavigateToHome = {},
+        onNavigateToGroups = {}
     )
 }

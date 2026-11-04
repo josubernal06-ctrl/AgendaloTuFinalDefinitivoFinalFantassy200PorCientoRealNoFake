@@ -11,6 +11,9 @@ interface GrupoDao {
     @Query("SELECT * FROM `GROUP` WHERE propietarioId = :userId OR id IN (SELECT grupoId FROM `GROUP_MEMBER` WHERE userId = :userId)")
     fun obtenerGruposPorUsuario(userId: String): Flow<List<GrupoEntity>>
 
+    @Query("SELECT * FROM `GROUP` WHERE propietarioId = :userId OR id IN (SELECT grupoId FROM `GROUP_MEMBER` WHERE userId = :userId)")
+    suspend fun obtenerGruposPorUsuarioSync(userId: String): List<GrupoEntity>
+
     @Query("SELECT * FROM `GROUP` WHERE id = :id")
     fun obtenerGrupoPorId(id: Int): Flow<GrupoEntity?>
 
@@ -28,6 +31,12 @@ interface GrupoDao {
 
     @Delete
     suspend fun eliminarMiembro(miembro: MiembroGrupoEntity)
+
+    @Query("DELETE FROM `GROUP_MEMBER` WHERE grupoId = :grupoId AND userId = :userId")
+    suspend fun eliminarMiembroPorId(grupoId: Int, userId: String)
+
+    @Query("DELETE FROM `GROUP_MEMBER` WHERE grupoId = :grupoId")
+    suspend fun eliminarTodosLosMiembrosDeGrupo(grupoId: Int)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertarMiembro(miembro: MiembroGrupoEntity)

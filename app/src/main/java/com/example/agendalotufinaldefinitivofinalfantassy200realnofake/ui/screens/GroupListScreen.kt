@@ -22,7 +22,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Grupo
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.components.MiTopBar
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
+import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.obtenerTema
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.viewmodels.GrupoUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,8 +37,7 @@ fun GroupListScreen(
     onNavigateToSettings: () -> Unit = {},
     onCreateGroup: () -> Unit,
     onJoinGroup: () -> Unit,
-    onGroupClick: (Grupo) -> Unit,
-    onDeleteGroupClick: ((Grupo) -> Unit)? = null
+    onGroupClick: (Grupo) -> Unit
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(1) } // 1 = Grupos
     val tabTitles = listOf("Home", "Grupos", "Alarma")
@@ -240,15 +241,6 @@ fun GroupListScreen(
                                                 fontWeight = FontWeight.SemiBold
                                             )
                                         }
-                                        if (onDeleteGroupClick != null) {
-                                            IconButton(onClick = { onDeleteGroupClick(grupo) }) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Delete,
-                                                    contentDescription = "Eliminar grupo",
-                                                    tint = tema.letras
-                                                )
-                                            }
-                                        }
                                     }
                                 }
                             }
@@ -266,4 +258,18 @@ fun GroupListScreen(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GroupListScreenPreview() {
+    GroupListScreen(
+        tema = obtenerTema(1),
+        uiState = GrupoUiState.Success(emptyList()),
+        onNavigateToHome = {},
+        onNavigateToAlarm = {},
+        onCreateGroup = {},
+        onJoinGroup = {},
+        onGroupClick = {}
+    )
 }

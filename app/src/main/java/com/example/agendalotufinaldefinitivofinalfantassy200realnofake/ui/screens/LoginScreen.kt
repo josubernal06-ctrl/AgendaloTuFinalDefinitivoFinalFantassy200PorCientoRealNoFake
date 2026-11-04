@@ -33,6 +33,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.R
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.ui.theme.TemaColor
@@ -174,4 +175,14 @@ fun LoginScreen(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenPreview() {
+    val dummyViewModel = AuthViewModel()
+    LoginScreen(
+        tema = obtenerTema(13),
+        viewModel = dummyViewModel
+    )
 }

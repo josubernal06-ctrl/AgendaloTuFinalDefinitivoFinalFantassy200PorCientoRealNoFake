@@ -39,7 +39,6 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import java.time.LocalDateTime
 
-//quiero anal
 class  MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,6 +93,9 @@ class  MainActivity : ComponentActivity() {
                         startDestination = "home"
                     ) {
                     composable("home") {
+                        LaunchedEffect(Unit) {
+                            currentUser?.let { grupoViewModel.sincronizarGrupos(it.id) }
+                        }
                         val actividadesViewModel: ActividadesViewModel = viewModel(factory = actividadFactory)
                         HomeScreen(
                             tema = temaActual,
@@ -120,6 +122,9 @@ class  MainActivity : ComponentActivity() {
                     }
 
                     composable("groups") {
+                        LaunchedEffect(Unit) {
+                            currentUser?.let { grupoViewModel.sincronizarGrupos(it.id) }
+                        }
                         val uiState by grupoViewModel.uiState.collectAsStateWithLifecycle()
                         GroupListScreen(
                             tema = temaActual,
@@ -141,8 +146,7 @@ class  MainActivity : ComponentActivity() {
                             onNavigateToSettings = { navController.navigate("settings") },
                             onCreateGroup = { navController.navigate("create_group") },
                             onJoinGroup = { navController.navigate("join_group") },
-                            onGroupClick = { grupo -> navController.navigate("group_detail/${grupo.id}") },
-                            onDeleteGroupClick = { grupo -> grupoViewModel.eliminarGrupo(grupo, currentUser!!.id) }
+                            onGroupClick = { grupo -> navController.navigate("group_detail/${grupo.id}") }
                         )
                     }
 
