@@ -7,6 +7,7 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repo
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Grupo
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.Usuario
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IGrupoRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +21,8 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
     private val _actionResult = MutableStateFlow<Resultado<String>?>(null)
     val actionResult: StateFlow<Resultado<String>?> = _actionResult.asStateFlow()
 
+    private var initJob: Job? = null
+
     fun sincronizarGrupos(userId: Int) {
         viewModelScope.launch {
             grupoRepository.sincronizarGrupos(userId)
@@ -27,7 +30,8 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
     }
 
     fun init(userId: Int) {
-        viewModelScope.launch {
+        initJob?.cancel()
+        initJob = viewModelScope.launch {
             _uiState.value = GrupoUiState.Loading
             grupoRepository.sincronizarGrupos(userId)
             
@@ -40,6 +44,12 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
                     }
                 }
         }
+    }
+
+    fun limpiar() {
+        initJob?.cancel()
+        _uiState.value = GrupoUiState.Loading
+        _actionResult.value = null
     }
 
     fun crearGrupo(nombre: String, descripcion: String, usuario: Usuario) {

@@ -5,8 +5,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ActividadDao {
-    @Query("SELECT * FROM actividades WHERE propietarioId = :propietarioId OR grupoId IN (SELECT grupoId FROM GROUP_MEMBER)")
-    fun obtenerTodasLasActividades(propietarioId: Int? = null): Flow<List<ActividadEntity>>
+    @Query("SELECT * FROM actividades WHERE (grupoId IS NULL AND propietarioId = :propietarioId) OR (grupoId IS NOT NULL AND grupoId IN (SELECT grupoId FROM GROUP_MEMBER WHERE userId = :userUid))")
+    fun obtenerTodasLasActividades(propietarioId: Int, userUid: String): Flow<List<ActividadEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertarActividad(actividad: ActividadEntity): Long

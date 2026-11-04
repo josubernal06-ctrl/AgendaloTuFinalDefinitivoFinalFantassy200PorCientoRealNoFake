@@ -37,7 +37,7 @@ class ActividadRepository(
 
     override fun obtenerActividades(propietarioId: Int?): Flow<Resultado<List<AbstractActividad>>> {
         val firebaseUser = FirebaseAuth.getInstance().currentUser
-        val currentUserId = firebaseUser?.uid?.hashCode() ?: propietarioId
+        val currentUserId = firebaseUser?.uid?.hashCode() ?: propietarioId ?: 0
         val currentUid = firebaseUser?.uid ?: ""
 
         val apiKey = BuildConfig.SQLITE_CLOUD_KEY
@@ -47,7 +47,7 @@ class ActividadRepository(
             }
         }
 
-        return dao.obtenerTodasLasActividades(currentUserId).map { entities ->
+        return dao.obtenerTodasLasActividades(currentUserId, currentUid).map { entities ->
             Resultado.Exito(entities.map { it.toDomain() }) as Resultado<List<AbstractActividad>>
         }.catch { e ->
             emit(Resultado.Error(e))

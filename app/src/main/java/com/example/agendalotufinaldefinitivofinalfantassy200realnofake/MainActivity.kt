@@ -54,6 +54,7 @@ class  MainActivity : ComponentActivity() {
                 val actividadFactory = ActividadesViewModel.Factory(appContainer.actividadRepository)
                 val grupoFactory = GrupoViewModel.Factory(appContainer.grupoRepository)
                 val grupoViewModel: GrupoViewModel = viewModel(factory = grupoFactory)
+                val actividadesViewModel: ActividadesViewModel = viewModel(factory = actividadFactory)
                 val aiViewModel: AiViewModel = viewModel()
 
                 val navController = rememberNavController()
@@ -72,6 +73,10 @@ class  MainActivity : ComponentActivity() {
                             currentUser!!.nickname = savedNick
                         }
                         grupoViewModel.init(currentUser!!.id)
+                        actividadesViewModel.cargarActividades(currentUser!!.id)
+                    } else {
+                        grupoViewModel.limpiar()
+                        actividadesViewModel.limpiar()
                     }
                 }
 

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.repository.Resultado
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.AbstractActividad
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.IActividadRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,13 +18,12 @@ class ActividadesViewModel(private val repository: IActividadRepository) : ViewM
     private val _uiState = MutableStateFlow(ActividadUiState())
     val uiState: StateFlow<ActividadUiState> = _uiState.asStateFlow()
 
-    init {
-        cargarActividades()
-    }
+    private var cargarJob: Job? = null
 
     fun cargarActividades(propietarioId: Int? = null) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+        cargarJob?.cancel()
+        cargarJob = viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, actividades = emptyList()) }
             repository.obtenerActividades(propietarioId).collect { resultado ->
                 when (resultado) {
                     is Resultado.Exito -> {
@@ -38,6 +38,11 @@ class ActividadesViewModel(private val repository: IActividadRepository) : ViewM
                 }
             }
         }
+    }
+
+    fun limpiar() {
+        cargarJob?.cancel()
+        _uiState.value = ActividadUiState()
     }
 
     fun crearActividad(actividad: AbstractActividad) {
