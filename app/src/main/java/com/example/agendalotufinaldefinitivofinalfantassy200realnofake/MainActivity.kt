@@ -39,15 +39,27 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import java.time.LocalDateTime
 
-class  MainActivity : ComponentActivity() {
+/**
+ * ACTIVIDAD PRINCIPAL (PUNTO DE ENTRADA) DE LA APLICACIÓN AGENDALOTÚ.
+ * 
+ * Responsabilidades principales:
+ * 1. Inicializar la arquitectura de la app (Inyección de dependencias con AppContainer).
+ * 2. Gestionar el ciclo de vida de la sesión del usuario con Firebase Authentication.
+ * 3. Coordinar la navegación general con Jetpack Compose Navigation (NavHost).
+ * 4. Iniciar y limpiar los ViewModels según la presencia de sesión de usuario (Aislamiento de datos).
+ */
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             AgendaloTuFinalDefinitivoFinalFantassy200RealNoFakeTheme {
                 val context = LocalContext.current
+                
+                // Contenedor de Inyección de Dependencias (DI) para repositorios y preferencias
                 val appContainer = remember { AppContainer(context) }
                 
+                // ViewModels globales vinculados al ciclo de vida
                 val authViewModel: AuthViewModel = viewModel()
                 val currentUser by authViewModel.currentUser.collectAsStateWithLifecycle()
                 
@@ -57,6 +69,7 @@ class  MainActivity : ComponentActivity() {
                 val actividadesViewModel: ActividadesViewModel = viewModel(factory = actividadFactory)
                 val aiViewModel: AiViewModel = viewModel()
 
+                // Controlador de navegación Compose y Preferencias de UI/Usuario
                 val navController = rememberNavController()
                 val themePreferences = remember { appContainer.themePreferences }
                 val userPreferences = remember { appContainer.userPreferences }
@@ -65,16 +78,18 @@ class  MainActivity : ComponentActivity() {
                 
                 var showSplash by remember { mutableStateOf(true) }
                 
-                // Cargar grupos y aplicar nickname guardado cuando el usuario inicie sesión
+                // EFECTO DE SESIÓN: Carga o limpia los ViewModels al iniciar o cerrar sesión
                 LaunchedEffect(currentUser) {
                     if (currentUser != null) {
                         val savedNick = userPreferences.getNickname(currentUser!!.email, currentUser!!.nickname)
                         if (savedNick.isNotBlank()) {
                             currentUser!!.nickname = savedNick
                         }
+                        // Inicia la sincronización y recarga de datos para el usuario actual
                         grupoViewModel.init(currentUser!!.id)
                         actividadesViewModel.cargarActividades(currentUser!!.id)
                     } else {
+                        // Limpia el estado interno de ViewModels para evitar fugas de información entre cuentas
                         grupoViewModel.limpiar()
                         actividadesViewModel.limpiar()
                     }

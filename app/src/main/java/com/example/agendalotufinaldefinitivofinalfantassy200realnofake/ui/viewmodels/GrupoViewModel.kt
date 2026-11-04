@@ -13,6 +13,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * VIEWMODEL DE GESTIÓN DE GRUPOS (ARQUITECTURA MVVM).
+ * Gestiona el estado de grupos y membresías para las pantallas de la app.
+ * Controla corrutinas activas con `initJob` para evitar fugas de información entre cuentas.
+ */
 class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow<GrupoUiState>(GrupoUiState.Loading)
@@ -23,12 +28,14 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
 
     private var initJob: Job? = null
 
+    /** Dispara la sincronización en segundo plano de grupos desde SQLite Cloud. */
     fun sincronizarGrupos(userId: Int) {
         viewModelScope.launch {
             grupoRepository.sincronizarGrupos(userId)
         }
     }
 
+    /** Inicia la escucha continua de grupos en Room para el usuario actual cancelando corrutinas previas. */
     fun init(userId: Int) {
         initJob?.cancel()
         initJob = viewModelScope.launch {
@@ -46,12 +53,14 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
         }
     }
 
+    /** Limpia el estado interno y cancela observadores activados al cerrar sesión. */
     fun limpiar() {
         initJob?.cancel()
         _uiState.value = GrupoUiState.Loading
         _actionResult.value = null
     }
 
+    /** Registra un nuevo grupo con código de invitación único. */
     fun crearGrupo(nombre: String, descripcion: String, usuario: Usuario) {
         viewModelScope.launch {
             val randomCode = "GRP" + (100000..999999).random()
@@ -68,6 +77,7 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
         }
     }
 
+    /** Elimina un grupo si el usuario es propietario. */
     fun eliminarGrupo(grupo: Grupo, userId: Int) {
         viewModelScope.launch {
             try {
@@ -80,6 +90,7 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
         }
     }
 
+    /** Elimina únicamente la membresía del usuario actual del grupo. */
     fun salirDelGrupo(grupo: Grupo, userId: Int) {
         viewModelScope.launch {
             try {
@@ -92,6 +103,7 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
         }
     }
 
+    /** Valida el código de invitación e integra al usuario en el grupo. */
     fun unirseAGrupo(codigo: String, usuario: Usuario) {
         viewModelScope.launch {
             _actionResult.value = Resultado.Cargando
@@ -107,10 +119,12 @@ class GrupoViewModel(private val grupoRepository: IGrupoRepository) : ViewModel(
         }
     }
 
+    /** Limpia los mensajes de resultado de operaciones (para Snacks/Dialogs). */
     fun clearActionResult() {
         _actionResult.value = null
     }
 
+    /** Factory para instanciar GrupoViewModel con inyección de IGrupoRepository. */
     class Factory(private val grupoRepository: IGrupoRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(GrupoViewModel::class.java)) {

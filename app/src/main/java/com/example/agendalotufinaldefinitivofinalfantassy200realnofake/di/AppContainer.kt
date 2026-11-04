@@ -8,33 +8,42 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repositor
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.mock.MockAuthRepository
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.repository.mock.MockAiRepository
 
+/**
+ * CONTENEDOR DE INYECCIÓN DE DEPENDENCIAS (MANUAL DI)
+ * 
+ * Centraliza la creación perezosa (by lazy) de repositorios y bases de datos locales
+ * garantizando una única instancia compartida (Singleton) en toda la aplicación.
+ */
 class AppContainer(private val context: Context) {
-    // Auth - always mock for now
+
+    // Repositorio de Autenticación
     val authRepository: IAuthRepository by lazy {
         MockAuthRepository()
     }
 
-    // Grupos - Uses Room + SQLite Cloud (Dev 2)
+    // Repositorio de Grupos (Room + SQLite Cloud)
     val grupoRepository: IGrupoRepository by lazy {
         val database = AppDatabase.getDatabase(context)
         GrupoRepository(database.grupoDao())
     }
 
-    // Actividades - Uses Room by default (Dev 2)
+    // Repositorio de Actividades (Room + SQLite Cloud + AlarmManager)
     val actividadRepository: IActividadRepository by lazy {
         val database = AppDatabase.getDatabase(context)
         ActividadRepository(database.actividadDao(), database.alarmDao(), context)
     }
 
-    // AI - Mock for development to avoid unnecessary real API calls
+    // Repositorio de Inteligencia Artificial (Gemini Prompt API)
     val aiRepository: IAiRepository by lazy {
-        MockAiRepository() // Use AiRepository() for real API
+        MockAiRepository()
     }
 
+    // Preferencias de Temas Visuales (SharedPreferences)
     val themePreferences: com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.ThemePreferences by lazy {
         com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.ThemePreferences(context)
     }
 
+    // Preferencias de Usuario y Nicknames (SharedPreferences)
     val userPreferences: com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.UserPreferences by lazy {
         com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.UserPreferences(context)
     }

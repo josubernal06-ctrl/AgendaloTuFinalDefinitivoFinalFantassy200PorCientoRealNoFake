@@ -5,6 +5,12 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.loca
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.modelos.*
 import java.time.LocalDateTime
 
+/**
+ * FUNCIONES EXTENSORAS (MAPPERS) DE DOMINIO Y PERSISTENCIA.
+ * Convierten las entidades persistidas de Room a clases del modelo de dominio y viceversa.
+ */
+
+/** Convierte una ActividadEntity de Room local a su modelo de dominio (ActividadConjunta o ActividadSolitaria). */
 fun ActividadEntity.toDomain(): AbstractActividad {
     val segmento = SegmentoTiempo(
         inicio = LocalDateTime.parse(this.inicio),
@@ -36,6 +42,7 @@ fun ActividadEntity.toDomain(): AbstractActividad {
     }
 }
 
+/** Convierte una clase de dominio AbstractActividad a su entidad ActividadEntity para Room/SQLite Cloud. */
 fun AbstractActividad.toEntity(): ActividadEntity {
     val clazz = AbstractActividad::class.java
 
@@ -82,6 +89,7 @@ fun AbstractActividad.toEntity(): ActividadEntity {
     )
 }
 
+/** Convierte una GrupoEntity de Room local al modelo de dominio Grupo. */
 fun GrupoEntity.toDomain(): Grupo {
     val propietario = Usuario(id = this.propietarioId.hashCode(), nickname = "Propietario", email = this.propietarioId)
     return Grupo(
@@ -93,6 +101,7 @@ fun GrupoEntity.toDomain(): Grupo {
     )
 }
 
+/** Convierte una clase de dominio Grupo a su entidad GrupoEntity para Room local. */
 fun Grupo.toEntity(): GrupoEntity {
     return GrupoEntity(
         id = this.id,

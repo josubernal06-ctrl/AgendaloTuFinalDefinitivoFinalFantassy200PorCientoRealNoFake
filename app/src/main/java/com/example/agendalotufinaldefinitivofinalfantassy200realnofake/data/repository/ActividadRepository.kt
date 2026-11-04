@@ -23,6 +23,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 
+/**
+ * REPOSISITORIO DE ACTIVIDADES (PATRÓN REPOSITORY).
+ * Sincroniza datos entre la base de datos local Room, la base de datos remota SQLite Cloud
+ * y el programador de alarmas/notificaciones de Android (AlarmManager).
+ */
 class ActividadRepository(
     private val dao: ActividadDao,
     private val alarmDao: AlarmDao? = null,
@@ -35,6 +40,10 @@ class ActividadRepository(
         return context?.let { AppDatabase.getDatabase(it).alarmDao() }
     }
 
+    /**
+     * Retorna el flujo (Flow) reactivo de actividades desde Room para la sesión actual,
+     * e inicia en segundo plano la descarga y sincronización desde SQLite Cloud.
+     */
     override fun obtenerActividades(propietarioId: Int?): Flow<Resultado<List<AbstractActividad>>> {
         val firebaseUser = FirebaseAuth.getInstance().currentUser
         val currentUserId = firebaseUser?.uid?.hashCode() ?: propietarioId ?: 0
@@ -54,6 +63,7 @@ class ActividadRepository(
         }
     }
 
+    /** Descarga las actividades autorizadas desde SQLite Cloud e inserta cada una en Room local. */
     private suspend fun sincronizarActividadesRemotas(apiKey: String, userUid: String) {
         try {
             val remoteActivities = remoteDataSource.obtenerActividadesRemotas(apiKey, userUid)
@@ -65,6 +75,10 @@ class ActividadRepository(
         }
     }
 
+    /**
+     * Inserta una actividad en Room local, programa su alarma 30 minutos antes con AlarmManager
+     * y la envía a la tabla ACTIVITY en SQLite Cloud.
+     */
     override suspend fun insertarActividad(actividad: AbstractActividad) {
         val currentUidHash = FirebaseAuth.getInstance().currentUser?.uid?.hashCode() ?: 1
         val entity = actividad.toEntity().copy(propietarioId = if (currentUidHash != 1) currentUidHash else actividad.propietario.id)

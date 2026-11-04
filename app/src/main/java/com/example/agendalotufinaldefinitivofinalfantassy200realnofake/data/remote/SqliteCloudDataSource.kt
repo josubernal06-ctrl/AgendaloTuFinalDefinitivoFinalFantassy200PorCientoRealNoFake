@@ -5,7 +5,9 @@ import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.loca
 import com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.RetrofitClient
 
 /**
- * Fuente de datos remota para ejecutar consultas SQL en SQLite Cloud sin bloquear la app si no hay red.
+ * FUENTE DE DATOS REMOTA PARA SQLITE CLOUD (HTTP API WEBLITE).
+ * Ejecuta consultas SQL en la base de datos remota agendalo.sqlite vía Retrofit.
+ * Maneja respaldo de endpoints, consultas para grupos, miembros, actividades y nicknames.
  */
 class SqliteCloudDataSource(
     private val api: SqliteCloudApi = RetrofitClient.sqliteCloudApi
@@ -17,6 +19,10 @@ class SqliteCloudDataSource(
 
     private var workingUrl: String? = "https://cpokzlqcdk.g3.sqlite.cloud/v1/weblite/sql"
 
+    /**
+     * Ejecuta cualquier consulta de modificación (INSERT, UPDATE, DELETE) en SQLite Cloud.
+     * Retorna true si la respuesta HTTP de SQLite Cloud fue exitosa (200 OK).
+     */
     suspend fun ejecutarConsulta(apiKey: String, sqlQuery: String): Boolean {
         return try {
             if (apiKey.isBlank()) {
@@ -67,6 +73,11 @@ class SqliteCloudDataSource(
         }
     }
 
+    /**
+     * Busca un grupo en SQLite Cloud filtrando por su codigoInvitacion.
+     * Retorna el GrupoEntity encontrado o null si la consulta HTTP es exitosa pero no hay filas.
+     * Lanza excepción si ocurre un error HTTP o de conexión para diferenciar no-existencia de fallas de red.
+     */
     suspend fun obtenerGrupoPorCodigoRemoto(apiKey: String, codigo: String): GrupoEntity? {
         if (apiKey.isBlank()) throw IllegalArgumentException("API Key está vacía")
         
@@ -134,6 +145,7 @@ class SqliteCloudDataSource(
         throw lastException ?: RuntimeException("Fallo desconocido al conectar con SQLite Cloud")
     }
 
+    /** Consulta la lista de UIDs de usuarios que son miembros de un grupo específico en la tabla GROUP_MEMBER. */
     suspend fun obtenerMiembrosDeGrupoRemoto(apiKey: String, grupoId: Int): List<String> {
         val result = mutableListOf<String>()
         try {
@@ -168,6 +180,10 @@ class SqliteCloudDataSource(
         return result
     }
 
+    /**
+     * Consulta todos los grupos asociados al userUid actual (como propietario o como miembro en GROUP_MEMBER).
+     * Retorna null si la solicitud HTTP/red falla para evitar limpiar la caché local por un error de conexión.
+     */
     suspend fun obtenerGruposRemotosDeUsuario(apiKey: String, userUid: String): List<GrupoEntity>? {
         if (apiKey.isBlank() || userUid.isBlank()) return null
         val authHeader = if (apiKey.startsWith("Bearer ")) apiKey else "Bearer $apiKey"
@@ -222,6 +238,10 @@ class SqliteCloudDataSource(
         else -> 0
     }
 
+    /**
+     * Consulta las actividades autorizadas desde la tabla ACTIVITY de SQLite Cloud para el userUid actual.
+     * Recupera tanto las personales (userId = userUid) como las compartidas (grupoId en sus membresías).
+     */
     suspend fun obtenerActividadesRemotas(apiKey: String, userUid: String): List<com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.ActividadEntity> {
         val result = mutableListOf<com.example.agendalotufinaldefinitivofinalfantassy200realnofake.data.local.ActividadEntity>()
         try {
@@ -310,6 +330,7 @@ class SqliteCloudDataSource(
         return result
     }
 
+    /** Consulta la tabla USER de SQLite Cloud para construir un mapa de (uid -> nickname, email -> nickname). */
     suspend fun obtenerNicknamesRemotos(apiKey: String): Map<String, String> {
         val result = mutableMapOf<String, String>()
         try {

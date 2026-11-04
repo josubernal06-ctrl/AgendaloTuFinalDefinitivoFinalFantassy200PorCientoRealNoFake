@@ -19,11 +19,20 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * REPOSITORIO DE GRUPOS (PATRÓN REPOSITORY).
+ * Maneja la sincronización bidireccional de grupos y sus integrantes entre
+ * SQLite Cloud (fuente de verdad remota) y Room (almacenamiento local reactivo).
+ */
 class GrupoRepository(
     private val dao: GrupoDao,
     private val remoteDataSource: SqliteCloudDataSource = SqliteCloudDataSource()
 ) : IGrupoRepository {
 
+    /**
+     * Retorna el flujo continuo (Flow) de grupos pertenecientes al usuario actual desde Room,
+     * obteniendo y asociando los nicknames reales de cada participante desde SQLite Cloud.
+     */
     override fun obtenerGrupos(userId: Int): Flow<Resultado<List<Grupo>>> {
         val firebaseUser = FirebaseAuth.getInstance().currentUser
         val currentUid = firebaseUser?.uid ?: userId.toString()
@@ -58,6 +67,7 @@ class GrupoRepository(
         }
     }
 
+    /** Invoca la sincronización en segundo plano con SQLite Cloud para actualizar Room local. */
     override suspend fun sincronizarGrupos(userId: Int) {
         val firebaseUser = FirebaseAuth.getInstance().currentUser ?: return
         val apiKey = BuildConfig.SQLITE_CLOUD_KEY
@@ -111,6 +121,10 @@ class GrupoRepository(
         }
     }
 
+    /**
+     * Crea un grupo en SQLite Cloud, obtiene su ID autogenerado e inserta
+     * al usuario creador como propietario en la tabla GROUP_MEMBER local y remota.
+     */
     override suspend fun crearGrupo(grupo: Grupo) {
         val firebaseUser = FirebaseAuth.getInstance().currentUser
             ?: throw IllegalStateException("Debes iniciar sesión para crear un grupo")
@@ -159,6 +173,10 @@ class GrupoRepository(
         }
     }
 
+    /**
+     * Valida un código de invitación contra SQLite Cloud y registra al usuario actual
+     * en la tabla GROUP_MEMBER remota y local.
+     */
     override suspend fun unirseAGrupo(codigo: String, user: Usuario): Resultado<Grupo> {
         return try {
             val firebaseUser = FirebaseAuth.getInstance().currentUser
@@ -232,6 +250,7 @@ class GrupoRepository(
         }
     }
 
+    /** Valida permisos de propietario y elimina el grupo y sus membresías en Room y SQLite Cloud. */
     override suspend fun eliminarGrupo(grupo: Grupo) {
         val firebaseUser = FirebaseAuth.getInstance().currentUser
             ?: throw IllegalStateException("Debes iniciar sesión para eliminar un grupo")
@@ -261,6 +280,7 @@ class GrupoRepository(
         }
     }
 
+    /** Elimina únicamente la membresía del usuario actual en Room y en GROUP_MEMBER de SQLite Cloud. */
     override suspend fun salirDelGrupo(grupo: Grupo) {
         val firebaseUser = FirebaseAuth.getInstance().currentUser
             ?: throw IllegalStateException("Debes iniciar sesión para salir de un grupo")

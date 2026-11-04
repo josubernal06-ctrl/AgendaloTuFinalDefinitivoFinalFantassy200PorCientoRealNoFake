@@ -7,16 +7,20 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
+/**
+ * LÓGICA DE NEGOCIO Y PROCESAMIENTO INTELIGENTE DE HORARIOS CON GEMINI AI.
+ * Contiene helpers para construir prompts formateados en JSON y deserializar
+ * las respuestas del modelo generativo en instancias de Actividad.
+ */
 class GestorHorarios {
     fun calcularMejorHorario(g: Grupo, a: AbstractActividad, dur: Int): RecomendacionHorario? {
-        // Implementación dummy para compilar y cumplir con el diagrama
         return null
     }
 
     companion object {
         /**
-         * Concatena el mensaje del usuario con un prompt optimizado y especializado
-         * en la creación de ACTIVIDADES para el horario del usuario o del grupo.
+         * Construye un prompt enriquecido con la fecha/hora actual en español
+         * e instruye a Gemini AI para que responda estrictamente en un objeto JSON.
          */
         fun construirPromptActividad(mensajeUsuario: String): String {
             val ahora = LocalDateTime.now()
@@ -53,7 +57,8 @@ class GestorHorarios {
         }
 
         /**
-         * Procesa el texto de respuesta de la API de Gemini y lo convierte en un objeto AbstractActividad.
+         * Limpia bloques markdown y deserializa el JSON devuelto por la IA
+         * convirtiéndolo en un objeto de dominio ActividadConjunta o ActividadSolitaria.
          */
         fun parsearActividadDesdeRespuesta(respuestaApi: String, usuarioActual: Usuario? = null, grupoId: Int? = null): AbstractActividad? {
             return try {
@@ -124,6 +129,7 @@ class GestorHorarios {
             }
         }
 
+        /** Helper seguro para intentar parsear varias máscaras de fecha ISO-8601. */
         private fun parsearFecha(fechaStr: String): LocalDateTime {
             return try {
                 LocalDateTime.parse(fechaStr)
